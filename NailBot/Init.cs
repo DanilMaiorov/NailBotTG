@@ -4,11 +4,9 @@ namespace NailBot
 {
     internal class Init
     {
-
-        static string[] availableCommands = { "/start", "/help", "/info", "/exit" };
         public static void Start()
         {
-            
+            string[] availableCommands = { "/start", "/help", "/info", "/exit" };
 
             Console.WriteLine($"Привет! Это NailBot! \nСписок доступных команд:");
 
@@ -86,7 +84,7 @@ namespace NailBot
         
         public static void Commands(string item, ref string[] array)
         {
-            if (array.Length < availableCommands.Length + 1)
+            if (array.Length < 5)
             {
                 string[] updatedAvailableCommands = new string[array.Length + 1];
 
