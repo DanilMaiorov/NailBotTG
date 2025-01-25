@@ -1,0 +1,14 @@
+C:\Users\genzel\source\repos\NailBot\NailBot\bin\Debug\net8.0\NailBot.exe
+C:\Users\genzel\source\repos\NailBot\NailBot\bin\Debug\net8.0\NailBot.deps.json
+C:\Users\genzel\source\repos\NailBot\NailBot\bin\Debug\net8.0\NailBot.runtimeconfig.json
+C:\Users\genzel\source\repos\NailBot\NailBot\bin\Debug\net8.0\NailBot.dll
+C:\Users\genzel\source\repos\NailBot\NailBot\bin\Debug\net8.0\NailBot.pdb
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.AssemblyInfoInputs.cache
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.AssemblyInfo.cs
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.csproj.CoreCompileInputs.cache
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.dll
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\refint\NailBot.dll
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.pdb
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\NailBot.genruntimeconfig.cache
+C:\Users\genzel\source\repos\NailBot\NailBot\obj\Debug\net8.0\ref\NailBot.dll
