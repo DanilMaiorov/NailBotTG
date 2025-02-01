@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\genzel\\source\\repos\\NailBot\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:NailBot\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -24,7 +24,7 @@
               "RelativeDocumentMoniker": "NailBot\\Program.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs*",
               "RelativeToolTip": "NailBot\\Program.cs*",
-              "ViewState": "AgIAACwAAAAAAAAAAAAgwHkAAAAsAAAAAAAAAA==",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAgwEMAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-22T15:57:25.036Z",
               "IsPinned": true,
