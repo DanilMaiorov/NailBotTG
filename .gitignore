@@ -1,3 +1,2 @@
-*.log
-NailBot/bin
-NailBot/obj
+*/bin
+*/obj
