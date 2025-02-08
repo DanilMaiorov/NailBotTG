@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\genzel\\source\\repos\\NailBot\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\descriptionbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\descriptionbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -14,20 +18,33 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs",
               "RelativeDocumentMoniker": "NailBot\\Program.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs",
               "RelativeToolTip": "NailBot\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAgAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-22T15:57:25.036Z",
               "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DescriptionBot.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\DescriptionBot.cs",
+              "RelativeDocumentMoniker": "NailBot\\DescriptionBot.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\DescriptionBot.cs",
+              "RelativeToolTip": "NailBot\\DescriptionBot.cs",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAgwH0AAABtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T06:45:42.316Z",
               "EditorCaption": ""
             }
           ]
