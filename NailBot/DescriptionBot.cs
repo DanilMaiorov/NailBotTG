@@ -26,7 +26,7 @@ namespace NailBot
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("3. Напишите какие функции будут у каждой роли.\n");
             Console.ForegroundColor = originalTextColor;
-
+            
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine($"{string.Format("{0,-10}", "Пункт 3.1")} Функции Клиента:\n");
             Console.ForegroundColor = originalTextColor;
