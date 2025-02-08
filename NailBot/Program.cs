@@ -9,9 +9,9 @@ namespace NailBot
     {
         static void Main(string[] args)
         {
-            Init.Start();
+            //Init.Start();
 
-            //DescriptionBot.PrintDescription();
+            DescriptionBot.PrintDescription();
         }
     }
 }

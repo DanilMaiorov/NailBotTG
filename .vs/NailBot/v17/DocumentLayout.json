@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -18,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -35,12 +39,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs",
+              "RelativeDocumentMoniker": "NailBot\\Program.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs",
+              "RelativeToolTip": "NailBot\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T16:54:59.935Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Extensions.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Extensions.cs",
               "RelativeDocumentMoniker": "NailBot\\Extensions.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Extensions.cs",
               "RelativeToolTip": "NailBot\\Extensions.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-08T11:47:45.393Z",
               "EditorCaption": ""
@@ -51,9 +68,9 @@
               "Title": "Init.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs",
               "RelativeDocumentMoniker": "NailBot\\Init.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs*",
-              "RelativeToolTip": "NailBot\\Init.cs*",
-              "ViewState": "AgIAADAAAAAAAAAAAAAQwEoAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs",
+              "RelativeToolTip": "NailBot\\Init.cs",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAwwBMAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-08T11:47:37.891Z",
               "EditorCaption": ""

@@ -14,6 +14,7 @@ namespace NailBot
         {
             int counter = 0;
 
+            Console.WriteLine("Список доступных команд:");
             foreach (T command in Enum.GetValues(typeof(T)))
             {
                 counter++;
@@ -32,13 +33,6 @@ namespace NailBot
                 }   
             }
             Console.WriteLine("");
-        }
-
-        //метод форматирования строки при команде /echo
-
-        public static string Slicer(this string str)
-        {
-            return str.Length >= 5 ? str.Substring(0, 5) : "default";
         }
 
         //метод замены ввода номера команды

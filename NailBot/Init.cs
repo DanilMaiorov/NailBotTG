@@ -19,14 +19,13 @@ namespace NailBot
 
         public static void Start()
         {
-
             string userName = "Пользователь";
 
             bool availableEcho = false;
 
             Console.WriteLine($"Привет! Это NailBot!");
 
-            Console.WriteLine("Введите команду для начала работы или выхода из бота. \n\nСписок доступных команд:");
+            Console.WriteLine("Введите команду для начала работы или выхода из бота.");
 
             Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
 
@@ -39,7 +38,7 @@ namespace NailBot
 
             userName = availableEcho ? userName : "Незнакомец";
             Console.WriteLine($"До свидания, {userName}! До новых встреч!");
-            Console.ReadLine();
+            Console.ReadKey();
         }
 
 
@@ -49,35 +48,26 @@ namespace NailBot
             string echoText = "";
             bool answer = true;
 
+            if (input.StartsWith("/echo "))
+            {
+                StringBuilder sb = new StringBuilder(input);
+                echoText = sb.ToString();
+                input = "/echo";
+            }
+
             try
             {
                 //if (Enum.TryParse<Commands>(input.Replace("/", string.Empty), true, out var result))
                 //{
                 //    int commandNumber = (int)result;
-                //    Console.WriteLine("Номер поля");
-                //    Console.WriteLine(commandNumber);
+                //    Console.WriteLine("Номер поля " + commandNumber);
                 //}
                 //else
                 //{
                 //    Console.WriteLine("Нет соответствующего значения");
                 //}
 
-                Console.WriteLine($"Введено {input}");
-
-                //input = Extensions.NumberReplacer(input);
-
-
-
-                if (Extensions.Slicer(input) == "/echo" && echo)
-                {
-                    Console.WriteLine(input);
-                    echoText = input.Substring(5).Trim();
-
-                    input = Extensions.Slicer(input);
-
-                    
-                }
-
+                input = Extensions.NumberReplacer(input);
 
                 Commands command = (Commands)Enum.Parse(typeof(Commands), input.Replace("/", string.Empty), true);
 
@@ -96,7 +86,6 @@ namespace NailBot
                         else
                             Console.WriteLine("Привет, Незнакомец!");
                         break;
-
                     case Commands.Help:
                         Console.WriteLine($"{name}, это NailBot - телеграм бот для записи на ноготочки.\n" +
                         $"Введя команду /start бот предложит тебе ввести имя\n" +
@@ -111,11 +100,9 @@ namespace NailBot
                         Console.WriteLine("Это NailBot версии 1.0 Beta. Релиз {0:dd MMMM yyyy}", releaseDate);
                         break;
                     case Commands.Echo:
-
-                        Console.WriteLine(echoText + "это эхо текст");
+                        Console.WriteLine(echoText.Substring(6));
                         break;
                     case Commands.Exit:
-                        Console.WriteLine("Введен Екзит");
                         answer = false;
                         break;
                     default:
@@ -132,25 +119,5 @@ namespace NailBot
 
             return answer;
         }
-
-
-        //public static void CommandsRender<T>(T array, bool echo) where T : Enum
-        //{
-        //    int counter = 0;
-
-        //    foreach (T command in Enum.GetValues(typeof(T)))
-        //    {
-        //        counter++;
-
-        //        if (echo)
-        //            Console.WriteLine($"/{command.ToString().ToLower()}");                   
-        //        else
-        //        {
-        //            if (counter != echoNumber)
-        //                Console.WriteLine($"/{command.ToString().ToLower()}");
-        //        }
-        //    }
-        //}
-
     }
 }
