@@ -21,7 +21,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
+          "DockedWidth": 498,
           "SelectedChildIndex": 5,
           "Children": [
             {
@@ -44,7 +44,7 @@
               "RelativeDocumentMoniker": "NailBot\\Program.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Program.cs",
               "RelativeToolTip": "NailBot\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-08T16:54:59.935Z",
               "EditorCaption": ""
@@ -55,9 +55,9 @@
               "Title": "Extensions.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Extensions.cs",
               "RelativeDocumentMoniker": "NailBot\\Extensions.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Extensions.cs",
-              "RelativeToolTip": "NailBot\\Extensions.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Extensions.cs*",
+              "RelativeToolTip": "NailBot\\Extensions.cs*",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAACgAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-08T11:47:45.393Z",
               "EditorCaption": ""
@@ -68,9 +68,9 @@
               "Title": "Init.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs",
               "RelativeDocumentMoniker": "NailBot\\Init.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs",
-              "RelativeToolTip": "NailBot\\Init.cs",
-              "ViewState": "AgIAAGsAAAAAAAAAAAAwwBMAAAAiAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs*",
+              "RelativeToolTip": "NailBot\\Init.cs*",
+              "ViewState": "AgIAACwAAAAAAAAAAAAqwEMAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-08T11:47:37.891Z",
               "EditorCaption": ""

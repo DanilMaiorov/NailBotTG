@@ -50,26 +50,38 @@ namespace NailBot
 
             if (input.StartsWith("/echo "))
             {
-                StringBuilder sb = new StringBuilder(input);
-                echoText = sb.ToString();
+                //StringBuilder sb = new StringBuilder(input);
+                //echoText = sb.ToString();
+
+                //StringBuilder sb = new StringBuilder(input);
+                echoText = input.Substring(6);
+
                 input = "/echo";
             }
 
-            try
-            {
-                //if (Enum.TryParse<Commands>(input.Replace("/", string.Empty), true, out var result))
-                //{
-                //    int commandNumber = (int)result;
-                //    Console.WriteLine("Номер поля " + commandNumber);
-                //}
-                //else
-                //{
-                //    Console.WriteLine("Нет соответствующего значения");
-                //}
+            input = input.Replace("/", string.Empty);
+
+            //try
+            //{
+                Commands command;
 
                 input = Extensions.NumberReplacer(input);
 
-                Commands command = (Commands)Enum.Parse(typeof(Commands), input.Replace("/", string.Empty), true);
+                if (Enum.TryParse<Commands>(input, true, out var result))
+                {
+                    int commandNumber = (int)result;
+                    Console.WriteLine("Номер поля " + commandNumber);
+                    command = result;
+                }
+                else
+                {
+                    Console.WriteLine("Нет соответствующего значения");
+                    command = default;
+                }
+
+
+
+                //Commands command = (Commands)Enum.Parse(typeof(Commands), input.Replace("/", string.Empty), true);
 
                 switch (command)
                 {
@@ -100,7 +112,7 @@ namespace NailBot
                         Console.WriteLine("Это NailBot версии 1.0 Beta. Релиз {0:dd MMMM yyyy}", releaseDate);
                         break;
                     case Commands.Echo:
-                        Console.WriteLine(echoText.Substring(6));
+                        Console.WriteLine(echoText);
                         break;
                     case Commands.Exit:
                         answer = false;
@@ -110,12 +122,12 @@ namespace NailBot
                         Extensions.CommandsRender(Commands.Start, echo, echoNumber);
                         break;
                 }
-            }
-            catch (ArgumentException)
-            {
-                Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                Extensions.CommandsRender(Commands.Start, echo, echoNumber);
-            }
+            //}
+            //catch (ArgumentException)
+            //{
+            //    Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
+            //    Extensions.CommandsRender(Commands.Start, echo, echoNumber);
+            //}
 
             return answer;
         }
