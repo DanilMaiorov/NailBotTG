@@ -25,7 +25,7 @@ namespace NailBot
                 {
                     if (counter != echoNum)
                     {
-                        if (counter == echoNum + 1)
+                        if (counter >= echoNum)
                             Console.WriteLine($"{counter - 1}) /{command.ToString().ToLower()}");
                         else
                             Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
@@ -38,7 +38,7 @@ namespace NailBot
         //метод замены ввода номера команды
         public static string NumberReplacer(this string str)
         {
-            Regex regex = new Regex("^[0-5]$");
+            Regex regex = new Regex("^[0-9]$");
 
             if (regex.IsMatch(str))
                 str = "uncorrect command";

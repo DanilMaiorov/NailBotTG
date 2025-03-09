@@ -12,7 +12,7 @@ namespace NailBot
     {
         enum Commands
         {
-            Start = 1, Help, Info, Echo, Exit
+            Start = 1, Help, Info, Echo, Addtask, Showtasks, Removetask, Exit
         }
 
         static int echoNumber = (int)Commands.Echo;
@@ -23,15 +23,22 @@ namespace NailBot
 
             bool availableEcho = false;
 
-            Console.WriteLine($"Привет! Это NailBot!");
-
-            Console.WriteLine("Введите команду для начала работы или выхода из бота.");
+            Console.WriteLine($"Привет! Это NailBot!" + 
+            " Введите команду для начала работы или выхода из бота.\n");
 
             Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
 
             string startInput = Console.ReadLine();
 
-            while (Handler(startInput, ref userName, ref availableEcho))
+
+            //объявление списка задач в виде списка
+            List<string> tasksList = new List<string>();
+
+            //объявление списка задач в виде списка
+            string[] tasksArray = [];
+
+
+            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray))
             {
                 startInput = Console.ReadLine();
             }
@@ -42,11 +49,12 @@ namespace NailBot
         }
 
 
-        public static bool Handler(string input, ref string name, ref bool echo)
+        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks)
         {
             string userName = name;
             string echoText = "";
             bool answer = true;
+
 
             if (input.StartsWith("/echo "))
             {
@@ -54,12 +62,15 @@ namespace NailBot
                 input = "/echo";
             }
 
+            //реплейс слэша для приведения к Enum
             input = input.Replace("/", string.Empty);
 
             Commands command;
 
-            input = Extensions.NumberReplacer(input);
+            //регулярка на реплейс циферного значения Enum
+            //input = Extensions.NumberReplacer(input);
 
+            //приведение к типу Enum
             if (Enum.TryParse<Commands>(input, true, out var result))
                 command = result;
             else
@@ -80,22 +91,32 @@ namespace NailBot
                     else
                         Console.WriteLine("Привет, Незнакомец!");
                     break;
+
                 case Commands.Help:
-                    Console.WriteLine($"{name}, это NailBot - телеграм бот для записи на ноготочки.\n" +
-                    $"Введя команду /start бот предложит тебе ввести имя\n" +
-                    $"Введя команду /help ты получишь справку о командах\n" +
-                    $"Введя команду /echo и какой либо текст после - этот текст останется на консоли\n" +
-                    $"Введя команду /info ты получишь информацию о версии программы\n" +
-                    $"Введя команду /exit бот попрощается и завершит работу\n");
+                    CommandsList.ShowHelp(name, echo);
                     break;
 
                 case Commands.Info:
-                    DateTime releaseDate = new DateTime(2025, 02, 08);
-                    Console.WriteLine("Это NailBot версии 1.0 Beta. Релиз {0:dd MMMM yyyy}", releaseDate);
+                    CommandsList.ShowInfo();
                     break;
+
                 case Commands.Echo:
                     Console.WriteLine(echoText);
                     break;
+
+
+                case Commands.Addtask:
+                    //CommandsList.AddTaskList(listTasks);
+
+                    CommandsList.AddTaskArray(ref arrayTasks);
+                    break;
+
+                case Commands.Showtasks:
+                    //CommandsList.ShowArrayTasks(listTasks);
+
+                    CommandsList.ShowArrayTasks(ref arrayTasks);
+                    break;
+
                 case Commands.Exit:
                     answer = false;
                     break;
