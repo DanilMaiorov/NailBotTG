@@ -44,5 +44,21 @@ namespace NailBot
                 str = "uncorrect command";
             return str;
         }
+
+        //метод выхода в основное меню выбора команд 
+        public static void GoToMainMenu()
+        {
+
+            Console.WriteLine("Нажмите клавишу Esc, чтобы вернуться в главное меню...");
+
+            // Ожидаем нажатие клавиши
+            var key = Console.ReadKey(true);  // Чтение клавиши без отображения на экране
+
+            // Если нажата клавиша Esc
+            if (key.Key == ConsoleKey.Escape)
+            {
+                Console.WriteLine("Вы вернулись в главное меню.");
+            }
+        }
     }
 }

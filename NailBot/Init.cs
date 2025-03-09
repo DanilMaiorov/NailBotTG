@@ -31,10 +31,10 @@ namespace NailBot
             string startInput = Console.ReadLine();
 
 
-            //объявление списка задач в виде списка
+            //объявление списка задач в виде List
             List<string> tasksList = new List<string>();
 
-            //объявление списка задач в виде списка
+            //объявление списка задач в виде Array
             string[] tasksArray = [];
 
 
@@ -48,13 +48,11 @@ namespace NailBot
             Console.ReadKey();
         }
 
-
         public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks)
         {
             string userName = name;
             string echoText = "";
             bool answer = true;
-
 
             if (input.StartsWith("/echo "))
             {
@@ -68,7 +66,7 @@ namespace NailBot
             Commands command;
 
             //регулярка на реплейс циферного значения Enum
-            //input = Extensions.NumberReplacer(input);
+            input = Extensions.NumberReplacer(input);
 
             //приведение к типу Enum
             if (Enum.TryParse<Commands>(input, true, out var result))
@@ -104,17 +102,25 @@ namespace NailBot
                     Console.WriteLine(echoText);
                     break;
 
-
                 case Commands.Addtask:
-                    //CommandsList.AddTaskList(listTasks);
-
+                    //вызов метода добавления задачи в List
+                    CommandsList.AddTaskList(listTasks);
+                    //вызов метода добавления задачи в Array
                     CommandsList.AddTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Showtasks:
-                    //CommandsList.ShowArrayTasks(listTasks);
+                    //вызов метода рендера задач из List
+                    CommandsList.ShowTasks(listTasks);
+                    //вызов метода рендера задач из Array
+                    CommandsList.ShowTasks(ref arrayTasks);
+                    break;
 
-                    CommandsList.ShowArrayTasks(ref arrayTasks);
+                case Commands.Removetask:
+                    //вызов метода удаления задачи из List
+                    CommandsList.RemoveTaskList(listTasks);
+                    //вызов метода удаления задачи из Array
+                    CommandsList.RemoveTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Exit:
