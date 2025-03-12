@@ -17,9 +17,39 @@ namespace NailBot
 
         static int echoNumber = (int)Commands.Echo;
 
-        public static void Start()
+        //количество задач при запуске программы
+        public static int startTaskAmount = 0;
+
+        //объявление списка задач в виде List
+        static List<string> tasksList = new List<string>();
+
+        public static void Start(int tasksAmount)
         {
-            string userName = "Пользователь";
+            int taskCountLimit = tasksAmount;
+            if (tasksAmount == 0)
+            {
+                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+                Console.WriteLine("Введите максимально допустимое количество задач");
+
+                taskCountLimit = int.Parse(Console.ReadLine());
+
+                if (taskCountLimit > 0 && taskCountLimit > 100)
+                    throw new ArgumentException();
+
+                //переопределение количества задач при успешном парсинге
+                startTaskAmount = taskCountLimit;
+            }
+
+
+
+
+
+
+
+
+
+
+        string userName = "Пользователь";
 
             bool availableEcho = false;
 
@@ -31,14 +61,11 @@ namespace NailBot
             string startInput = Console.ReadLine();
 
 
-            //объявление списка задач в виде List
-            List<string> tasksList = new List<string>();
 
             //объявление списка задач в виде Array
             string[] tasksArray = [];
 
-
-            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray))
+            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, taskCountLimit))
             {
                 startInput = Console.ReadLine();
             }
@@ -48,7 +75,7 @@ namespace NailBot
             Console.ReadKey();
         }
 
-        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks)
+        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks, int taskCountLimit)
         {
             string userName = name;
             string echoText = "";
@@ -59,6 +86,21 @@ namespace NailBot
                 echoText = input.Substring(6);
                 input = "/echo";
             }
+
+
+            Console.WriteLine($"Максимальное количество задач {taskCountLimit}");
+
+
+
+
+
+
+
+
+
+
+
+
 
             //реплейс слэша для приведения к Enum
             input = input.Replace("/", string.Empty);
@@ -104,23 +146,23 @@ namespace NailBot
 
                 case Commands.Addtask:
                     //вызов метода добавления задачи в List
-                    CommandsList.AddTaskList(listTasks);
+                    CommandsList.AddTaskList(listTasks, taskCountLimit);
                     //вызов метода добавления задачи в Array
-                    CommandsList.AddTaskArray(ref arrayTasks);
+                    //CommandsList.AddTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Showtasks:
                     //вызов метода рендера задач из List
                     CommandsList.ShowTasks(listTasks);
                     //вызов метода рендера задач из Array
-                    CommandsList.ShowTasks(ref arrayTasks);
+                    //CommandsList.ShowTasks(ref arrayTasks);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи из List
                     CommandsList.RemoveTaskList(listTasks);
                     //вызов метода удаления задачи из Array
-                    CommandsList.RemoveTaskArray(ref arrayTasks);
+                    //CommandsList.RemoveTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Exit:
@@ -135,3 +177,7 @@ namespace NailBot
         }
     }
 }
+
+//решил сделать циклом while
+//добавил стартовое количество задач и добавил в стартовый метод параметр стартового количества задач
+//вынес создание листа из метода

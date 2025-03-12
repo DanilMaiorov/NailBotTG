@@ -57,7 +57,25 @@ namespace NailBot
 
             Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
         }
-        
+
+        //добавлю перегрузку
+        internal static void AddTaskList(List<string> tasks, int maxTasksAmount)
+        {
+            //проверяю длину листа и выбрасываю исключение если больше лимита
+            if (tasks.Count >= maxTasksAmount)
+                throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
+            
+
+            Console.WriteLine("Введите описание задачи (добавится в List):");
+            string newTask = Console.ReadLine();
+
+            tasks.Add(newTask);
+
+            Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
+        }
+
+
+
         //метод рендера задач из List
         internal static void ShowTasks(List<string> tasks)
         {
