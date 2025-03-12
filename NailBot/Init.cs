@@ -12,7 +12,7 @@ namespace NailBot
     {
         enum Commands
         {
-            Start = 1, Help, Info, Echo, Exit
+            Start = 1, Help, Info, Echo, Addtask, Showtasks, Removetask, Exit
         }
 
         static int echoNumber = (int)Commands.Echo;
@@ -23,15 +23,22 @@ namespace NailBot
 
             bool availableEcho = false;
 
-            Console.WriteLine($"Привет! Это NailBot!");
-
-            Console.WriteLine("Введите команду для начала работы или выхода из бота.");
+            Console.WriteLine($"Привет! Это NailBot!" + 
+            " Введите команду для начала работы или выхода из бота.\n");
 
             Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
 
             string startInput = Console.ReadLine();
 
-            while (Handler(startInput, ref userName, ref availableEcho))
+
+            //объявление списка задач в виде List
+            List<string> tasksList = new List<string>();
+
+            //объявление списка задач в виде Array
+            string[] tasksArray = [];
+
+
+            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray))
             {
                 startInput = Console.ReadLine();
             }
@@ -41,8 +48,7 @@ namespace NailBot
             Console.ReadKey();
         }
 
-
-        public static bool Handler(string input, ref string name, ref bool echo)
+        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks)
         {
             string userName = name;
             string echoText = "";
@@ -50,85 +56,81 @@ namespace NailBot
 
             if (input.StartsWith("/echo "))
             {
-                //StringBuilder sb = new StringBuilder(input);
-                //echoText = sb.ToString();
-
-                //StringBuilder sb = new StringBuilder(input);
                 echoText = input.Substring(6);
-
                 input = "/echo";
             }
 
+            //реплейс слэша для приведения к Enum
             input = input.Replace("/", string.Empty);
 
-            //try
-            //{
-                Commands command;
+            Commands command;
 
-                input = Extensions.NumberReplacer(input);
+            //регулярка на реплейс циферного значения Enum
+            input = Extensions.NumberReplacer(input);
 
-                if (Enum.TryParse<Commands>(input, true, out var result))
-                {
-                    int commandNumber = (int)result;
-                    Console.WriteLine("Номер поля " + commandNumber);
-                    command = result;
-                }
-                else
-                {
-                    Console.WriteLine("Нет соответствующего значения");
-                    command = default;
-                }
+            //приведение к типу Enum
+            if (Enum.TryParse<Commands>(input, true, out var result))
+                command = result;
+            else
+                command = default;
 
+            switch (command)
+            {
+                case Commands.Start:
+                    Console.WriteLine("Введите ваше имя:");
+                    name = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(name) && name != userName)
+                    {
+                        name = char.ToUpper(name[0]) + name.Substring(1);
+                        Console.WriteLine($"Привет {name}! Тебе стала доступна команда /echo");
+                        Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"");
+                        echo = true;
+                    }
+                    else
+                        Console.WriteLine("Привет, Незнакомец!");
+                    break;
 
+                case Commands.Help:
+                    CommandsList.ShowHelp(name, echo);
+                    break;
 
-                //Commands command = (Commands)Enum.Parse(typeof(Commands), input.Replace("/", string.Empty), true);
+                case Commands.Info:
+                    CommandsList.ShowInfo();
+                    break;
 
-                switch (command)
-                {
-                    case Commands.Start:
-                        Console.WriteLine("Введите ваше имя:");
-                        name = Console.ReadLine();
-                        if (!string.IsNullOrWhiteSpace(name) && name != userName)
-                        {
-                            name = char.ToUpper(name[0]) + name.Substring(1);
-                            Console.WriteLine($"Привет {name}! Тебе стала доступна команда /echo");
-                            Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"");
-                            echo = true;
-                        }
-                        else
-                            Console.WriteLine("Привет, Незнакомец!");
-                        break;
-                    case Commands.Help:
-                        Console.WriteLine($"{name}, это NailBot - телеграм бот для записи на ноготочки.\n" +
-                        $"Введя команду /start бот предложит тебе ввести имя\n" +
-                        $"Введя команду /help ты получишь справку о командах\n" +
-                        $"Введя команду /echo и какой либо текст после - этот текст останется на консоли\n" +
-                        $"Введя команду /info ты получишь информацию о версии программы\n" +
-                        $"Введя команду /exit бот попрощается и завершит работу\n");
-                        break;
+                case Commands.Echo:
+                    Console.WriteLine(echoText);
+                    break;
 
-                    case Commands.Info:
-                        DateTime releaseDate = new DateTime(2025, 02, 08);
-                        Console.WriteLine("Это NailBot версии 1.0 Beta. Релиз {0:dd MMMM yyyy}", releaseDate);
-                        break;
-                    case Commands.Echo:
-                        Console.WriteLine(echoText);
-                        break;
-                    case Commands.Exit:
-                        answer = false;
-                        break;
-                    default:
-                        Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Extensions.CommandsRender(Commands.Start, echo, echoNumber);
-                        break;
-                }
-            //}
-            //catch (ArgumentException)
-            //{
-            //    Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-            //    Extensions.CommandsRender(Commands.Start, echo, echoNumber);
-            //}
+                case Commands.Addtask:
+                    //вызов метода добавления задачи в List
+                    CommandsList.AddTaskList(listTasks);
+                    //вызов метода добавления задачи в Array
+                    CommandsList.AddTaskArray(ref arrayTasks);
+                    break;
 
+                case Commands.Showtasks:
+                    //вызов метода рендера задач из List
+                    CommandsList.ShowTasks(listTasks);
+                    //вызов метода рендера задач из Array
+                    CommandsList.ShowTasks(ref arrayTasks);
+                    break;
+
+                case Commands.Removetask:
+                    //вызов метода удаления задачи из List
+                    CommandsList.RemoveTaskList(listTasks);
+                    //вызов метода удаления задачи из Array
+                    CommandsList.RemoveTaskArray(ref arrayTasks);
+                    break;
+
+                case Commands.Exit:
+                    answer = false;
+                    break;
+                default:
+                    Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
+                    Extensions.CommandsRender(Commands.Start, echo, echoNumber);
+                    break;
+            }
             return answer;
         }
     }
