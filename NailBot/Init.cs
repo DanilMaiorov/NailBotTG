@@ -18,7 +18,7 @@ namespace NailBot
         static int echoNumber = (int)Commands.Echo;
 
         //количество задач при запуске программы
-        public static int startTaskAmount = 0;
+        public static int maxTaskAmount = 0;
 
         //длина задачи при запуске программы
         public static int maxTaskLenght = 0;
@@ -33,22 +33,47 @@ namespace NailBot
 
         public static void Start(int tasksAmount, int taskLenght)
         {
-            int taskCountLimit = tasksAmount;
+            //int taskCountLimit = tasksAmount;
 
-            int taskLengthLimit = taskLenght;
+            //int taskLengthLimit = taskLenght;
+
+            //if (tasksAmount == 0)
+            //{
+            //    //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+            //    Console.WriteLine("Введите максимально допустимое количество задач");
+
+            //    taskCountLimit = int.Parse(Console.ReadLine());
+
+            //    if (taskCountLimit > 0 && taskCountLimit > 100)
+            //        throw new ArgumentException();
+
+            //    //переопределение количества задач при успешном парсинге
+            //    startTaskAmount = taskCountLimit;
+            //}
+
+            //if (taskLenght == 0)
+            //{
+            //    //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+            //    Console.WriteLine("Введите максимально допустимую длину задачи");
+
+            //    taskLengthLimit = int.Parse(Console.ReadLine());
+
+            //    if (taskLenght > 0 && taskLenght > 100)
+            //        throw new ArgumentException();
+
+            //    //переопределение количества задач при успешном парсинге
+            //    maxTaskLenght = taskLengthLimit;
+            //}
 
             if (tasksAmount == 0)
             {
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
                 Console.WriteLine("Введите максимально допустимое количество задач");
 
-                taskCountLimit = int.Parse(Console.ReadLine());
-
-                if (taskCountLimit > 0 && taskCountLimit > 100)
-                    throw new ArgumentException();
+                string strTaskCountLimit = Console.ReadLine();
 
                 //переопределение количества задач при успешном парсинге
-                startTaskAmount = taskCountLimit;
+                maxTaskAmount = Validate.ParseAndValidateInt(strTaskCountLimit, 1, 100);
             }
 
             if (taskLenght == 0)
@@ -56,21 +81,11 @@ namespace NailBot
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
                 Console.WriteLine("Введите максимально допустимую длину задачи");
 
-                taskLengthLimit = int.Parse(Console.ReadLine());
-
-                if (taskLenght > 0 && taskLenght > 100)
-                    throw new ArgumentException();
+                string strTaskLengthLimit = Console.ReadLine();
 
                 //переопределение количества задач при успешном парсинге
-                maxTaskLenght = taskLengthLimit;
+                maxTaskLenght = Validate.ParseAndValidateInt(strTaskLengthLimit, 1, 100);
             }
-
-
-
-
-
-
-
 
 
 
@@ -90,7 +105,7 @@ namespace NailBot
 
 
 
-            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, taskCountLimit, taskLengthLimit))
+            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, maxTaskAmount, maxTaskLenght))
             {
                 startInput = Console.ReadLine();
             }
@@ -173,9 +188,9 @@ namespace NailBot
 
                 case Commands.Addtask:
                     //вызов метода добавления задачи в List
-                    //CommandsList.AddTaskList(listTasks, taskCountLimit, taskLengthLimit);
+                    CommandsList.AddTaskList(listTasks, taskCountLimit, taskLengthLimit);
                     //вызов метода добавления задачи в Array
-                    CommandsList.AddTaskArray(ref arrayTasks, taskCountLimit, taskLengthLimit);
+                    //CommandsList.AddTaskArray(ref arrayTasks, taskCountLimit, taskLengthLimit);
                     break;
 
                 case Commands.Showtasks:

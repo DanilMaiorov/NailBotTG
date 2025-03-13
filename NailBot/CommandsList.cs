@@ -72,6 +72,10 @@ namespace NailBot
             if (newTask.Length >= taskLengthLimit)
                 throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
 
+            //проверяю дубликаты введённой задачи
+            if (tasks.Contains(newTask.Trim()))
+                throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
+
             tasks.Add(newTask);
 
             Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
@@ -139,10 +143,20 @@ namespace NailBot
 
             Console.WriteLine("Введите описание задачи (добавится в Array):");
             string newTask = Console.ReadLine();
+            
 
             //проверяю длину введёной задачи и выбрасываю исключение если больше лимита
             if (newTask.Length >= taskLengthLimit)
                 throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
+
+
+            //проверяю дубликаты введённой задачи
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                //удаляю пробелы
+                if (tasks[i] == newTask.Trim())
+                    throw new DuplicateTaskException($"Задача \"{newTask}\"", newTask);
+            }
 
             int index = arrayTasks.Length - 1;
 

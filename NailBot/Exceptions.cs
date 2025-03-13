@@ -13,7 +13,7 @@ namespace NailBot
         public int TaskLimit { get; }
 
         public TaskCountLimitException(string message, int taskCountLimit)
-            : base(message) 
+            : base(message)
         {
             TaskLimit = taskCountLimit;
         }
