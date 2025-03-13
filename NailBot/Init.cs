@@ -20,12 +20,23 @@ namespace NailBot
         //количество задач при запуске программы
         public static int startTaskAmount = 0;
 
+        //длина задачи при запуске программы
+        public static int maxTaskLenght = 0;
+
+
         //объявление списка задач в виде List
         static List<string> tasksList = new List<string>();
 
-        public static void Start(int tasksAmount)
+        //объявление списка задач в виде Array
+        static string[] tasksArray = [];
+
+
+        public static void Start(int tasksAmount, int taskLenght)
         {
             int taskCountLimit = tasksAmount;
+
+            int taskLengthLimit = taskLenght;
+
             if (tasksAmount == 0)
             {
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
@@ -40,6 +51,19 @@ namespace NailBot
                 startTaskAmount = taskCountLimit;
             }
 
+            if (taskLenght == 0)
+            {
+                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+                Console.WriteLine("Введите максимально допустимую длину задачи");
+
+                taskLengthLimit = int.Parse(Console.ReadLine());
+
+                if (taskLenght > 0 && taskLenght > 100)
+                    throw new ArgumentException();
+
+                //переопределение количества задач при успешном парсинге
+                maxTaskLenght = taskLengthLimit;
+            }
 
 
 
@@ -49,7 +73,9 @@ namespace NailBot
 
 
 
-        string userName = "Пользователь";
+
+
+            string userName = "Пользователь";
 
             bool availableEcho = false;
 
@@ -62,10 +88,9 @@ namespace NailBot
 
 
 
-            //объявление списка задач в виде Array
-            string[] tasksArray = [];
 
-            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, taskCountLimit))
+
+            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, taskCountLimit, taskLengthLimit))
             {
                 startInput = Console.ReadLine();
             }
@@ -75,7 +100,7 @@ namespace NailBot
             Console.ReadKey();
         }
 
-        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks, int taskCountLimit)
+        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks, int taskCountLimit, int taskLengthLimit)
         {
             string userName = name;
             string echoText = "";
@@ -89,6 +114,8 @@ namespace NailBot
 
 
             Console.WriteLine($"Максимальное количество задач {taskCountLimit}");
+
+            Console.WriteLine($"Максимальная длина задачи {taskLengthLimit}");
 
 
 
@@ -108,7 +135,7 @@ namespace NailBot
             Commands command;
 
             //регулярка на реплейс циферного значения Enum
-            input = Extensions.NumberReplacer(input);
+            //input = Extensions.NumberReplacer(input);
 
             //приведение к типу Enum
             if (Enum.TryParse<Commands>(input, true, out var result))
@@ -146,23 +173,23 @@ namespace NailBot
 
                 case Commands.Addtask:
                     //вызов метода добавления задачи в List
-                    CommandsList.AddTaskList(listTasks, taskCountLimit);
+                    //CommandsList.AddTaskList(listTasks, taskCountLimit, taskLengthLimit);
                     //вызов метода добавления задачи в Array
-                    //CommandsList.AddTaskArray(ref arrayTasks);
+                    CommandsList.AddTaskArray(ref arrayTasks, taskCountLimit, taskLengthLimit);
                     break;
 
                 case Commands.Showtasks:
                     //вызов метода рендера задач из List
-                    CommandsList.ShowTasks(listTasks);
+                    //CommandsList.ShowTasks(listTasks);
                     //вызов метода рендера задач из Array
-                    //CommandsList.ShowTasks(ref arrayTasks);
+                    CommandsList.ShowTasks(ref arrayTasks);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи из List
-                    CommandsList.RemoveTaskList(listTasks);
+                    //CommandsList.RemoveTaskList(listTasks);
                     //вызов метода удаления задачи из Array
-                    //CommandsList.RemoveTaskArray(ref arrayTasks);
+                    CommandsList.RemoveTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Exit:

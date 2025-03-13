@@ -16,7 +16,7 @@ namespace NailBot
             {
                 try
                 {
-                    Init.Start(Init.startTaskAmount);
+                    Init.Start(Init.startTaskAmount, Init.maxTaskLenght);
                     isFinish = true; 
                 }
                 catch (ArgumentException ex)
@@ -27,6 +27,14 @@ namespace NailBot
                     Console.WriteLine($"Где произошла: {ex.InnerException}");
                 }
                 catch (TaskCountLimitException ex)
+                {
+                    Console.WriteLine($"Тип ошибки: {ex.Message}");
+                }
+                catch (TaskLengthLimitException ex)
+                {
+                    Console.WriteLine($"Тип ошибки: {ex.Message}");
+                }
+                catch (DuplicateTaskException ex)
                 {
                     Console.WriteLine($"Тип ошибки: {ex.Message}");
                 }

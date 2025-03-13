@@ -59,15 +59,18 @@ namespace NailBot
         }
 
         //добавлю перегрузку
-        internal static void AddTaskList(List<string> tasks, int maxTasksAmount)
+        internal static void AddTaskList(List<string> tasks, int maxTasksAmount, int taskLengthLimit)
         {
             //проверяю длину листа и выбрасываю исключение если больше лимита
             if (tasks.Count >= maxTasksAmount)
                 throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
-            
 
             Console.WriteLine("Введите описание задачи (добавится в List):");
             string newTask = Console.ReadLine();
+
+            //проверяю длину введёной задачи и выбрасываю исключение если больше лимита
+            if (newTask.Length >= taskLengthLimit)
+                throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
 
             tasks.Add(newTask);
 
@@ -124,12 +127,22 @@ namespace NailBot
         //работа с Array
 
         //метод добавления задачи в Array
-        internal static void AddTaskArray(ref string[] tasks)
+        internal static void AddTaskArray(ref string[] tasks, int maxTasksAmount, int taskLengthLimit)
         {
             string[] arrayTasks = new string[tasks.Length + 1];
 
+
+            //проверяю длину листа и выбрасываю исключение если больше лимита
+            if (tasks.Length >= maxTasksAmount)
+                throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
+
+
             Console.WriteLine("Введите описание задачи (добавится в Array):");
             string newTask = Console.ReadLine();
+
+            //проверяю длину введёной задачи и выбрасываю исключение если больше лимита
+            if (newTask.Length >= taskLengthLimit)
+                throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
 
             int index = arrayTasks.Length - 1;
 

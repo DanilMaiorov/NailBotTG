@@ -17,7 +17,31 @@ namespace NailBot
         {
             TaskLimit = taskCountLimit;
         }
+    }
 
+    //исключение на превышение длины задачи
+    public class TaskLengthLimitException : Exception
+    {
+        public int TaskLengthLimit { get; }
+        public int TaskLength { get; }
 
+        public TaskLengthLimitException(string message, int taskLengthLimit, int taskLength)
+            : base(message)
+        {
+            TaskLengthLimit = taskLengthLimit;
+            TaskLength = taskLength;
+        }
+    }
+
+    //исключение на дубликат задачи
+    public class DuplicateTaskException : Exception
+    {
+        public string Task { get; }
+
+        public DuplicateTaskException(string message, string task)
+            : base(message)
+        {
+            Task = task;
+        }
     }
 }
