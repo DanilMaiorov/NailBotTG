@@ -51,14 +51,14 @@ namespace NailBot
         internal static void AddTaskList(List<string> tasks)
         {
             Console.WriteLine("Введите описание задачи (добавится в List):");
-            string newTask = Console.ReadLine();
+            string newTask = Validate.ValidateString(Console.ReadLine());
 
             tasks.Add(newTask);
 
             Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
         }
 
-        //добавлю перегрузку
+        //добавлю перегрузку метода добавления задачи в List
         internal static void AddTaskList(List<string> tasks, int maxTasksAmount, int taskLengthLimit)
         {
             //проверяю длину листа и выбрасываю исключение если больше лимита
@@ -66,16 +66,9 @@ namespace NailBot
                 throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
 
             Console.WriteLine("Введите описание задачи (добавится в List):");
-            string newTask = Console.ReadLine();
 
-            //проверяю длину введёной задачи и выбрасываю исключение если больше лимита
-            if (newTask.Length >= taskLengthLimit)
-                throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
-
-            //валидация строки перед проверкой на дубликаты
-            Validate.ValidateString(newTask, out string validTask);
-
-            newTask = validTask;
+            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
+            string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
 
             //проверяю дубликаты введённой задачи с удалением пробелов
             if (tasks.Contains(newTask))
@@ -85,8 +78,6 @@ namespace NailBot
 
             Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
         }
-
-
 
         //метод рендера задач из List
         internal static void ShowTasks(List<string> tasks)
@@ -133,9 +124,30 @@ namespace NailBot
             }
         }
 
-        //работа с Array
 
+        //работа с Array
         //метод добавления задачи в Array
+        internal static void AddTaskArray(ref string[] tasks)
+        {
+            string[] arrayTasks = new string[tasks.Length + 1];
+
+            Console.WriteLine("Введите описание задачи (добавится в Array):");
+            //валидация строки
+            string newTask = Validate.ValidateString(Console.ReadLine());
+
+            int index = arrayTasks.Length - 1;
+
+            arrayTasks[index] = newTask;
+
+            for (int i = 0; i < index; i++)
+                arrayTasks[i] = tasks[i];
+
+            tasks = arrayTasks;
+
+            Console.WriteLine($"Задача \"{newTask}\" добавлена в Array задач");
+        }
+
+        //добавлю перегрузку метода добавления задачи в Array
         internal static void AddTaskArray(ref string[] tasks, int maxTasksAmount, int taskLengthLimit)
         {
             string[] arrayTasks = new string[tasks.Length + 1];
@@ -146,16 +158,10 @@ namespace NailBot
 
 
             Console.WriteLine("Введите описание задачи (добавится в Array):");
-            string newTask = Console.ReadLine();
 
-            //проверяю длину введёной задачи и выбрасываю исключение если больше лимита
-            if (newTask.Length >= taskLengthLimit)
-                throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
+            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
+            string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
 
-            //валидация строки перед проверкой на дубликаты
-            Validate.ValidateString(newTask, out string validTask);
-
-            newTask = validTask;
 
             //проверяю дубликаты введённой задачи
             for (int i = 0; i < tasks.Length; i++)

@@ -21,7 +21,7 @@ namespace NailBot
                 if (limit > 0 && limit < 100)
                     return limit;
 
-            throw new Exception("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
+            throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
 
             //тут я написал ещё 1 try catch чтобы в Main можно было прокидывать просто через throw с полным StackTrace и во внешнем catch обращаться к InnerException
 
@@ -43,11 +43,27 @@ namespace NailBot
         }
 
         //метод валидации строки
-        internal static string ValidateString(string? str, out string resultStr)
+        internal static string ValidateString(string? str)
         {
             if (!string.IsNullOrWhiteSpace(str))
+            {
+                string resultStr;
                 return resultStr = str.Trim();
+            }
+            throw new ArgumentException("Введена строка из пробелов или пустая строка");
+        }
 
+        //добавлю перегрузку метода валидации строки
+        internal static string ValidateString(string? str, int strLength)
+        {
+            if (!string.IsNullOrWhiteSpace(str))
+            {
+                string resultStr = str.Trim();
+
+                if (resultStr.Length < strLength)
+                    return resultStr;
+                throw new TaskLengthLimitException($"Длина задачи \"{resultStr}\" - {resultStr.Length}, что превышает максимально допустимое значение {strLength}", resultStr.Length, strLength);
+            }
             throw new ArgumentException("Введена строка из пробелов или пустая строка");
         }
     }

@@ -35,42 +35,21 @@ namespace NailBot
         //объявление списка задач в виде Array
         static string[] tasksArray = [];
 
-
         public static void Start(int tasksAmount, int taskLenght)
         {
-            if (tasksAmount == 0)
-            {
-                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                Console.WriteLine("Введите максимально допустимое количество задач");
+            //присваивание значений длин происходит через метод конструктора класса StartValues
+            Extensions.StartValues startValues = Extensions.GetLengthValues(tasksAmount, taskLenght);
 
-                string strTaskCountLimit = Console.ReadLine();
-
-                //переопределение количества задач при успешном парсинге
-                maxTaskAmount = Validate.ParseAndValidateInt(strTaskCountLimit, 1, 100);
-            }
-
-            if (taskLenght == 0)
-            {
-                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                Console.WriteLine("Введите максимально допустимую длину задачи");
-
-                string strTaskLengthLimit = Console.ReadLine();
-
-                //переопределение количества задач при успешном парсинге
-                maxTaskLenght = Validate.ParseAndValidateInt(strTaskLengthLimit, 1, 100);
-            }
-
-            Console.WriteLine($"Привет! Это NailBot!" + 
-            " Введите команду для начала работы или выхода из бота.\n");
+            maxTaskAmount = startValues.MaxTaskAmount;
+            maxTaskLenght = startValues.MaxTaskLenght;
 
             Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
 
-            string startInput = Console.ReadLine();
-
+            string startInput = Validate.ValidateString(Console.ReadLine());
 
             while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, maxTaskAmount, maxTaskLenght))
             {
-                startInput = Console.ReadLine();
+                startInput = Validate.ValidateString(Console.ReadLine());
             }
 
             userName = availableEcho ? userName : "Незнакомец";
@@ -113,7 +92,7 @@ namespace NailBot
                     {
                         name = char.ToUpper(name[0]) + name.Substring(1);
                         Console.WriteLine($"Привет {name}! Тебе стала доступна команда /echo");
-                        Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"");
+                        Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"\n");
                         echo = true;
                         Extensions.CommandsRender(Commands.Start, echo, echoNumber);
                     }
@@ -137,21 +116,21 @@ namespace NailBot
                     //вызов метода добавления задачи в List
                     CommandsList.AddTaskList(listTasks, taskCountLimit, taskLengthLimit);
                     //вызов метода добавления задачи в Array
-                    //CommandsList.AddTaskArray(ref arrayTasks, taskCountLimit, taskLengthLimit);
+                    CommandsList.AddTaskArray(ref arrayTasks, taskCountLimit, taskLengthLimit);
                     break;
 
                 case Commands.Showtasks:
                     //вызов метода рендера задач из List
                     CommandsList.ShowTasks(listTasks);
                     //вызов метода рендера задач из Array
-                    //CommandsList.ShowTasks(ref arrayTasks);
+                    CommandsList.ShowTasks(ref arrayTasks);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи из List
                     CommandsList.RemoveTaskList(listTasks);
                     //вызов метода удаления задачи из Array
-                    //CommandsList.RemoveTaskArray(ref arrayTasks);
+                    CommandsList.RemoveTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Exit:
@@ -171,3 +150,7 @@ namespace NailBot
 //добавил стартовое количество задач и добавил в стартовый метод параметр стартового количества задач
 //вынес создание листа и массива из метода start
 //вынес объявление имени пользака и эха из метода старт
+
+//вынес приветствие в самое начало метода старт и рендер по условию
+
+//добавил перегрузки метода добавления задач в массив в список
