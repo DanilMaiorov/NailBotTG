@@ -23,6 +23,11 @@ namespace NailBot
         //длина задачи при запуске программы
         public static int maxTaskLenght = 0;
 
+        //эхо
+        static bool availableEcho = false;
+
+        //дефолтное имя пользака
+        static string userName = "Пользователь";
 
         //объявление списка задач в виде List
         static List<string> tasksList = new List<string>();
@@ -33,38 +38,6 @@ namespace NailBot
 
         public static void Start(int tasksAmount, int taskLenght)
         {
-            //int taskCountLimit = tasksAmount;
-
-            //int taskLengthLimit = taskLenght;
-
-            //if (tasksAmount == 0)
-            //{
-            //    //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-            //    Console.WriteLine("Введите максимально допустимое количество задач");
-
-            //    taskCountLimit = int.Parse(Console.ReadLine());
-
-            //    if (taskCountLimit > 0 && taskCountLimit > 100)
-            //        throw new ArgumentException();
-
-            //    //переопределение количества задач при успешном парсинге
-            //    startTaskAmount = taskCountLimit;
-            //}
-
-            //if (taskLenght == 0)
-            //{
-            //    //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-            //    Console.WriteLine("Введите максимально допустимую длину задачи");
-
-            //    taskLengthLimit = int.Parse(Console.ReadLine());
-
-            //    if (taskLenght > 0 && taskLenght > 100)
-            //        throw new ArgumentException();
-
-            //    //переопределение количества задач при успешном парсинге
-            //    maxTaskLenght = taskLengthLimit;
-            //}
-
             if (tasksAmount == 0)
             {
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
@@ -87,22 +60,12 @@ namespace NailBot
                 maxTaskLenght = Validate.ParseAndValidateInt(strTaskLengthLimit, 1, 100);
             }
 
-
-
-
-            string userName = "Пользователь";
-
-            bool availableEcho = false;
-
             Console.WriteLine($"Привет! Это NailBot!" + 
             " Введите команду для начала работы или выхода из бота.\n");
 
             Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
 
             string startInput = Console.ReadLine();
-
-
-
 
 
             while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, maxTaskAmount, maxTaskLenght))
@@ -126,23 +89,6 @@ namespace NailBot
                 echoText = input.Substring(6);
                 input = "/echo";
             }
-
-
-            Console.WriteLine($"Максимальное количество задач {taskCountLimit}");
-
-            Console.WriteLine($"Максимальная длина задачи {taskLengthLimit}");
-
-
-
-
-
-
-
-
-
-
-
-
 
             //реплейс слэша для приведения к Enum
             input = input.Replace("/", string.Empty);
@@ -169,6 +115,7 @@ namespace NailBot
                         Console.WriteLine($"Привет {name}! Тебе стала доступна команда /echo");
                         Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"");
                         echo = true;
+                        Extensions.CommandsRender(Commands.Start, echo, echoNumber);
                     }
                     else
                         Console.WriteLine("Привет, Незнакомец!");
@@ -195,16 +142,16 @@ namespace NailBot
 
                 case Commands.Showtasks:
                     //вызов метода рендера задач из List
-                    //CommandsList.ShowTasks(listTasks);
+                    CommandsList.ShowTasks(listTasks);
                     //вызов метода рендера задач из Array
-                    CommandsList.ShowTasks(ref arrayTasks);
+                    //CommandsList.ShowTasks(ref arrayTasks);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи из List
-                    //CommandsList.RemoveTaskList(listTasks);
+                    CommandsList.RemoveTaskList(listTasks);
                     //вызов метода удаления задачи из Array
-                    CommandsList.RemoveTaskArray(ref arrayTasks);
+                    //CommandsList.RemoveTaskArray(ref arrayTasks);
                     break;
 
                 case Commands.Exit:
@@ -222,4 +169,5 @@ namespace NailBot
 
 //решил сделать циклом while
 //добавил стартовое количество задач и добавил в стартовый метод параметр стартового количества задач
-//вынес создание листа из метода
+//вынес создание листа и массива из метода start
+//вынес объявление имени пользака и эха из метода старт

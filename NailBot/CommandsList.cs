@@ -72,8 +72,13 @@ namespace NailBot
             if (newTask.Length >= taskLengthLimit)
                 throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
 
-            //проверяю дубликаты введённой задачи
-            if (tasks.Contains(newTask.Trim()))
+            //валидация строки перед проверкой на дубликаты
+            Validate.ValidateString(newTask, out string validTask);
+
+            newTask = validTask;
+
+            //проверяю дубликаты введённой задачи с удалением пробелов
+            if (tasks.Contains(newTask))
                 throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
 
             tasks.Add(newTask);
@@ -135,26 +140,27 @@ namespace NailBot
         {
             string[] arrayTasks = new string[tasks.Length + 1];
 
-
-            //проверяю длину листа и выбрасываю исключение если больше лимита
+            //проверяю длину  и выбрасываю исключение если больше лимита
             if (tasks.Length >= maxTasksAmount)
                 throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
 
 
             Console.WriteLine("Введите описание задачи (добавится в Array):");
             string newTask = Console.ReadLine();
-            
 
             //проверяю длину введёной задачи и выбрасываю исключение если больше лимита
             if (newTask.Length >= taskLengthLimit)
                 throw new TaskLengthLimitException($"Длина задачи \"{newTask}\" - {newTask.Length}, что превышает максимально допустимое значение {taskLengthLimit}", newTask.Length, taskLengthLimit);
 
+            //валидация строки перед проверкой на дубликаты
+            Validate.ValidateString(newTask, out string validTask);
+
+            newTask = validTask;
 
             //проверяю дубликаты введённой задачи
             for (int i = 0; i < tasks.Length; i++)
             {
-                //удаляю пробелы
-                if (tasks[i] == newTask.Trim())
+                if (tasks[i] == newTask)
                     throw new DuplicateTaskException($"Задача \"{newTask}\"", newTask);
             }
 

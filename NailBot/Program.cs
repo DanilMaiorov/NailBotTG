@@ -16,43 +16,55 @@ namespace NailBot
             {
                 try
                 {
-                    Init.Start(Init.maxTaskAmount, Init.maxTaskLenght);
-                    isFinish = true; 
-                }
-                catch (ArgumentException ex)
-                {
-                    Console.WriteLine("Введено некорректное количество задач");
-                    Console.WriteLine($"Тип ошибки: {ex.Message}");
-                    Console.WriteLine($"Стек трейс: {ex.StackTrace}");
-                    Console.WriteLine($"Где произошла: {ex.InnerException}");
-                }
-                catch (TaskCountLimitException ex)
-                {
-                    Console.WriteLine($"Тип ошибки: {ex.Message}");
-                    Console.WriteLine($"Стек трейс: {ex.StackTrace}");
-                }
-                catch (TaskLengthLimitException ex)
-                {
-                    Console.WriteLine($"Тип ошибки: {ex.Message}");
-                    Console.WriteLine($"Стек трейс: {ex.StackTrace}");
-                }
-                catch (DuplicateTaskException ex)
-                {
-                    Console.WriteLine($"Тип ошибки: {ex.Message}");
-                    Console.WriteLine($"Стек трейс: {ex.StackTrace}");
+                    try
+                    {
+                        Init.Start(Init.maxTaskAmount, Init.maxTaskLenght);
+                        isFinish = true;
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        //выбрасываю новую ошибку, а во внешнем catch обращаюсь к InnerException чтобы отследить путь откуда выброшена ошибка
+                        throw new Exception("Произошла непредвиденная ошибка", ex);
+                        //если выбросить просто через throw, то InnerException будет null
+                        //throw;
+                    }
+                    catch (TaskCountLimitException ex)
+                    {
+                        throw new Exception("Произошла непредвиденная ошибка", ex);
+                    }
+                    catch (TaskLengthLimitException ex)
+                    {
+                        throw new Exception("Произошла непредвиденная ошибка", ex);
+                    }
+                    catch (DuplicateTaskException ex)
+                    {
+                        throw new Exception("Произошла непредвиденная ошибка", ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Произошла непредвиденная ошибка", ex);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Произошла непредвиденная ошибка");
-                    Console.WriteLine($"Тип ошибки: {ex.Message}");
-                    Console.WriteLine($"Стек трейс: {ex.StackTrace}");
-                    Console.WriteLine($"Где произошла: {ex.InnerException}");
+                    Console.WriteLine($"Основное исключение: {ex.Message}\n");
+                    Console.WriteLine($"Стек трейс основного исключения: {ex.StackTrace}\n");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"Внутреннее исключение: {ex.InnerException.Message}\n");
+                        Console.WriteLine($"Источник внутреннего исключения: {ex.InnerException.StackTrace}\n");
+                    }
                 }
             }
 
-            //Сделать рекурсией
-
             //DescriptionBot.PrintDescription();
+
+            // не совсем до конца понял по количеству try catch и как будто бы переборщил с ними))) 
+            // повешал глобальный try catch внутри которого ещё try catch которые отлавливают исключения из задания
+            // и выбрасывают ещё одно, чтобы прочитать InnerException, всё время получал null, потому так обвешал
+
+            // не совсем понял каким образом отловить Exception и вывести InnerException потому что во всех случаях ввода предусматриваются те или иные кастомные Exception
+            // по заданию там нужно выводить только сообщение об ошибке, без innerException
         }
     }
 }
