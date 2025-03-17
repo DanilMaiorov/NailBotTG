@@ -70,7 +70,7 @@ namespace NailBot
             //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
             string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
 
-            //проверяю дубликаты введённой задачи с удалением пробелов
+            //проверяю дубликаты введённой задачи
             if (tasks.Contains(newTask))
                 throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
 
@@ -167,7 +167,7 @@ namespace NailBot
             for (int i = 0; i < tasks.Length; i++)
             {
                 if (tasks[i] == newTask)
-                    throw new DuplicateTaskException($"Задача \"{newTask}\"", newTask);
+                    throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
             }
 
             int index = arrayTasks.Length - 1;

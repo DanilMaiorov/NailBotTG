@@ -45,41 +45,26 @@ namespace NailBot
             return str;
         }
 
-        public class StartValues()
+
+        //метод присваивания значений длин
+        public static int GetStartValues(this int value, string str)
         {
-            //количество задач при запуске программы
-            public int MaxTaskAmount { get; set; }
-
-            //длина задачи при запуске программы
-            public int MaxTaskLenght { get; set; }
-           
-            public StartValues(int maxTaskAmount, int maxTaskLenght) : this()
+            while (value == 0)
             {
-                MaxTaskAmount = maxTaskAmount;
-                MaxTaskLenght = maxTaskLenght;
+                try
+                {
+                    //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+                    Console.WriteLine(str);
+                    return value = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
+                }
+                catch (ArgumentException)
+                {
+                    throw;
+                }
             }
+            return value;
         }
-        public static StartValues GetLengthValues(this int maxTaskAmount, int maxTaskLenght)
-        {
-            if (maxTaskAmount == 0)
-            {
-                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                Console.WriteLine("Введите максимально допустимое количество задач");
 
-                //переопределение количества задач при успешном парсинге
-                maxTaskAmount = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
-            }
 
-            if (maxTaskLenght == 0)
-            {
-                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                Console.WriteLine("Введите максимально допустимую длину задачи");
-
-                //переопределение количества задач при успешном парсинге
-                maxTaskLenght = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
-            }
-
-            return new StartValues(maxTaskAmount, maxTaskLenght);
-        }
     }
 }

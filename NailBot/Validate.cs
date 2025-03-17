@@ -15,6 +15,9 @@ namespace NailBot
         {
             //выбрасываю ошибки и отображаю их во внешнем catch в Main как InnerException
 
+            if (string.IsNullOrWhiteSpace(str))
+                throw new ArgumentException("Введена строка из пробелов или пустая строка");
+
             bool parsingRelust = int.TryParse(str, out int limit);
 
             if (parsingRelust)
@@ -27,6 +30,9 @@ namespace NailBot
 
             //try
             //{
+            //    if (string.IsNullOrWhiteSpace(str))
+            //        throw new ArgumentException("Введена строка из пробелов или пустая строка");
+
             //    bool parsingRelust = int.TryParse(str, out int limit);
 
             //    if (parsingRelust)

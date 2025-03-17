@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Text.RegularExpressions;
+using static NailBot.Extensions;
+using static NailBot.StartValues;
 
 namespace NailBot
 {
@@ -37,17 +39,22 @@ namespace NailBot
 
         public static void Start(int tasksAmount, int taskLenght)
         {
-            //присваивание значений длин происходит через метод конструктора класса StartValues
-            Extensions.StartValues startValues = Extensions.GetLengthValues(tasksAmount, taskLenght);
+            //присваиваю значения длин
+            if (tasksAmount == 0)
+                maxTaskAmount = Extensions.GetStartValues(tasksAmount, "Введите максимально допустимое количество задач");
 
-            maxTaskAmount = startValues.MaxTaskAmount;
-            maxTaskLenght = startValues.MaxTaskLenght;
+            if (maxTaskLenght == 0)
+                maxTaskLenght = Extensions.GetStartValues(maxTaskLenght, "Введите максимально допустимую длину задачи");
+            
+            //создаю экземпляр класса со значениями длин для хранения
+            StartValues StartValues = new StartValues(maxTaskAmount, maxTaskLenght);
 
+            //рендер списка команд
             Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
 
             string startInput = Validate.ValidateString(Console.ReadLine());
 
-            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, maxTaskAmount, maxTaskLenght))
+            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, StartValues.MaxTaskAmount, StartValues.MaxTaskLenght))
             {
                 startInput = Validate.ValidateString(Console.ReadLine());
             }
@@ -75,7 +82,7 @@ namespace NailBot
             Commands command;
 
             //регулярка на реплейс циферного значения Enum
-            //input = Extensions.NumberReplacer(input);
+            input = Extensions.NumberReplacer(input);
 
             //приведение к типу Enum
             if (Enum.TryParse<Commands>(input, true, out var result))
@@ -145,12 +152,3 @@ namespace NailBot
         }
     }
 }
-
-//решил сделать циклом while
-//добавил стартовое количество задач и добавил в стартовый метод параметр стартового количества задач
-//вынес создание листа и массива из метода start
-//вынес объявление имени пользака и эха из метода старт
-
-//вынес приветствие в самое начало метода старт и рендер по условию
-
-//добавил перегрузки метода добавления задач в массив в список
