@@ -51,11 +51,11 @@ namespace NailBot
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Основное исключение: {ex.Message}\n");
-                    //Console.WriteLine($"Стек трейс основного исключения: {ex.StackTrace}\n");
+                    Console.WriteLine($"Стек трейс основного исключения: {ex.StackTrace}\n");
                     if (ex.InnerException != null)
                     {
                         Console.WriteLine($"Внутреннее исключение: {ex.InnerException.Message}\n");
-                        //Console.WriteLine($"Источник внутреннего исключения: {ex.InnerException.StackTrace}\n");
+                        Console.WriteLine($"Источник внутреннего исключения: {ex.InnerException.StackTrace}\n");
                     }
                 }
             }
