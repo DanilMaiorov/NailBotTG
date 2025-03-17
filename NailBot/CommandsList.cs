@@ -15,7 +15,7 @@ namespace NailBot
         {
             if (availableEcho)
             {
-                Console.WriteLine($"{userName}, это NailBot - телеграм бот для записи на ноготочки.\n" +
+                Console.WriteLine($"{userName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /echo и какой либо текст после - этот текст останется на консоли\n" +
@@ -27,7 +27,7 @@ namespace NailBot
             }
             else
             {
-                Console.WriteLine($"{userName}, это NailBot - телеграм бот для записи на ноготочки.\n" +
+                Console.WriteLine($"{userName}, Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /addtask ты сможешь добавлять задачи в список задач\n" +

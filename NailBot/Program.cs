@@ -10,7 +10,7 @@ namespace NailBot
         static void Main(string[] args)
         {
             //здороваемся только 1 раз при запуске бота
-            Console.WriteLine($"Привет! Это NailBot! Введите команду для начала работы или выхода из бота.\n");
+            Console.WriteLine($"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
             //переменная проверки выхода из программы
             bool isFinish = false;
@@ -59,9 +59,6 @@ namespace NailBot
                     }
                 }
             }
-
-            //DescriptionBot.PrintDescription();
-
         }
     }
 }
