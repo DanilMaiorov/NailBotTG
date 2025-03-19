@@ -41,16 +41,16 @@ namespace NailBot
         {
             //присваиваю значения длин
             if (tasksAmount == 0)
-                maxTaskAmount = Extensions.GetStartValues(tasksAmount, "Введите максимально допустимое количество задач");
+                maxTaskAmount = tasksAmount.GetStartValues("Введите максимально допустимое количество задач");
 
             if (maxTaskLenght == 0)
-                maxTaskLenght = Extensions.GetStartValues(maxTaskLenght, "Введите максимально допустимую длину задачи");
+                maxTaskLenght = taskLenght.GetStartValues("Введите максимально допустимую длину задачи");
             
             //создаю экземпляр класса со значениями длин для хранения
             StartValues StartValues = new StartValues(maxTaskAmount, maxTaskLenght);
 
             //рендер списка команд
-            Extensions.CommandsRender(Commands.Start, availableEcho, echoNumber);
+            Commands.Start.CommandsRender(availableEcho, echoNumber);
 
             string startInput = Validate.ValidateString(Console.ReadLine());
 
@@ -82,7 +82,7 @@ namespace NailBot
             Commands command;
 
             //регулярка на реплейс циферного значения Enum
-            input = Extensions.NumberReplacer(input);
+            input = input.NumberReplacer();
 
             //приведение к типу Enum
             if (Enum.TryParse<Commands>(input, true, out var result))
@@ -101,7 +101,7 @@ namespace NailBot
                         Console.WriteLine($"Привет {name}! Тебе стала доступна команда /echo");
                         Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"\n");
                         echo = true;
-                        Extensions.CommandsRender(Commands.Start, echo, echoNumber);
+                        Commands.Start.CommandsRender(echo, echoNumber);
                     }
                     else
                         Console.WriteLine("Привет, Незнакомец!");
@@ -145,7 +145,7 @@ namespace NailBot
                     break;
                 default:
                     Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                    Extensions.CommandsRender(Commands.Start, echo, echoNumber);
+                    Commands.Start.CommandsRender(echo, echoNumber);
                     break;
             }
             return answer;

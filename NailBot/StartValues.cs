@@ -8,7 +8,7 @@ namespace NailBot
 {
 
     //класс для хранения данных
-    internal class StartValues()
+    internal class StartValues
     {
         //количество задач при запуске программы
         public int MaxTaskAmount { get; set; }
@@ -16,7 +16,7 @@ namespace NailBot
         //длина задачи при запуске программы
         public int MaxTaskLenght { get; set; }
 
-        public StartValues(int maxTaskAmount, int maxTaskLenght) : this()
+        public StartValues(int maxTaskAmount, int maxTaskLenght)
         {
             MaxTaskAmount = maxTaskAmount;
             MaxTaskLenght = maxTaskLenght;
