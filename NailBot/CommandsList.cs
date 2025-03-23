@@ -15,7 +15,7 @@ namespace NailBot
         {
             if (availableEcho)
             {
-                Console.WriteLine($"{userName}, это NailBot - телеграм бот для записи на ноготочки.\n" +
+                Console.WriteLine($"{userName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /echo и какой либо текст после - этот текст останется на консоли\n" +
@@ -27,7 +27,7 @@ namespace NailBot
             }
             else
             {
-                Console.WriteLine($"{userName}, это NailBot - телеграм бот для записи на ноготочки.\n" +
+                Console.WriteLine($"{userName}, Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /addtask ты сможешь добавлять задачи в список задач\n" +
@@ -36,7 +36,6 @@ namespace NailBot
                 $"Введя команду /info ты получишь информацию о версии программы\n" +
                 $"Введя команду /exit бот попрощается и завершит работу\n");
             }
-
         }
 
         //метод команды Info
@@ -51,13 +50,35 @@ namespace NailBot
         internal static void AddTaskList(List<string> tasks)
         {
             Console.WriteLine("Введите описание задачи (добавится в List):");
-            string newTask = Console.ReadLine();
+            string newTask = Validate.ValidateString(Console.ReadLine());
 
             tasks.Add(newTask);
 
             Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
         }
-        
+
+        //добавлю перегрузку метода добавления задачи в List
+        internal static void AddTaskList(List<string> tasks, int maxTasksAmount, int taskLengthLimit)
+        {
+            //проверяю длину листа и выбрасываю исключение если больше лимита
+            if (tasks.Count >= maxTasksAmount)
+                throw new TaskCountLimitException(maxTasksAmount);
+
+            Console.WriteLine("Введите описание задачи (добавится в List):");
+
+            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
+            string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
+
+            //проверяю дубликаты введённой задачи
+            if (tasks.Contains(newTask))
+                throw new DuplicateTaskException(newTask);
+                //throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
+
+            tasks.Add(newTask);
+
+            Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
+        }
+
         //метод рендера задач из List
         internal static void ShowTasks(List<string> tasks)
         {
@@ -103,15 +124,52 @@ namespace NailBot
             }
         }
 
-        //работа с Array
 
+        //работа с Array
         //метод добавления задачи в Array
         internal static void AddTaskArray(ref string[] tasks)
         {
             string[] arrayTasks = new string[tasks.Length + 1];
 
             Console.WriteLine("Введите описание задачи (добавится в Array):");
-            string newTask = Console.ReadLine();
+            //валидация строки
+            string newTask = Validate.ValidateString(Console.ReadLine());
+
+            int index = arrayTasks.Length - 1;
+
+            arrayTasks[index] = newTask;
+
+            for (int i = 0; i < index; i++)
+                arrayTasks[i] = tasks[i];
+
+            tasks = arrayTasks;
+
+            Console.WriteLine($"Задача \"{newTask}\" добавлена в Array задач");
+        }
+
+        //добавлю перегрузку метода добавления задачи в Array
+        internal static void AddTaskArray(ref string[] tasks, int maxTasksAmount, int taskLengthLimit)
+        {
+            string[] arrayTasks = new string[tasks.Length + 1];
+
+            //проверяю длину  и выбрасываю исключение если больше лимита
+            if (tasks.Length >= maxTasksAmount)
+                throw new TaskCountLimitException(maxTasksAmount);
+
+
+            Console.WriteLine("Введите описание задачи (добавится в Array):");
+
+            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
+            string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
+
+
+            //проверяю дубликаты введённой задачи
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                if (tasks[i] == newTask)
+                    throw new DuplicateTaskException(newTask);
+                    //throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
+            }
 
             int index = arrayTasks.Length - 1;
 

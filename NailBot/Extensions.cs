@@ -45,20 +45,19 @@ namespace NailBot
             return str;
         }
 
-        //метод выхода в основное меню выбора команд 
-        public static void GoToMainMenu()
+
+        //метод присваивания значений длин
+        public static int GetStartValues(this int value, string str)
         {
-
-            Console.WriteLine("Нажмите клавишу Esc, чтобы вернуться в главное меню...");
-
-            // Ожидаем нажатие клавиши
-            var key = Console.ReadKey(true);  // Чтение клавиши без отображения на экране
-
-            // Если нажата клавиша Esc
-            if (key.Key == ConsoleKey.Escape)
+            while (value == 0)
             {
-                Console.WriteLine("Вы вернулись в главное меню.");
+                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+                Console.WriteLine(str);
+                return value = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
             }
+            return value;
         }
+
+
     }
 }
