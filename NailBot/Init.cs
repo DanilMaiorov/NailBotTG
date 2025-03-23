@@ -54,7 +54,7 @@ namespace NailBot
 
             string startInput = Validate.ValidateString(Console.ReadLine());
 
-            while (Handler(startInput))
+            while (Handle(startInput))
             {
                 startInput = Validate.ValidateString(Console.ReadLine());
             }
@@ -64,7 +64,7 @@ namespace NailBot
             Console.ReadKey();
         }
 
-        public static bool Handler(string input)
+        public static bool Handle(string input)
         {
             string echoText = "";
             bool answer = true;
