@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace NailBot
 {
-
     //класс для хранения данных
     internal class StartValues
     {

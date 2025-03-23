@@ -36,7 +36,6 @@ namespace NailBot
                 $"Введя команду /info ты получишь информацию о версии программы\n" +
                 $"Введя команду /exit бот попрощается и завершит работу\n");
             }
-
         }
 
         //метод команды Info
@@ -63,7 +62,7 @@ namespace NailBot
         {
             //проверяю длину листа и выбрасываю исключение если больше лимита
             if (tasks.Count >= maxTasksAmount)
-                throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
+                throw new TaskCountLimitException(maxTasksAmount);
 
             Console.WriteLine("Введите описание задачи (добавится в List):");
 
@@ -72,7 +71,8 @@ namespace NailBot
 
             //проверяю дубликаты введённой задачи
             if (tasks.Contains(newTask))
-                throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
+                throw new DuplicateTaskException(newTask);
+                //throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
 
             tasks.Add(newTask);
 
@@ -154,7 +154,7 @@ namespace NailBot
 
             //проверяю длину  и выбрасываю исключение если больше лимита
             if (tasks.Length >= maxTasksAmount)
-                throw new TaskCountLimitException($"Превышено максимальное количество задач равное {maxTasksAmount}", maxTasksAmount);
+                throw new TaskCountLimitException(maxTasksAmount);
 
 
             Console.WriteLine("Введите описание задачи (добавится в Array):");
@@ -167,7 +167,8 @@ namespace NailBot
             for (int i = 0; i < tasks.Length; i++)
             {
                 if (tasks[i] == newTask)
-                    throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
+                    throw new DuplicateTaskException(newTask);
+                    //throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
             }
 
             int index = arrayTasks.Length - 1;

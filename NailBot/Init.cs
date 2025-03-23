@@ -33,7 +33,7 @@ namespace NailBot
 
         //объявление списка задач в виде List
         static List<string> tasksList = new List<string>();
-
+        
         //объявление списка задач в виде Array
         static string[] tasksArray = [];
 
@@ -54,7 +54,7 @@ namespace NailBot
 
             string startInput = Validate.ValidateString(Console.ReadLine());
 
-            while (Handler(startInput, ref userName, ref availableEcho, tasksList, ref tasksArray, StartValues.MaxTaskAmount, StartValues.MaxTaskLenght))
+            while (Handler(startInput))
             {
                 startInput = Validate.ValidateString(Console.ReadLine());
             }
@@ -64,9 +64,8 @@ namespace NailBot
             Console.ReadKey();
         }
 
-        public static bool Handler(string input, ref string name, ref bool echo, List<string> listTasks, ref string[] arrayTasks, int taskCountLimit, int taskLengthLimit)
+        public static bool Handler(string input)
         {
-            string userName = name;
             string echoText = "";
             bool answer = true;
 
@@ -94,21 +93,21 @@ namespace NailBot
             {
                 case Commands.Start:
                     Console.WriteLine("Введите ваше имя:");
-                    name = Console.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(name) && name != userName)
+                    userName = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(userName))
                     {
-                        name = char.ToUpper(name[0]) + name.Substring(1);
-                        Console.WriteLine($"Привет {name}! Тебе стала доступна команда /echo");
+                        userName = char.ToUpper(userName[0]) + userName.Substring(1);
+                        Console.WriteLine($"Привет {userName}! Тебе стала доступна команда /echo");
                         Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"\n");
-                        echo = true;
-                        Commands.Start.CommandsRender(echo, echoNumber);
+                        availableEcho = true;
+                        Commands.Start.CommandsRender(availableEcho, echoNumber);
                     }
                     else
                         Console.WriteLine("Привет, Незнакомец!");
                     break;
 
                 case Commands.Help:
-                    CommandsList.ShowHelp(name, echo);
+                    CommandsList.ShowHelp(userName, availableEcho);
                     break;
 
                 case Commands.Info:
@@ -121,23 +120,23 @@ namespace NailBot
 
                 case Commands.Addtask:
                     //вызов метода добавления задачи в List
-                    CommandsList.AddTaskList(listTasks, taskCountLimit, taskLengthLimit);
+                    CommandsList.AddTaskList(tasksList, maxTaskAmount, maxTaskLenght);
                     //вызов метода добавления задачи в Array
-                    CommandsList.AddTaskArray(ref arrayTasks, taskCountLimit, taskLengthLimit);
+                    CommandsList.AddTaskArray(ref tasksArray, maxTaskAmount, maxTaskLenght);
                     break;
 
                 case Commands.Showtasks:
                     //вызов метода рендера задач из List
-                    CommandsList.ShowTasks(listTasks);
+                    CommandsList.ShowTasks(tasksList);
                     //вызов метода рендера задач из Array
-                    CommandsList.ShowTasks(ref arrayTasks);
+                    CommandsList.ShowTasks(ref tasksArray);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи из List
-                    CommandsList.RemoveTaskList(listTasks);
+                    CommandsList.RemoveTaskList(tasksList);
                     //вызов метода удаления задачи из Array
-                    CommandsList.RemoveTaskArray(ref arrayTasks);
+                    CommandsList.RemoveTaskArray(ref tasksArray);
                     break;
 
                 case Commands.Exit:
@@ -145,7 +144,7 @@ namespace NailBot
                     break;
                 default:
                     Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                    Commands.Start.CommandsRender(echo, echoNumber);
+                    Commands.Start.CommandsRender(availableEcho, echoNumber);
                     break;
             }
             return answer;

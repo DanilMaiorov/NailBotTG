@@ -51,16 +51,9 @@ namespace NailBot
         {
             while (value == 0)
             {
-                try
-                {
-                    //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                    Console.WriteLine(str);
-                    return value = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
-                }
-                catch (ArgumentException)
-                {
-                    throw;
-                }
+                //спрашиваем при запуске программы до тех пор пока не получим валидное значение
+                Console.WriteLine(str);
+                return value = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
             }
             return value;
         }

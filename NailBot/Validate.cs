@@ -68,7 +68,7 @@ namespace NailBot
 
                 if (resultStr.Length < strLength)
                     return resultStr;
-                throw new TaskLengthLimitException($"Длина задачи \"{resultStr}\" - {resultStr.Length}, что превышает максимально допустимое значение {strLength}", resultStr.Length, strLength);
+                throw new TaskLengthLimitException(resultStr, strLength);
             }
             throw new ArgumentException("Введена строка из пробелов или пустая строка");
         }
