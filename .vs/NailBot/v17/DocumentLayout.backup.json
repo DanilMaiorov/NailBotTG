@@ -3,20 +3,28 @@
   "WorkspaceRootPath": "C:\\Users\\genzel\\source\\repos\\NailBot\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\startvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\startvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\exceptions\\duplicatetaskexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\exceptions\\duplicatetaskexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\commandslist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\commandslist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\startvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\startvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\commandslist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\commandslist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -27,16 +35,8 @@
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\exceptions\\tasklengthlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\exceptions\\taskcountlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\exceptions\\taskcountlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbot\\nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -46,17 +46,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 741,
-          "SelectedChildIndex": 12,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 2,
               "Title": "Init.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs",
               "RelativeDocumentMoniker": "NailBot\\Init.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Init.cs",
               "RelativeToolTip": "NailBot\\Init.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAAUwCwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAswBwAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-08T11:47:37.891Z",
               "IsPinned": true,
@@ -80,7 +80,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "TaskCountLimitException.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Exceptions\\TaskCountLimitException.cs",
               "RelativeDocumentMoniker": "NailBot\\Exceptions\\TaskCountLimitException.cs",
@@ -88,12 +88,11 @@
               "RelativeToolTip": "NailBot\\Exceptions\\TaskCountLimitException.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-23T16:26:40.593Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-23T16:26:40.593Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 1,
               "Title": "Extensions.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Extensions.cs",
               "RelativeDocumentMoniker": "NailBot\\Extensions.cs",
@@ -106,7 +105,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "TaskLengthLimitException.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Exceptions\\TaskLengthLimitException.cs",
               "RelativeDocumentMoniker": "NailBot\\Exceptions\\TaskLengthLimitException.cs",
@@ -114,12 +113,11 @@
               "RelativeToolTip": "NailBot\\Exceptions\\TaskLengthLimitException.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAADwvw8AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-23T16:27:26.686Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-23T16:27:26.686Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "Validate.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Validate.cs",
               "RelativeDocumentMoniker": "NailBot\\Validate.cs",
@@ -127,8 +125,7 @@
               "RelativeToolTip": "NailBot\\Validate.cs",
               "ViewState": "AgIAAB0AAAAAAAAAAAAkwDAAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-13T18:05:06.257Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-13T18:05:06.257Z"
             },
             {
               "$type": "Document",
@@ -140,12 +137,11 @@
               "RelativeToolTip": "NailBot\\Program.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAgwBkAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-08T16:54:59.935Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-08T16:54:59.935Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "CommandsList.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\CommandsList.cs",
               "RelativeDocumentMoniker": "NailBot\\CommandsList.cs",
@@ -153,12 +149,11 @@
               "RelativeToolTip": "NailBot\\CommandsList.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAowCYAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T18:39:16.88Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-12T18:39:16.88Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "DuplicateTaskException.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\Exceptions\\DuplicateTaskException.cs",
               "RelativeDocumentMoniker": "NailBot\\Exceptions\\DuplicateTaskException.cs",
@@ -171,7 +166,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "StartValues.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBot\\NailBot\\StartValues.cs",
               "RelativeDocumentMoniker": "NailBot\\StartValues.cs",
@@ -179,8 +174,7 @@
               "RelativeToolTip": "NailBot\\StartValues.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-17T18:33:23.089Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-17T18:33:23.089Z"
             }
           ]
         }
