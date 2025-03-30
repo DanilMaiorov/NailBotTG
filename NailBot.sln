@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NailBot", "NailBot\NailBot.csproj", "{A93DB3E2-38A2-488F-8F19-E759BED277E0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otus.ToDoList.ConsoleBot", "..\C-Sharp-Basic\Homeworks\5 ООП классы и интерфейсы\Otus.ToDoList.ConsoleBot\Otus.ToDoList.ConsoleBot.csproj", "{FFF9C414-329E-46B4-AA73-41F0670572DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{A93DB3E2-38A2-488F-8F19-E759BED277E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A93DB3E2-38A2-488F-8F19-E759BED277E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A93DB3E2-38A2-488F-8F19-E759BED277E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFF9C414-329E-46B4-AA73-41F0670572DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFF9C414-329E-46B4-AA73-41F0670572DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFF9C414-329E-46B4-AA73-41F0670572DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFF9C414-329E-46B4-AA73-41F0670572DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
