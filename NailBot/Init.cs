@@ -10,6 +10,7 @@ using static NailBot.StartValues;
 using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
 using static System.Net.Mime.MediaTypeNames;
+using System.Xml.Serialization;
 
 namespace NailBot
 {
@@ -284,19 +285,18 @@ namespace NailBot
 
 
 
-        public static void Start(int tasksAmount, int taskLenght)
+        //создаю экземпляр объекта хендлера
+        static UpdateHandler handler = new UpdateHandler();
+
+
+        //создаю экземпляр объекта апдейт
+        static Update update = new Update();
+
+        public static void Start()
         {
-            
-            //присваиваю значения длин
-            if (tasksAmount == 0)
-                maxTaskAmount = tasksAmount.GetStartValues("Введите максимально допустимое количество задач");
 
-            if (maxTaskLenght == 0)
-                maxTaskLenght = taskLenght.GetStartValues("Введите максимально допустимую длину задачи");
-
-
-            //создаю экземпляр класса со значениями длин для хранения
-            StartValues StartValues = new StartValues(maxTaskAmount, maxTaskLenght);
+            //запуск бота
+            bot.StartReceiving(handler);
 
             //рендер списка команд
             Commands.Start.CommandsRender(availableEcho, echoNumber);
@@ -308,51 +308,25 @@ namespace NailBot
                 startInput = Validate.ValidateString(Console.ReadLine());
             }
 
-            userName = availableEcho ? userName : "Незнакомец";
-            Console.WriteLine($"До свидания, {userName}! До новых встреч!");
-            Console.ReadKey();
+            
         }
 
         public static bool Handle(string input)
         {
-            string echoText = "";
-            bool answer = true;
-
-            //регулярка на реплейс циферного значения Enum
-            //input = input.NumberReplacer();
-
-
-            if (input.StartsWith("/echo "))
-            {
-                echoText = input.Substring(6);
-                input = "/echo";
-            }
-
-            //реплейс слэша для приведения к Enum
-            input = input.Replace("/", string.Empty);
-            
-            //создаю экземпляр объекта сообщения
-            Message newMessage = new Message { Id = messageId++, Text = input};
-
-
-            //создаю экземпляр объекта хендлера
-            UpdateHandler handler = new UpdateHandler();
-
-            //объявляю переменную типа интерфейса
-
-
-
-
-            //создаю экземпляр объекта апдейт
-            Update update = new Update { Message = newMessage };
-
-            bot.StartReceiving(handler);
 
             handler.HandleUpdateAsync(telegramBotClient, update);
 
-            Console.WriteLine(input);
+            Console.WriteLine(handler);
 
             return handler.answer;
+        }
+
+        public static void Stop()
+        {
+            userName = availableEcho ? userName : "Незнакомец";
+            Console.WriteLine($"До свидания, {userName}! До новых встреч!");
+            Console.ReadKey();
+            return;
         }
     }
 }

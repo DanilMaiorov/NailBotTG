@@ -18,6 +18,9 @@ namespace NailBot
             Start = 1, Help, Info, Echo, Addtask, Showtasks, Removetask, Exit
         }
 
+
+
+
         static int echoNumber = (int)Commands.Echo;
 
         //эхо
@@ -25,44 +28,85 @@ namespace NailBot
 
         public bool answer = true;
 
-        public void HandleUpdateAsync(ITelegramBotClient botClient, Update update) {
+        public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
+        {
 
-            Commands command;
-
-            string res = update.Message.Text;
-
-            string userName = "";
-
-            Chat chatId = update.Message.Chat;
 
             try
-			{
+            {
+                if (update.Message.Id == 1)
+                {
+
+                    //присваиваю значения длин
+                    if (Init.maxTaskAmount == 0)
+                        Init.maxTaskAmount = Init.maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач");
+
+
+
+
+                    if (Init.maxTaskLenght == 0)
+                        Init.maxTaskLenght = Init.maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи");
+
+                    botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
+
+                    Commands.Start.CommandsRender(availableEcho, echoNumber);
+
+                    return;
+                }
+
+
+
+
+
+
+                string res = update.Message.Text;
+
+                Commands command;
+
+                string userName = "";
+
+                string echoText = "";
+
+
+                //регулярка на реплейс циферного значения Enum
+                //input = input.NumberReplacer();
+
+
+                if (res.StartsWith("/echo "))
+                {
+                    echoText = res.Substring(6);
+                    res = "/echo";
+                }
+
+                //реплейс слэша для приведения к Enum
+                res = res.Replace("/", string.Empty);
+
                 //приведение к типу Enum
-                if (Enum.TryParse<Commands>(update.Message.Text, true, out var result))
+                if (Enum.TryParse<Commands>(res, true, out var result))
                     command = result;
                 else
                     command = default;
 
-
-
                 switch (command)
                 {
                     case Commands.Start:
-                        //Console.WriteLine("Введите ваше имя:");
 
-                        botClient.SendMessage(chatId, "Введите ваше имя:");
-
+                        botClient.SendMessage(update.Message.Chat, "Введите ваше имя:");
 
                         userName = Console.ReadLine();
                         if (!string.IsNullOrWhiteSpace(userName))
                         {
                             userName = char.ToUpper(userName[0]) + userName.Substring(1);
-                            Console.WriteLine($"Привет {userName}! Тебе стала доступна команда /echo");
-                            Console.WriteLine($"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"\n");
+
+                            botClient.SendMessage(update.Message.Chat, $"Привет {userName}! Тебе стала доступна команда /echo");
+
+                            botClient.SendMessage(update.Message.Chat, $"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"\n");
+
                             availableEcho = true;
                         }
                         else
-                            Console.WriteLine("Привет, Незнакомец!");
+                            botClient.SendMessage(update.Message.Chat, "Привет, Незнакомец!");
+
                         Commands.Start.CommandsRender(availableEcho, echoNumber);
                         break;
 
@@ -75,7 +119,7 @@ namespace NailBot
                         break;
 
                     case Commands.Echo:
-                        Console.WriteLine("ECHO");
+                        botClient.SendMessage(update.Message.Chat, "ECHO");
                         //Console.WriteLine(echoText);
                         break;
 
@@ -101,22 +145,48 @@ namespace NailBot
                         break;
 
                     case Commands.Exit:
-                        Console.WriteLine("EXIT");
                         answer = false;
+
+                        Program.Main([res]);
                         break;
                     default:
-                        Console.WriteLine("Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
+                        botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
                         Commands.Start.CommandsRender(availableEcho, echoNumber);
                         break;
                 }
             }
-			catch (Exception ex)
-			{
-				throw new Exception("asdsadasd");
-			}
+            catch (ArgumentException ex)
+            {
+                botClient.SendMessage(update.Message.Chat, ex.Message);
 
+                if (update.Message.Id == 1)
+                    HandleUpdateAsync(botClient, update);
+            }
+            catch (TaskCountLimitException ex)
+            {
+                botClient.SendMessage(update.Message.Chat, ex.Message);
+
+                if (update.Message.Id == 1)
+                    HandleUpdateAsync(botClient, update);
+            }
+            catch (TaskLengthLimitException ex)
+            {
+                botClient.SendMessage(update.Message.Chat, ex.Message);
+
+                if (update.Message.Id == 1)
+                    HandleUpdateAsync(botClient, update);
+            }
+            catch (DuplicateTaskException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Произошла непредвиденная ошибка");
+                throw;
+            }
+            return;
         }
-
 
     }
 }
