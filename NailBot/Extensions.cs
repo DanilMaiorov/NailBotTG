@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Otus.ToDoList.ConsoleBot.Types;
+using Otus.ToDoList.ConsoleBot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,33 +12,54 @@ namespace NailBot
     public static class Extensions
     {
         //метод рендера списка команд
-        public static void CommandsRender<T>(this T array, bool echo, int echoNum) where T : Enum
+        public static void CommandsRender<T>(this T array, User user) where T : Enum
         {
             int counter = 0;
 
-            Console.WriteLine("Список доступных команд:");
-            foreach (T command in Enum.GetValues(typeof(T)))
+            if (user.UserId == Guid.Empty)
             {
-                counter++;
-
-                if (echo)
-                    Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
-                else
+                Console.WriteLine("Список доступных команд для незарегистрированного юзера:");
+                foreach (T command in Enum.GetValues(typeof(T)))
                 {
-                    if (counter != echoNum)
+                    if (command.ToString() == "Start" || command.ToString() == "Help" || command.ToString() == "Info" || command.ToString() == "Exit")
                     {
-                        if (counter >= echoNum)
-                            Console.WriteLine($"{counter - 1}) /{command.ToString().ToLower()}");
-                        else
-                            Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
+                        Console.WriteLine($"{++counter}) /{command.ToString().ToLower()}");
                     }
+                    
                 }
+            } 
+            else
+            {
+                Console.WriteLine("Список доступных команд:");
+                foreach (T command in Enum.GetValues(typeof(T)))
+                {
+                    Console.WriteLine($"{++counter}) /{command.ToString().ToLower()}");
+                }
+                Console.WriteLine("");
             }
-            Console.WriteLine("");
+
+
         }
 
-        //метод замены ввода номера команды
-        public static string NumberReplacer(this string str)
+
+//                        if (echo)
+//                    Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
+//                else
+//                {
+//                    if (counter != echoNum)
+//                    {
+//                        if (counter >= echoNum)
+//                            Console.WriteLine($"{counter - 1}) /{command.ToString().ToLower()}");
+//                        else
+//                            Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
+//                    }
+//}
+
+
+
+
+//метод замены ввода номера команды
+public static string NumberReplacer(this string str)
         {
             Regex regex = new Regex("^[0-9]$");
 
@@ -47,12 +70,12 @@ namespace NailBot
 
 
         //метод присваивания значений длин
-        public static int GetStartValues(this int value, string str)
+        public static int GetStartValues(this int value, string str, ITelegramBotClient botClient, Update update)
         {
             while (value == 0)
             {
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                Console.WriteLine(str);
+                botClient.SendMessage(update.Message.Chat, str);
                 return value = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
             }
             return value;

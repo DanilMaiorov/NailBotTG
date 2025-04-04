@@ -26,26 +26,6 @@ namespace NailBot
 
             throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
 
-            //тут я написал ещё 1 try catch чтобы в Main можно было прокидывать просто через throw с полным StackTrace и во внешнем catch обращаться к InnerException
-
-            //try
-            //{
-            //    if (string.IsNullOrWhiteSpace(str))
-            //        throw new ArgumentException("Введена строка из пробелов или пустая строка");
-
-            //    bool parsingRelust = int.TryParse(str, out int limit);
-
-            //    if (parsingRelust)
-            //    {
-            //        if (limit > 1 && limit < 100)
-            //            return limit;
-            //    }
-            //    throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
-            //}
-            //catch (ArgumentException ex)
-            //{
-            //    throw new ArgumentException("Произошла непредвиденная ошибка", ex);
-            //}
         }
 
         //метод валидации строки

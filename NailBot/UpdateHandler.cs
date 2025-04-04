@@ -2,10 +2,12 @@
 using Otus.ToDoList.ConsoleBot.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static NailBot.IUserService;
 
 
 namespace NailBot
@@ -13,51 +15,63 @@ namespace NailBot
 
     internal class UpdateHandler : IUpdateHandler
     {
-        enum Commands
+
+        private readonly IUserService _userService;
+
+        // Получаем IUserService через конструктор
+        public UpdateHandler(IUserService userService)
         {
-            Start = 1, Help, Info, Echo, Addtask, Showtasks, Removetask, Exit
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
+        enum Commands
+        {
+            Start = 1, Help, Info, Addtask, Showtasks, Removetask, Exit
+        }
 
+        User newUser = new User();
 
+        public ITelegramBotClient botClient1;
+        public Update update1 = new Update();
 
-        static int echoNumber = (int)Commands.Echo;
-
-        //эхо
-        static bool availableEcho = false;
+        public void SayGoodBye()
+        {
+            botClient1.SendMessage(update1.Message.Chat, $"ПАКА");
+        }
 
         public bool answer = true;
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
 
+            update1 = update;
+            botClient1 = botClient;
 
+            
             try
             {
                 if (update.Message.Id == 1)
                 {
-
                     //присваиваю значения длин
                     if (Init.maxTaskAmount == 0)
-                        Init.maxTaskAmount = Init.maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач");
-
-
-
+                        Init.maxTaskAmount = Init.maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач", botClient, update);
 
                     if (Init.maxTaskLenght == 0)
-                        Init.maxTaskLenght = Init.maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи");
+                        Init.maxTaskLenght = Init.maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи", botClient, update);
 
                     botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
-                    Commands.Start.CommandsRender(availableEcho, echoNumber);
+
+                    Console.WriteLine(newUser.UserId == Guid.Empty);
+
+                    //_userService.GetUser(update.Message.From.Id);
+
+
+                    Commands.Start.CommandsRender(newUser);
 
                     return;
+
                 }
-
-
-
-
-
 
                 string res = update.Message.Text;
 
@@ -65,21 +79,21 @@ namespace NailBot
 
                 string userName = "";
 
-                string echoText = "";
-
 
                 //регулярка на реплейс циферного значения Enum
                 //input = input.NumberReplacer();
 
+                //реплейс слэша для приведения к Enum 
+                res = res.Replace("/", string.Empty);
 
-                if (res.StartsWith("/echo "))
+                if (newUser.UserId == Guid.Empty)
                 {
-                    echoText = res.Substring(6);
-                    res = "/echo";
+                    if (res != "start" && res != "help" && res != "info" && res != "exit")
+                        res = "unregistered user command";
                 }
 
-                //реплейс слэша для приведения к Enum
-                res = res.Replace("/", string.Empty);
+
+
 
                 //приведение к типу Enum
                 if (Enum.TryParse<Commands>(res, true, out var result))
@@ -91,67 +105,46 @@ namespace NailBot
                 {
                     case Commands.Start:
 
-                        botClient.SendMessage(update.Message.Chat, "Введите ваше имя:");
+                        newUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
 
-                        userName = Console.ReadLine();
-                        if (!string.IsNullOrWhiteSpace(userName))
-                        {
-                            userName = char.ToUpper(userName[0]) + userName.Substring(1);
-
-                            botClient.SendMessage(update.Message.Chat, $"Привет {userName}! Тебе стала доступна команда /echo");
-
-                            botClient.SendMessage(update.Message.Chat, $"Чтобы использовать команду /echo, напиши \"/echo *свой текст*\"\n");
-
-                            availableEcho = true;
-                        }
-                        else
-                            botClient.SendMessage(update.Message.Chat, "Привет, Незнакомец!");
-
-                        Commands.Start.CommandsRender(availableEcho, echoNumber);
+                        Commands.Start.CommandsRender(newUser);
                         break;
 
                     case Commands.Help:
-                        Init.ShowHelp(userName, availableEcho);
+                        Init.ShowHelp();
                         break;
 
                     case Commands.Info:
                         Init.ShowInfo();
                         break;
 
-                    case Commands.Echo:
-                        botClient.SendMessage(update.Message.Chat, "ECHO");
-                        //Console.WriteLine(echoText);
-                        break;
-
                     case Commands.Addtask:
                         //вызов метода добавления задачи в List
                         Init.AddTaskList(Init.tasksList, Init.maxTaskAmount, Init.maxTaskLenght);
                         //вызов метода добавления задачи в Array
-                        //Init.AddTaskArray(ref Init.tasksArray, Init.maxTaskAmount, Init.maxTaskLenght);
+                        Init.AddTaskArray(ref Init.tasksArray, Init.maxTaskAmount, Init.maxTaskLenght);
                         break;
 
                     case Commands.Showtasks:
                         //вызов метода рендера задач из List
                         Init.ShowTasks(Init.tasksList);
                         //вызов метода рендера задач из Array
-                        //Init.ShowTasks(ref Init.tasksArray);
+                        Init.ShowTasks(ref Init.tasksArray);
                         break;
 
                     case Commands.Removetask:
                         //вызов метода удаления задачи из List
                         Init.RemoveTaskList(Init.tasksList);
                         //вызов метода удаления задачи из Array
-                        //Init.RemoveTaskArray(ref Init.tasksArray);
+                        Init.RemoveTaskArray(ref Init.tasksArray);
                         break;
 
                     case Commands.Exit:
-                        answer = false;
-
                         Program.Main([res]);
                         break;
                     default:
                         botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Commands.Start.CommandsRender(availableEcho, echoNumber);
+                        Commands.Start.CommandsRender(newUser);
                         break;
                 }
             }
@@ -187,7 +180,6 @@ namespace NailBot
             }
             return;
         }
-
     }
 }
 

@@ -21,7 +21,6 @@ namespace NailBot
             Start = 1, Help, Info, Echo, Addtask, Showtasks, Removetask, Exit
         }
 
-        static int echoNumber = (int)Commands.Echo;
 
         //количество задач при запуске программы
         public static int maxTaskAmount = 0;
@@ -29,11 +28,10 @@ namespace NailBot
         //длина задачи при запуске программы
         public static int maxTaskLenght = 0;
 
-        //эхо
-        static bool availableEcho = false;
+
 
         //дефолтное имя пользака
-        static string userName = "Пользователь";
+        public static string userName = "Незнакомец";
 
         //объявление списка задач в виде List
         public static List<string> tasksList = new List<string>();
@@ -45,23 +43,21 @@ namespace NailBot
 
         ////МЕТОДЫ КОМАНД
         ////метод команды Help
-        internal static void ShowHelp(string userName, bool availableEcho)
+        internal static void ShowHelp()
         {
-            if (availableEcho)
+            string name = string.IsNullOrWhiteSpace(userName) ? "Незнакомец" : userName;
+
+            if (name == "Незнакомец")
             {
-                Console.WriteLine($"{userName}, это Todo List Bot - телеграм бот записи дел.\n" +
+                Console.WriteLine($"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
-                $"Введя команду /echo и какой либо текст после - этот текст останется на консоли\n" +
-                $"Введя команду /addtask ты сможешь добавлять задачи в список задач\n" +
-                $"Введя команду /showtasks ты сможешь увидеть список добавленных задач в список задач\n" +
-                $"Введя команду /removetask ты сможешь удалять задачи из списка задач\n" +
                 $"Введя команду /info ты получишь информацию о версии программы\n" +
                 $"Введя команду /exit бот попрощается и завершит работу\n");
             }
             else
             {
-                Console.WriteLine($"{userName}, Todo List Bot - телеграм бот записи дел.\n" +
+                Console.WriteLine($"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /addtask ты сможешь добавлять задачи в список задач\n" +
@@ -271,22 +267,21 @@ namespace NailBot
             }
         }
 
-        static long userId = 123;
-        static long chatId = 123321;
-        static int messageId = 0;
 
-        //static User newUser = new User { Id = ++userId, Username = "igor" };
+        static ConsoleBotClient botClient = new ConsoleBotClient();
 
-        //static Chat newChat = new Chat { Id = ++chatId };
+        static ITelegramBotClient telegramBotClient = botClient;
 
-        static ConsoleBotClient bot = new ConsoleBotClient();
 
-        static ITelegramBotClient telegramBotClient = bot;
 
+        static UserService userService = new UserService();
+
+        static IUserService iuserService = userService;
 
 
         //создаю экземпляр объекта хендлера
-        static UpdateHandler handler = new UpdateHandler();
+        static internal UpdateHandler handler = new UpdateHandler(iuserService);
+
 
 
         //создаю экземпляр объекта апдейт
@@ -296,22 +291,18 @@ namespace NailBot
         {
 
             //запуск бота
-            bot.StartReceiving(handler);
+            botClient.StartReceiving(handler);
 
-            //рендер списка команд
-            Commands.Start.CommandsRender(availableEcho, echoNumber);
 
             string startInput = Validate.ValidateString(Console.ReadLine());
 
-            while (Handle(startInput))
+            while (Handle())
             {
                 startInput = Validate.ValidateString(Console.ReadLine());
             }
-
-            
         }
 
-        public static bool Handle(string input)
+        public static bool Handle()
         {
 
             handler.HandleUpdateAsync(telegramBotClient, update);
@@ -323,8 +314,11 @@ namespace NailBot
 
         public static void Stop()
         {
-            userName = availableEcho ? userName : "Незнакомец";
-            Console.WriteLine($"До свидания, {userName}! До новых встреч!");
+            
+            userName = userName != "Пользователь" ? userName : "Незнакомец";
+            Console.WriteLine();
+            handler.SayGoodBye();
+            //botClient.SendMessage(update.Message.Chat, $"До свидания, {userName}! До новых встреч!");
             Console.ReadKey();
             return;
         }
