@@ -12,54 +12,32 @@ namespace NailBot
     public static class Extensions
     {
         //метод рендера списка команд
-        public static void CommandsRender<T>(this T array, User user) where T : Enum
+        public static void CommandsRender<T>(this T array, ToDoUser user, ITelegramBotClient botClient, Update update) where T : Enum
         {
             int counter = 0;
 
             if (user.UserId == Guid.Empty)
             {
-                Console.WriteLine("Список доступных команд для незарегистрированного юзера:");
+                botClient.SendMessage(update.Message.Chat, $"Список доступных команд для незарегистрированного юзера:");
                 foreach (T command in Enum.GetValues(typeof(T)))
                 {
                     if (command.ToString() == "Start" || command.ToString() == "Help" || command.ToString() == "Info" || command.ToString() == "Exit")
-                    {
                         Console.WriteLine($"{++counter}) /{command.ToString().ToLower()}");
-                    }
-                    
                 }
             } 
             else
             {
-                Console.WriteLine("Список доступных команд:");
+                botClient.SendMessage(update.Message.Chat, $"Список доступных команд:");
+
                 foreach (T command in Enum.GetValues(typeof(T)))
-                {
                     Console.WriteLine($"{++counter}) /{command.ToString().ToLower()}");
-                }
+                
                 Console.WriteLine("");
             }
-
-
         }
 
-
-//                        if (echo)
-//                    Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
-//                else
-//                {
-//                    if (counter != echoNum)
-//                    {
-//                        if (counter >= echoNum)
-//                            Console.WriteLine($"{counter - 1}) /{command.ToString().ToLower()}");
-//                        else
-//                            Console.WriteLine($"{counter}) /{command.ToString().ToLower()}");
-//                    }
-//}
-
-
-
-
-//метод замены ввода номера команды
-public static string NumberReplacer(this string str)
+        //метод замены ввода номера команды
+        public static string NumberReplacer(this string str)
         {
             Regex regex = new Regex("^[0-9]$");
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NailBot
 {
-    public class User
+    public class ToDoUser
     {
         public Guid UserId { get; init; }
         public long TelegramUserId { get; init; }

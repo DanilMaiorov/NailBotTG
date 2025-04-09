@@ -6,19 +6,15 @@ using System.Threading.Tasks;
 
 namespace NailBot
 {
-    internal class ToDoItem
+    public enum ToDoItemState { Active, Completed };
+    public class ToDoItem
     {
-        public enum ToDoItemState { Active, Completed };
-
-
-
-
         public Guid Id { get; init; }
-        public User User { get; init; }
+        public ToDoUser User { get; init; }
         public string Name { get; init; }
         public DateTime CreatedAt { get; init; }
-        public ToDoItemState State { get; init; }
-        public DateTime? StateChangedAt { get; init; }
+        public ToDoItemState State { get; set; }
+        public DateTime? StateChangedAt { get; set; }
     }
 }
 

@@ -11,277 +11,48 @@ using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
 using static System.Net.Mime.MediaTypeNames;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 
 namespace NailBot
 {
     internal class Init
     {
-        enum Commands
-        {
-            Start = 1, Help, Info, Echo, Addtask, Showtasks, Removetask, Exit
-        }
-
-
         //количество задач при запуске программы
         public static int maxTaskAmount = 0;
 
         //длина задачи при запуске программы
         public static int maxTaskLenght = 0;
 
-
-
         //дефолтное имя пользака
         public static string userName = "Незнакомец";
 
         //объявление списка задач в виде List
-        public static List<string> tasksList = new List<string>();
+        public static List<ToDoItem> tasksList = new List<ToDoItem>();
 
         //объявление списка задач в виде Array
-        public static string[] tasksArray = [];
+        public static ToDoItem[] tasksArray = [];
 
 
 
-        ////МЕТОДЫ КОМАНД
-        ////метод команды Help
-        internal static void ShowHelp()
-        {
-            string name = string.IsNullOrWhiteSpace(userName) ? "Незнакомец" : userName;
-
-            if (name == "Незнакомец")
-            {
-                Console.WriteLine($"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду /start бот предложит тебе ввести имя\n" +
-                $"Введя команду /help ты получишь справку о командах\n" +
-                $"Введя команду /info ты получишь информацию о версии программы\n" +
-                $"Введя команду /exit бот попрощается и завершит работу\n");
-            }
-            else
-            {
-                Console.WriteLine($"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду /start бот предложит тебе ввести имя\n" +
-                $"Введя команду /help ты получишь справку о командах\n" +
-                $"Введя команду /addtask ты сможешь добавлять задачи в список задач\n" +
-                $"Введя команду /showtasks ты сможешь увидеть список добавленных задач в список задач\n" +
-                $"Введя команду /removetask ты сможешь удалять задачи из списка задач\n" +
-                $"Введя команду /info ты получишь информацию о версии программы\n" +
-                $"Введя команду /exit бот попрощается и завершит работу\n");
-            }
-        }
-
-        ////метод команды Info
-        internal static void ShowInfo()
-        {
-            DateTime releaseDate = new DateTime(2025, 02, 08);
-            Console.WriteLine("Это NailBot версии 1.0 Beta. Релиз {0:dd MMMM yyyy}", releaseDate);
-        }
-
-        ////работа с List
-        ////метод добавления задачи в List
-        //internal static void AddTaskList(List<string> tasks)
-        //{
-        //    Console.WriteLine("Введите описание задачи (добавится в List):");
-        //    string newTask = Validate.ValidateString(Console.ReadLine());
-
-        //    tasks.Add(newTask);
-
-        //    Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
-        //}
-
-        ////добавлю перегрузку метода добавления задачи в List
-        internal static void AddTaskList(List<string> tasks, int maxTasksAmount, int taskLengthLimit)
-        {
-            //проверяю длину листа и выбрасываю исключение если больше лимита
-            if (tasks.Count >= maxTasksAmount)
-                throw new TaskCountLimitException(maxTasksAmount);
-
-            Console.WriteLine("Введите описание задачи (добавится в List):");
-
-            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
-            string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
-
-            //проверяю дубликаты введённой задачи
-            if (tasks.Contains(newTask))
-                throw new DuplicateTaskException(newTask);
-            //throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
-
-            tasks.Add(newTask);
-
-            Console.WriteLine($"Задача \"{newTask}\" добавлена в List задач");
-        }
-
-        ////метод рендера задач из List
-        internal static void ShowTasks(List<string> tasks)
-        {
-            if (tasks.Count == 0)
-                Console.WriteLine("Список задач из List пуст");
-            else
-            {
-                Console.WriteLine($"Список задач из List:\n");
-                int taskCounter = 0;
-                foreach (string task in tasks)
-                {
-                    taskCounter++;
-                    Console.WriteLine($"{taskCounter}) {task}");
-                }
-            }
-        }
-
-        ////метод удаления задачи из List
-        internal static void RemoveTaskList(List<string> tasks)
-        {
-            if (tasks.Count == 0)
-            {
-                Console.WriteLine("Ваш список задач пуст, удалять нечего:");
-                return;
-            }
-            ShowTasks(tasks);
-
-            Console.Write("Введите номер задачи для удаления (из List): ");
-            int taskNumber;
-
-            bool success = int.TryParse(Console.ReadLine(), out taskNumber);
-
-            if (success && (taskNumber > 0 && taskNumber <= tasks.Count))
-            {
-                Console.WriteLine($"Задача {tasks[taskNumber - 1]} удалена");
-                tasks.RemoveAt(taskNumber - 1);
-                ShowTasks(tasks);
-            }
-            else
-            {
-                Console.WriteLine("Введён некорректный номер задачи");
-                RemoveTaskList(tasks);
-            }
-        }
 
 
-        ////работа с Array
-        ////метод добавления задачи в Array
-        //internal static void AddTaskArray(ref string[] tasks)
-        //{
-        //    string[] arrayTasks = new string[tasks.Length + 1];
-
-        //    Console.WriteLine("Введите описание задачи (добавится в Array):");
-        //    //валидация строки
-        //    string newTask = Validate.ValidateString(Console.ReadLine());
-
-        //    int index = arrayTasks.Length - 1;
-
-        //    arrayTasks[index] = newTask;
-
-        //    for (int i = 0; i < index; i++)
-        //        arrayTasks[i] = tasks[i];
-
-        //    tasks = arrayTasks;
-
-        //    Console.WriteLine($"Задача \"{newTask}\" добавлена в Array задач");
-        //}
-
-        ////добавлю перегрузку метода добавления задачи в Array
-        internal static void AddTaskArray(ref string[] tasks, int maxTasksAmount, int taskLengthLimit)
-        {
-            string[] arrayTasks = new string[tasks.Length + 1];
-
-            //проверяю длину  и выбрасываю исключение если больше лимита
-            if (tasks.Length >= maxTasksAmount)
-                throw new TaskCountLimitException(maxTasksAmount);
-
-
-            Console.WriteLine("Введите описание задачи (добавится в Array):");
-
-            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
-            string newTask = Validate.ValidateString(Console.ReadLine(), taskLengthLimit);
-
-
-            //проверяю дубликаты введённой задачи
-            for (int i = 0; i < tasks.Length; i++)
-            {
-                if (tasks[i] == newTask)
-                    throw new DuplicateTaskException(newTask);
-                //throw new DuplicateTaskException($"Задача \"{newTask}\" является дубликатом, она не будет добавлена", newTask);
-            }
-
-            int index = arrayTasks.Length - 1;
-
-            arrayTasks[index] = newTask;
-
-            for (int i = 0; i < index; i++)
-                arrayTasks[i] = tasks[i];
-
-            tasks = arrayTasks;
-
-            Console.WriteLine($"Задача \"{newTask}\" добавлена в Array задач");
-        }
-
-        ////метод рендера задач из Array
-        internal static void ShowTasks(ref string[] tasks)
-        {
-            if (tasks.Length == 0)
-                Console.WriteLine("Список задач из Array пуст");
-            else
-            {
-                Console.WriteLine($"Список задач из Array:\n");
-                for (int i = 0; i < tasks.Length; i++)
-                    Console.WriteLine($"{i + 1}) {tasks[i]}");
-            }
-        }
-
-        ////метод удаления задачи из Array
-        internal static void RemoveTaskArray(ref string[] tasks)
-        {
-            if (tasks.Length == 0)
-            {
-                Console.WriteLine("Ваш список задач пуст, удалять нечего:");
-                return;
-            }
-
-            ShowTasks(ref tasks);
-
-            Console.Write("Введите номер задачи для удаления (из Array): ");
-            int taskNumber;
-
-            bool success = int.TryParse(Console.ReadLine(), out taskNumber);
-
-            if (success && (taskNumber > 0 && taskNumber <= tasks.Length))
-            {
-                Console.WriteLine($"Задача {tasks[taskNumber - 1]} удалена");
-
-                string[] newTasks = new string[tasks.Length - 1];
-
-                int index = taskNumber;
-
-                for (int i = 0; i < index - 1; i++)
-                    newTasks[i] = tasks[i];
-
-                for (int i = index - 1; i < newTasks.Length; i++)
-                    newTasks[i] = tasks[i + 1];
-
-                tasks = newTasks;
-
-                ShowTasks(ref tasks);
-            }
-            else
-            {
-                Console.WriteLine("Введён некорректный номер задачи");
-                RemoveTaskArray(ref tasks);
-            }
-        }
-
-
+        //создаю экземпляр бота
         static ConsoleBotClient botClient = new ConsoleBotClient();
-
         static ITelegramBotClient telegramBotClient = botClient;
 
 
-
+        //создаю экземпляр UserService
         static UserService userService = new UserService();
-
         static IUserService iuserService = userService;
 
 
-        //создаю экземпляр объекта хендлера
-        static internal UpdateHandler handler = new UpdateHandler(iuserService);
+        //создаю экземпляр ToDoService
+        static ToDoService toDoService = new ToDoService();
+        static IToDoService itoDoService = toDoService;
 
+
+        //создаю экземпляр объекта хендлера
+        static internal UpdateHandler handler = new UpdateHandler(iuserService, itoDoService);
 
 
         //создаю экземпляр объекта апдейт
@@ -292,7 +63,6 @@ namespace NailBot
 
             //запуск бота
             botClient.StartReceiving(handler);
-
 
             string startInput = Validate.ValidateString(Console.ReadLine());
 
@@ -315,9 +85,9 @@ namespace NailBot
         public static void Stop()
         {
             
-            userName = userName != "Пользователь" ? userName : "Незнакомец";
+            //userName = userName != "Пользователь" ? userName : "Незнакомец";
             Console.WriteLine();
-            handler.SayGoodBye();
+      
             //botClient.SendMessage(update.Message.Chat, $"До свидания, {userName}! До новых встреч!");
             Console.ReadKey();
             return;

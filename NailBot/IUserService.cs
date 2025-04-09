@@ -8,8 +8,8 @@ namespace NailBot
 {
     public interface IUserService
     {
-        User RegisterUser(long telegramUserId, string telegramUserName);
-        User? GetUser(long telegramUserId);
+        ToDoUser RegisterUser(long telegramUserId, string telegramUserName);
+        ToDoUser? GetUser(long telegramUserId);
     }
     
 }
