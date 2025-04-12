@@ -43,18 +43,23 @@ namespace NailBot
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
+
+            newService.NewUpdate = update;
+
             try
             {
                 //тут запрашиваю начальные ограничения длины задачи и их количества
                 if (update.Message.Id == 1)
                 {
-                    Init.maxTaskAmount = newService.CheckMaxAmount(Init.maxTaskAmount, botClient, update);
+                    newService.Chat = update.Message.Chat;
 
-                    Init.maxTaskLenght = newService.CheckMaxLength(Init.maxTaskLenght, botClient, update);
+                    Init.maxTaskAmount = newService.CheckMaxAmount(Init.maxTaskAmount, newService.Chat);
+
+                    Init.maxTaskLenght = newService.CheckMaxLength(Init.maxTaskLenght, newService.Chat);
 
                     botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
-                    Commands.Start.CommandsRender(newUser, botClient, update);
+                    Commands.Start.CommandsRender(newUser, update);
 
                     return;
                 }
@@ -64,10 +69,10 @@ namespace NailBot
                 Commands command;
 
                 //регулярка на реплейс циферного значения Enum
-                //input = input.NumberReplacer();
+                input = input.NumberReplacer();
 
                 //верну тут кортежем
-                (string, string) inputs = newService.CheckAddAndRemove(input);
+                (string inputCommand, string inputText, Guid taskGuid) inputs = newService.CheckAddAndRemove(input);
 
 
                 //реплейс слэша для приведения к Enum 
@@ -91,36 +96,47 @@ namespace NailBot
 
                         newUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
 
-                        Commands.Start.CommandsRender(newUser, botClient, update);
+                        Commands.Start.CommandsRender(newUser, update);
                         break;
 
                     case Commands.Help:
-                        newService.ShowHelp(update.Message.From.Username, botClient, update);
+                        newService.ShowHelp(update.Message.From.Username);
                         break;
 
                     case Commands.Info:
-                        newService.ShowInfo(botClient, update);
+                        newService.ShowInfo();
                         break;
 
                     case Commands.Addtask:
                         //вызов метода добавления задачи в List
-                        newService.AddTaskList(newUser, inputs.Item2, botClient, update);
+                        newService.Add(newUser, inputs.inputText);
                         //вызов метода добавления задачи в Array
-                        newService.AddTaskArray(newUser, inputs.Item2, botClient, update);
+                        //newService.Add(newUser, inputs.inputText);
                         break;
 
                     case Commands.Showtasks:
                         //вызов метода рендера задач из List
-                        newService.ShowTasks(Init.tasksList, botClient, update);
+                        newService.ShowTasks();
                         //вызов метода рендера задач из Array
-                        newService.ShowTasks(ref Init.tasksArray, botClient, update);
+                        //newService.ShowTasks();
                         break;
 
                     case Commands.Removetask:
                         //вызов метода удаления задачи из List
-                        newService.RemoveTaskList(Init.tasksList, inputs.Item2, botClient, update);
+
+                        newService.Delete(inputs.taskGuid);
+
+                        bool success = int.TryParse(inputs.Item2, out int taskNumber);
+
+                        if (!success)
+                            throw new ArgumentException("Введён некорректный номер задачи.\n");
+                            
+                        
+
+
+                        //newService.RemoveTaskList(Init.tasksList, inputs.Item2);
                         //вызов метода удаления задачи из Array
-                        newService.RemoveTaskArray(ref Init.tasksArray, inputs.Item2, botClient, update);
+                        newService.RemoveTaskArray(ref Init.tasksArray, inputs.Item2);
                         break;
 
                     case Commands.Exit:
@@ -128,7 +144,7 @@ namespace NailBot
                         break;
                     default:
                         botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Commands.Start.CommandsRender(newUser, botClient, update);
+                        Commands.Start.CommandsRender(newUser, update);
                         break;
                 }
             }

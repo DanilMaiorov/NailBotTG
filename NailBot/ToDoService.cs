@@ -11,15 +11,30 @@ namespace NailBot
 {
     class ToDoService : IToDoService
     {
+        //создам экземляр чата, чтобы передавать в SendMessage
+        private Chat chat;
+        public Chat Chat {
+            get { return chat; }
+            set { chat = value; }
+        }
+
+        private Update newUpdate;
+        public Update NewUpdate
+        {
+            get { return newUpdate; }
+            set { newUpdate = value; }
+        }
+
+
         ////МЕТОДЫ КОМАНД
         ////метод команды Help
-        public void ShowHelp(string userName, ITelegramBotClient botClient, Update update)
+        public void ShowHelp(string userName)
         {
             string name = string.IsNullOrWhiteSpace(userName) ? "Незнакомец" : userName;
 
             if (name == "Незнакомец")
             {
-                botClient.SendMessage(update.Message.Chat, $"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
+                Init.botClient.SendMessage(chat, $"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /info ты получишь информацию о версии программы\n" +
@@ -27,7 +42,7 @@ namespace NailBot
             }
             else
             {
-                botClient.SendMessage(update.Message.Chat, $"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
+                Init.botClient.SendMessage(chat, $"{name}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду /start бот предложит тебе ввести имя\n" +
                 $"Введя команду /help ты получишь справку о командах\n" +
                 $"Введя команду /addtask ты сможешь добавлять задачи в список задач\n" +
@@ -39,28 +54,58 @@ namespace NailBot
         }
 
         ////метод команды Info
-        public void ShowInfo(ITelegramBotClient botClient, Update update)
+        public void ShowInfo()
         {
             DateTime releaseDate = new DateTime(2025, 02, 08);
-            botClient.SendMessage(update.Message.Chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
+            Init.botClient.SendMessage(chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
         }
+
 
         ////работа с List
         ////метод добавления задачи в List
-        public void AddTaskList(ToDoUser user, string taskText, ITelegramBotClient botClient, Update update)
+        //public void AddTaskList()
+        //{
+        //}
+
+        //////метод удаления задачи из List
+        //public void RemoveTaskList(List<ToDoItem> tasks, string removeTask)
+        //{
+        //}
+
+        //////метод рендера задач из List
+        public void ShowTasks()
+        {
+            if (Init.tasksList.Count == 0)
+                Init.botClient.SendMessage(chat, $"Список задач из List пуст.\n");
+            else
+            {
+                Init.botClient.SendMessage(chat, $"\nСписок задач из List:");
+                int taskCounter = 0;
+                foreach (ToDoItem task in Init.tasksList)
+                {
+                    if (task.State != ToDoItemState.Active)
+                        continue;
+
+                    taskCounter++;
+                    Init.botClient.SendMessage(chat, $"{taskCounter}) {task.Name} - {task.CreatedAt} - {task.Id}");
+                }
+            }
+        }
+
+        // реализация метода интерфейса Add для List
+        public ToDoItem Add(ToDoUser user, string name)
         {
             //проверяю длину листа и выбрасываю исключение если больше лимита
             if (Init.tasksList.Count >= Init.maxTaskAmount)
                 throw new TaskCountLimitException(Init.maxTaskAmount);
 
             //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
-            string newTask = Validate.ValidateString(taskText, Init.maxTaskLenght);
+            string newTask = Validate.ValidateString(name, Init.maxTaskLenght);
 
             //проверяю дубликаты введённой задачи
             CheckDuplicateList(Init.tasksList, newTask);
 
-            //инициализирую новый объект задачи
-            var newItem = new ToDoItem
+            ToDoItem newToDoItem = new ToDoItem
             {
                 Name = newTask,
                 Id = Guid.NewGuid(),
@@ -69,124 +114,109 @@ namespace NailBot
                 StateChangedAt = DateTime.Now,
             };
 
-            Init.tasksList.Add(newItem);
+            Init.tasksList.Add(newToDoItem);
 
-            botClient.SendMessage(update.Message.Chat, $"Задача \"{newTask}\" добавлена в List задач.\n");
+            Init.botClient.SendMessage(chat, $"Задача \"{newTask}\" добавлена в List задач.\n");
+
+            //возвращаю новый объект задачи
+            return newToDoItem;
         }
 
-        //////метод рендера задач из List
-        public void ShowTasks(List<ToDoItem> tasks, ITelegramBotClient botClient, Update update)
-        {
-            if (tasks.Count == 0)
-                botClient.SendMessage(update.Message.Chat, $"Список задач из List пуст.\n");
-            else
-            {
-                botClient.SendMessage(update.Message.Chat, $"\nСписок задач из List:");
-                int taskCounter = 0;
-                foreach (ToDoItem task in tasks)
-                {
-                    if (task.State != ToDoItemState.Active)
-                        continue;
 
-                    taskCounter++;
-                    Console.WriteLine($"{taskCounter}) {task.Name} - {task.CreatedAt} - {task.Id}");
+        // реализация метода интерфейса Delete для List
+        public void Delete(Guid id)
+        {
+            if (Init.tasksList.Count == 0)
+            {
+                Init.botClient.SendMessage(chat, $"Ваш список задач пуст, удалять нечего.\n");
+
+                ShowTasks();
+
+                return;
+            }
+
+            //достану удаляемый объект задачи
+            var removedProducts = Init.tasksList.Where(x => x.Id == id).ToList();
+
+            //удаляю задачу
+            Init.tasksList.RemoveAll(x => x.Id == id);
+
+            Init.botClient.SendMessage(chat, $"Задача {removedProducts[0].Name} удалена.\n");
+
+            ShowTasks();
+        }
+
+        public (string, string, Guid) CheckAddAndRemove(string input)
+        {
+            string cutInput = "";
+
+            Guid taskGuid = Guid.Empty;
+
+            if (input.StartsWith("/addtask") || input.StartsWith("/removetask"))
+            {
+                if (input.StartsWith("/addtask "))
+                {
+                    cutInput = input.Substring(9);
+                    input = "/addtask";
+                }
+
+                else if (input.StartsWith("/removetask "))
+                {
+
+                    //перенесу проверку на пустоту списка с объектами задачи
+                    if (Init.tasksList.Count == 0)
+                    {
+                        Init.botClient.SendMessage(chat, $"Ваш список задач пуст, удалять нечего.\n");
+
+                        ShowTasks();
+
+                        return (input, cutInput, taskGuid);
+                    }
+
+                    cutInput = input.Substring(12);
+                    input = "/removetask";
+
+
+                    bool success = int.TryParse(cutInput, out int taskNumber);
+
+                    if (success && (taskNumber > 0 && taskNumber <= Init.tasksList.Count))
+                        taskGuid = Init.tasksList[taskNumber - 1].Id;
+                    else
+                    {
+                        throw new ArgumentException($"Введён некорректный номер задачи.\n");
+
+                        //RemoveTaskList(tasks, removeTask);
+                    }
+
+
+
+                }
+                else
+                {
+                    input = "unregistered user command";
                 }
             }
-        }
-
-        //////метод удаления задачи из List
-        public void RemoveTaskList(List<ToDoItem> tasks, string removeTask, ITelegramBotClient botClient, Update update)
-        {
-            if (tasks.Count == 0)
-            {
-                botClient.SendMessage(update.Message.Chat, $"Ваш список задач пуст, удалять нечего.\n");
-
-                return;
-            }
-            ShowTasks(tasks, botClient, update);
-
-            bool success = int.TryParse(removeTask, out int taskNumber);
-
-            if (success && (taskNumber > 0 && taskNumber <= tasks.Count))
-            {
-                botClient.SendMessage(update.Message.Chat, $"Задача {tasks[taskNumber - 1].Name} удалена.\n");
-                tasks.RemoveAt(taskNumber - 1);
-                ShowTasks(tasks, botClient, update);
-            }
-            else
-            {
-                botClient.SendMessage(update.Message.Chat, $"Введён некорректный номер задачи.\n");
-                return;
-                //RemoveTaskList(tasks, removeTask);
-            }
+            return (input, cutInput, taskGuid);
         }
 
 
-        ////работа с Array
-        ////метод добавления задачи в Array Init.maxTaskLenght
-        public void AddTaskArray(ToDoUser user, string taskText, ITelegramBotClient botClient, Update update)
-        {
-            ToDoItem[] arrayTasks = new ToDoItem[Init.tasksArray.Length + 1];
-
-            //проверяю длину  и выбрасываю исключение если больше лимита
-            if (Init.tasksArray.Length >= Init.maxTaskAmount)
-                throw new TaskCountLimitException(Init.maxTaskAmount);
-
-            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
-            string newTask = Validate.ValidateString(taskText, Init.maxTaskLenght);
-
-            int index = arrayTasks.Length - 1;
-
-            //проверяю дубликаты введённой задачи
-            CheckDuplicateArr(Init.tasksArray, newTask);
-
-            //инициализирую новый объект задачи
-            arrayTasks[index] = new ToDoItem
-            {
-                Name = newTask,
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.Now,
-                User = user,
-                StateChangedAt = DateTime.Now,
-            };
-
-            for (int i = 0; i < index; i++)
-                arrayTasks[i] = Init.tasksArray[i];
-
-            Init.tasksArray = arrayTasks;
-
-            botClient.SendMessage(update.Message.Chat, $"Задача \"{newTask}\" добавлена в Array задач.\n");
-        }
-
-        //////метод рендера задач из Array
-        public void ShowTasks(ref ToDoItem[] tasks, ITelegramBotClient botClient, Update update)
-        {
-            if (tasks.Length == 0)
-                botClient.SendMessage(update.Message.Chat, $"Список задач из Array пуст.\n");
-            else
-            {
-                botClient.SendMessage(update.Message.Chat, $"\nСписок задач из Array:");
-                for (int i = 0; i < tasks.Length; i++)
-                    Console.WriteLine($"{i + 1}) {tasks[i].Name} - {tasks[i].CreatedAt} - {tasks[i].Id}");
-            }
-        }
 
         //////метод удаления задачи из Array
-        public void RemoveTaskArray(ref ToDoItem[] tasks, string removeTask, ITelegramBotClient botClient, Update update)
+        public void RemoveTaskArray(ref ToDoItem[] tasks, string removeTask)
         {
             if (tasks.Length == 0)
             {
-                botClient.SendMessage(update.Message.Chat, $"Ваш список задач пуст, удалять нечего.\n");
+                Init.botClient.SendMessage(chat, $"Ваш список задач пуст, удалять нечего.\n");
                 return;
             }
 
-            ShowTasks(ref tasks, botClient, update);
+            ShowTasks();
 
             bool success = int.TryParse(removeTask, out int taskNumber);
 
             if (success && (taskNumber > 0 && taskNumber <= tasks.Length))
             {
-                botClient.SendMessage(update.Message.Chat, $"Задача {tasks[taskNumber - 1].Name} удалена.\n");
+                Init.botClient.SendMessage(chat, $"Задача {tasks[taskNumber - 1].Name} удалена.\n");
 
                 ToDoItem[] newTasks = new ToDoItem[tasks.Length - 1];
 
@@ -200,15 +230,18 @@ namespace NailBot
 
                 tasks = newTasks;
 
-                ShowTasks(ref tasks, botClient, update);
+                ShowTasks();
             }
             else
             {
-                botClient.SendMessage(update.Message.Chat, $"Введён некорректный номер задачи.\n");
+                Init.botClient.SendMessage(chat, $"Введён некорректный номер задачи.\n");
                 return;
                 //RemoveTaskArray(ref tasks);
             }
         }
+
+
+
 
         //проверка дубликатов Arr
         void CheckDuplicateArr(ToDoItem[] tasks, string newTask)
@@ -231,49 +264,62 @@ namespace NailBot
         }
 
         //проверка корректности названия новой задачи и номера удаляемой
-        public (string, string) CheckAddAndRemove(string input)
-        {
-            string cutInput = "";
-            if (input.StartsWith("/addtask") || input.StartsWith("/removetask"))
-            {
-                if (input.StartsWith("/addtask "))
-                {
-                    cutInput = input.Substring(9);
-                    input = "/addtask";
-                }
+        //public (string, string, Guid) CheckAddAndRemove(string input)
+        //{
+        //    string cutInput = "";
+        //    Guid taskGuid = Guid.Empty;
+        //    if (input.StartsWith("/addtask") || input.StartsWith("/removetask"))
+        //    {
+        //        if (input.StartsWith("/addtask "))
+        //        {
+        //            cutInput = input.Substring(9);
+        //            input = "/addtask";
+        //        }
                 
-                else if (input.StartsWith("/removetask "))
-                {
-                    cutInput = input.Substring(12);
-                    input = "/removetask";
-                }
-                else
-                {
-                    input = "unregistered user command";
-                }
-            }
-            return (input, cutInput);
-        }
+        //        else if (input.StartsWith("/removetask "))
+        //        {
+        //            cutInput = input.Substring(12);
+        //            input = "/removetask";
+
+        //            //task = int.Parse(cutInput.ToString());
+        //        }
+        //        else
+        //        {
+        //            input = "unregistered user command";
+        //        }
+        //    }
+        //    return (input, cutInput, taskGuid);
+        //}
 
 
         //валидация начальных значений задач
-        public int CheckMaxAmount(int maxAmount, ITelegramBotClient botClient, Update update)
+        public int CheckMaxAmount(int maxAmount, Chat chat)
         {
             //присваиваю значения длин
             if (maxAmount == 0)
-                maxAmount = maxAmount.GetStartValues("Введите максимально допустимое количество задач", botClient, update);
+                maxAmount = maxAmount.GetStartValues("Введите максимально допустимое количество задач", chat);
 
             return maxAmount;
         }
 
-        public int CheckMaxLength(int maxLength, ITelegramBotClient botClient, Update update)
+        public int CheckMaxLength(int maxLength, Chat chat)
         {
             //присваиваю значения длин
             if (maxLength == 0)
-                maxLength = maxLength.GetStartValues("Введите максимально допустимую длину задачи", botClient, update);
+                maxLength = maxLength.GetStartValues("Введите максимально допустимую длину задачи", chat);
 
             return maxLength;
         }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -295,19 +341,74 @@ namespace NailBot
             return list;
         }
 
-        public ToDoItem Add(ToDoUser user, string name)
-        {
-           return new ToDoItem();
-        }
+
         public void MarkCompleted(Guid id)
         {
             // реализация
         }
 
-        public void Delete(Guid id)
-        {
-            // реализация
-        }
+
+
+
+        // реализация метода Add для Array
+        //public ToDoItem Add(ToDoUser user, string name)
+        //{
+        //    ToDoItem[] arrayTasks = new ToDoItem[Init.tasksArray.Length + 1];
+
+        //    //проверяю длину  и выбрасываю исключение если больше лимита
+        //    if (Init.tasksArray.Length >= Init.maxTaskAmount)
+        //        throw new TaskCountLimitException(Init.maxTaskAmount);
+
+        //    //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
+        //    string newTask = Validate.ValidateString(name, Init.maxTaskLenght);
+
+        //    int index = arrayTasks.Length - 1;
+
+        //    //проверяю дубликаты введённой задачи
+        //    CheckDuplicateArr(Init.tasksArray, newTask);
+
+        //    //инициализирую новый объект задачи
+        //    arrayTasks[index] = new ToDoItem
+        //    {
+        //        Name = newTask,
+        //        Id = Guid.NewGuid(),
+        //        CreatedAt = DateTime.Now,
+        //        User = user,
+        //        StateChangedAt = DateTime.Now,
+        //    };
+
+        //    for (int i = 0; i < index; i++)
+        //        arrayTasks[i] = Init.tasksArray[i];
+
+        //    Init.tasksArray = arrayTasks;
+
+        //    Init.botClient.SendMessage(chat, $"Задача \"{newTask}\" добавлена в Array задач.\n");
+
+        //    return arrayTasks[index];
+        //}
+
+
+        ////работа с Array
+        ////метод добавления задачи в Array 
+        //public void AddTaskArray(ToDoUser user, string taskText)
+        //{
+        //}
+
+        //////метод рендера задач из Array
+        //public void ShowTasks()
+        //{
+        //    if (Init.tasksArray.Length == 0)
+        //        Init.botClient.SendMessage(chat, $"Список задач из Array пуст.\n");
+        //    else
+        //    {
+        //        Init.botClient.SendMessage(chat, $"\nСписок задач из Array:");
+        //        for (int i = 0; i < Init.tasksArray.Length; i++)
+        //            Init.botClient.SendMessage(chat, $"{i + 1}) {Init.tasksArray[i].Name} - {Init.tasksArray[i].CreatedAt} - {Init.tasksArray[i].Id}");
+        //    }
+        //}
+
+
+
     }
 }
 

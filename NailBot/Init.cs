@@ -15,7 +15,7 @@ using System.Xml.Linq;
 
 namespace NailBot
 {
-    internal class Init
+    public class Init
     {
         //количество задач при запуске программы
         public static int maxTaskAmount = 0;
@@ -37,8 +37,8 @@ namespace NailBot
 
 
         //создаю экземпляр бота
-        static ConsoleBotClient botClient = new ConsoleBotClient();
-        static ITelegramBotClient telegramBotClient = botClient;
+        public static ConsoleBotClient botClient = new ConsoleBotClient();
+        public static ITelegramBotClient telegramBotClient = botClient;
 
 
         //создаю экземпляр UserService
@@ -56,7 +56,7 @@ namespace NailBot
 
 
         //создаю экземпляр объекта апдейт
-        static Update update = new Update();
+        public static Update update = new Update();
 
         public static void Start()
         {
