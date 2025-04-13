@@ -54,7 +54,6 @@ namespace NailBot
         //создаю экземпляр объекта хендлера
         static internal UpdateHandler handler = new UpdateHandler(iuserService, itoDoService);
 
-
         //создаю экземпляр объекта апдейт
         public static Update update = new Update();
 

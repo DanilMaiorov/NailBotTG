@@ -34,32 +34,33 @@ namespace NailBot
         }
 
         //создаю нового юзера
-        ToDoUser newUser = new ToDoUser();
+        ToDoUser toDoUser = new ToDoUser();
 
         //создаю новый сервис
-        ToDoService newService = new ToDoService();
+        ToDoService toDoService = new ToDoService();
 
         public bool answer = true;
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
-
-            newService.NewUpdate = update;
+            //передаю в newService текущий экземпляр update
+            toDoService.NewUpdate = update;
 
             try
             {
                 //тут запрашиваю начальные ограничения длины задачи и их количества
                 if (update.Message.Id == 1)
                 {
-                    newService.Chat = update.Message.Chat;
+                    //передаю в newService созданный экземпляр Chat
+                    toDoService.Chat = update.Message.Chat;
 
-                    Init.maxTaskAmount = newService.CheckMaxAmount(Init.maxTaskAmount, newService.Chat);
+                    Init.maxTaskAmount = toDoService.CheckMaxAmount(toDoService.Chat);
 
-                    Init.maxTaskLenght = newService.CheckMaxLength(Init.maxTaskLenght, newService.Chat);
+                    Init.maxTaskLenght = toDoService.CheckMaxLength(toDoService.Chat);
 
                     botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
-                    Commands.Start.CommandsRender(newUser, update);
+                    Commands.Start.CommandsRender(toDoUser, update);
 
                     return;
                 }
@@ -72,13 +73,13 @@ namespace NailBot
                 input = input.NumberReplacer();
 
                 //верну тут кортежем
-                (string inputCommand, string inputText, Guid taskGuid) inputs = newService.CheckAddAndRemove(input);
+                (string inputCommand, string inputText, Guid taskGuid) inputs = toDoService.CheckAddAndRemove(input);
 
 
                 //реплейс слэша для приведения к Enum 
                 input = inputs.Item1.Replace("/", string.Empty);
 
-                if (newUser.UserId == Guid.Empty)
+                if (toDoUser.UserId == Guid.Empty)
                 {
                     if (input != "start" && input != "help" && input != "info" && input != "exit")
                         input = "unregistered user command";
@@ -94,49 +95,32 @@ namespace NailBot
                 {
                     case Commands.Start:
 
-                        newUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
+                        toDoUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
 
-                        Commands.Start.CommandsRender(newUser, update);
+                        Commands.Start.CommandsRender(toDoUser, update);
                         break;
 
                     case Commands.Help:
-                        newService.ShowHelp(update.Message.From.Username);
+                        toDoService.ShowHelp(update.Message.From.Username);
                         break;
 
                     case Commands.Info:
-                        newService.ShowInfo();
+                        toDoService.ShowInfo();
                         break;
 
                     case Commands.Addtask:
-                        //вызов метода добавления задачи в List
-                        newService.Add(newUser, inputs.inputText);
-                        //вызов метода добавления задачи в Array
-                        //newService.Add(newUser, inputs.inputText);
+                        //вызов метода добавления задачи
+                        _toDoService.Add(toDoUser, inputs.inputText);
                         break;
 
                     case Commands.Showtasks:
-                        //вызов метода рендера задач из List
-                        newService.ShowTasks();
-                        //вызов метода рендера задач из Array
-                        //newService.ShowTasks();
+                        //вызов метода рендера задач
+                        toDoService.ShowTasks();
                         break;
 
                     case Commands.Removetask:
-                        //вызов метода удаления задачи из List
-
-                        newService.Delete(inputs.taskGuid);
-
-                        bool success = int.TryParse(inputs.Item2, out int taskNumber);
-
-                        if (!success)
-                            throw new ArgumentException("Введён некорректный номер задачи.\n");
-                            
-                        
-
-
-                        //newService.RemoveTaskList(Init.tasksList, inputs.Item2);
-                        //вызов метода удаления задачи из Array
-                        newService.RemoveTaskArray(ref Init.tasksArray, inputs.Item2);
+                        //вызов метода удаления задачи
+                        _toDoService.Delete(inputs.taskGuid);                         
                         break;
 
                     case Commands.Exit:
@@ -144,7 +128,7 @@ namespace NailBot
                         break;
                     default:
                         botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Commands.Start.CommandsRender(newUser, update);
+                        Commands.Start.CommandsRender(toDoUser, update);
                         break;
                 }
             }
@@ -182,11 +166,3 @@ namespace NailBot
         }
     }
 }
-
-
-
-//Создать класс UpdateHandler, который реализует интерфейс IUpdateHandler,
-//и перенести в метод HandleUpdateAsync обработку всех команд. Вместо Console.WriteLine использовать SendMessage у ITelegramBotClient
-
-//Перенести try/catch в HandleUpdateAsync. В Main оставить catch(Exception)
-//Для вывода в коноль сообщений использовать метод ITelegramBotClient.SendMessage

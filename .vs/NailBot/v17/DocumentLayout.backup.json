@@ -11,6 +11,10 @@
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\updatehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\todoitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\todoitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\todouser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\todouser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -18,45 +22,20 @@
       "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\consolebotclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\todoitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\todoitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\startvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\startvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\types\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\types\\update.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\types\\chat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\exceptions\\taskcountlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\exceptions\\taskcountlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\exceptions\\duplicatetaskexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -71,6 +50,30 @@
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\itelegrambotclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\types\\update.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\types\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\types\\chat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\exceptions\\taskcountlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\exceptions\\taskcountlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\genzel\\AppData\\Local\\SourceServer\\191dc7131d57a70966936a5df00a83ccf0065bc7dd9df927e58fa63945a0ee76\\NailBot\\UpdateHandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -78,9 +81,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\otus.todolist.consolebot.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FFF9C414-329E-46B4-AA73-41F0670572DF}|..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj|c:\\users\\genzel\\source\\repos\\c-sharp-basic\\homeworks\\5 \u043E\u043E\u043F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\otus.todolist.consolebot\\itelegrambotclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\source\\repos\\nailbottg\\nailbot\\exceptions\\tasklengthlimitexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -98,7 +98,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 978,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Document",
@@ -132,65 +132,52 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UpdateHandler.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\UpdateHandler.cs",
+              "RelativeDocumentMoniker": "NailBot\\UpdateHandler.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\UpdateHandler.cs",
+              "RelativeToolTip": "NailBot\\UpdateHandler.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAAAAvwE8AAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-30T16:50:19.878Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "ToDoService.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoService.cs",
               "RelativeDocumentMoniker": "NailBot\\ToDoService.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoService.cs*",
               "RelativeToolTip": "NailBot\\ToDoService.cs*",
-              "ViewState": "AgIAAJoAAAAAAAAAAIAwwK4AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAI8AAAAAAAAAAAAvwKQAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-09T15:22:10.564Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "ToDoItem.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoItem.cs",
-              "RelativeDocumentMoniker": "NailBot\\ToDoItem.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoItem.cs",
-              "RelativeToolTip": "NailBot\\ToDoItem.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAqwAkAAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-04T07:10:37.725Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ToDoUser.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoUser.cs",
-              "RelativeDocumentMoniker": "NailBot\\ToDoUser.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoUser.cs",
-              "RelativeToolTip": "NailBot\\ToDoUser.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T14:18:20.776Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "Extensions.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Extensions.cs",
               "RelativeDocumentMoniker": "NailBot\\Extensions.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Extensions.cs",
               "RelativeToolTip": "NailBot\\Extensions.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAD4vy4AAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAnwC4AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-15T17:19:47.867Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "Validate.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Validate.cs",
               "RelativeDocumentMoniker": "NailBot\\Validate.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Validate.cs",
               "RelativeToolTip": "NailBot\\Validate.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAEwDUAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAewDUAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-13T18:05:06.257Z",
               "EditorCaption": ""
@@ -198,79 +185,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "ToDoUser.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoUser.cs",
+              "RelativeDocumentMoniker": "NailBot\\ToDoUser.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoUser.cs",
+              "RelativeToolTip": "NailBot\\ToDoUser.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-03T14:18:20.776Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "ConsoleBotClient.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ConsoleBotClient.cs",
               "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ConsoleBotClient.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ConsoleBotClient.cs",
               "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ConsoleBotClient.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAIAxwBcAAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAIA4wBcAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-30T19:30:09.966Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Program.cs",
-              "RelativeDocumentMoniker": "NailBot\\Program.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Program.cs",
-              "RelativeToolTip": "NailBot\\Program.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAApwAoAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-08T16:54:59.935Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "UpdateHandler.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\UpdateHandler.cs",
-              "RelativeDocumentMoniker": "NailBot\\UpdateHandler.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\UpdateHandler.cs",
-              "RelativeToolTip": "NailBot\\UpdateHandler.cs",
-              "ViewState": "AgIAAEAAAAAAAAAAAAApwH4AAAAYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-30T16:50:19.878Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Message.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
-              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
-              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-12T18:59:28.86Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "Update.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
-              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
-              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAALAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-30T17:17:26.836Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "Chat.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
-              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
-              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-12T18:59:32.676Z",
               "EditorCaption": ""
             },
             {
@@ -289,19 +224,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 9,
-              "Title": "StartValues.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\StartValues.cs",
-              "RelativeDocumentMoniker": "NailBot\\StartValues.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\StartValues.cs",
-              "RelativeToolTip": "NailBot\\StartValues.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-17T18:33:23.089Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
               "Title": "DuplicateTaskException.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Exceptions\\DuplicateTaskException.cs",
               "RelativeDocumentMoniker": "NailBot\\Exceptions\\DuplicateTaskException.cs",
@@ -314,33 +236,59 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "TaskCountLimitException.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Exceptions\\TaskCountLimitException.cs",
-              "RelativeDocumentMoniker": "NailBot\\Exceptions\\TaskCountLimitException.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Exceptions\\TaskCountLimitException.cs",
-              "RelativeToolTip": "NailBot\\Exceptions\\TaskCountLimitException.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-23T16:26:40.593Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 10,
               "Title": "IToDoService.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\IToDoService.cs",
               "RelativeDocumentMoniker": "NailBot\\IToDoService.cs",
               "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\IToDoService.cs",
               "RelativeToolTip": "NailBot\\IToDoService.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAIwA8AAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA0AAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-09T15:21:29.074Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 2,
+              "Title": "ToDoItem.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoItem.cs",
+              "RelativeDocumentMoniker": "NailBot\\ToDoItem.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\ToDoItem.cs",
+              "RelativeToolTip": "NailBot\\ToDoItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAgAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-04T07:10:37.725Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "StartValues.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\StartValues.cs",
+              "RelativeDocumentMoniker": "NailBot\\StartValues.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\StartValues.cs",
+              "RelativeToolTip": "NailBot\\StartValues.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-17T18:33:23.089Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ITelegramBotClient.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
+              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
+              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-30T16:54:27.918Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
               "Title": "IUserService.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\IUserService.cs",
               "RelativeDocumentMoniker": "NailBot\\IUserService.cs",
@@ -353,7 +301,72 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Program.cs",
+              "RelativeDocumentMoniker": "NailBot\\Program.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Program.cs",
+              "RelativeToolTip": "NailBot\\Program.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAApwAoAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T16:54:59.935Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Update.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
+              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
+              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Update.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-30T17:17:26.836Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Message.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
+              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
+              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Message.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-12T18:59:28.86Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Chat.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
+              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
+              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Types\\Chat.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-12T18:59:32.676Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 18,
+              "Title": "TaskCountLimitException.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Exceptions\\TaskCountLimitException.cs",
+              "RelativeDocumentMoniker": "NailBot\\Exceptions\\TaskCountLimitException.cs",
+              "ToolTip": "C:\\Users\\genzel\\source\\repos\\NailBotTG\\NailBot\\Exceptions\\TaskCountLimitException.cs",
+              "RelativeToolTip": "NailBot\\Exceptions\\TaskCountLimitException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-23T16:26:40.593Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
               "Title": "UpdateHandler.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\AppData\\Local\\SourceServer\\191dc7131d57a70966936a5df00a83ccf0065bc7dd9df927e58fa63945a0ee76\\NailBot\\UpdateHandler.cs",
               "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\SourceServer\\191dc7131d57a70966936a5df00a83ccf0065bc7dd9df927e58fa63945a0ee76\\NailBot\\UpdateHandler.cs",
@@ -366,7 +379,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "IUpdateHandler.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\IUpdateHandler.cs",
               "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\IUpdateHandler.cs",
@@ -378,7 +391,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "Otus.ToDoList.ConsoleBot.csproj",
               "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj",
               "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\Otus.ToDoList.ConsoleBot.csproj",
@@ -387,18 +400,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-03-30T16:50:32.535Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "ITelegramBotClient.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
-              "RelativeDocumentMoniker": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
-              "ToolTip": "C:\\Users\\genzel\\source\\repos\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
-              "RelativeToolTip": "..\\C-Sharp-Basic\\Homeworks\\5 \u041E\u041E\u041F \u043A\u043B\u0430\u0441\u0441\u044B \u0438 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u044B\\Otus.ToDoList.ConsoleBot\\ITelegramBotClient.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAYAAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-30T16:54:27.918Z"
             },
             {
               "$type": "Document",
