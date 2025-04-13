@@ -43,12 +43,12 @@ namespace NailBot
 
         //создаю экземпляр UserService
         static UserService userService = new UserService();
-        static IUserService iuserService = userService;
+        public static IUserService iuserService = userService;
 
 
         //создаю экземпляр ToDoService
         static ToDoService toDoService = new ToDoService();
-        static IToDoService itoDoService = toDoService;
+        public static IToDoService itoDoService = toDoService;
 
 
         //создаю экземпляр объекта хендлера

@@ -20,8 +20,12 @@ namespace NailBot
         }
 
         public ToDoUser? GetUser(long telegramUserId) 
-        { 
-            return new ToDoUser(); 
+        {
+            if (telegramUserId != 0)
+                //сделал поле toDoUser статическим в UpdateHandler
+                return UpdateHandler.toDoUser;
+            else
+                return new ToDoUser();
         }
     }
 }

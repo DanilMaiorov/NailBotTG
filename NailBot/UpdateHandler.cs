@@ -12,7 +12,6 @@ using static NailBot.IUserService;
 
 namespace NailBot
 {
-
     internal class UpdateHandler : IUpdateHandler
     {
         //объявляю переменную типа интефрейса IUserService _userService
@@ -30,11 +29,11 @@ namespace NailBot
 
         enum Commands
         {
-            Start = 1, Help, Info, Addtask, Showtasks, Removetask, Exit
+            Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Completetask, Exit
         }
 
         //создаю нового юзера
-        ToDoUser toDoUser = new ToDoUser();
+        public static ToDoUser toDoUser = new ToDoUser();
 
         //создаю новый сервис
         ToDoService toDoService = new ToDoService();
@@ -43,8 +42,8 @@ namespace NailBot
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
-            //передаю в newService текущий экземпляр update
-            toDoService.NewUpdate = update;
+
+            toDoService.Uppp = update;
 
             try
             {
@@ -73,7 +72,7 @@ namespace NailBot
                 input = input.NumberReplacer();
 
                 //верну тут кортежем
-                (string inputCommand, string inputText, Guid taskGuid) inputs = toDoService.CheckAddAndRemove(input);
+                (string inputCommand, string inputText, Guid taskGuid) inputs = toDoService.InputCheck(input);
 
 
                 //реплейс слэша для приведения к Enum 
@@ -94,14 +93,12 @@ namespace NailBot
                 switch (command)
                 {
                     case Commands.Start:
-
                         toDoUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
-
                         Commands.Start.CommandsRender(toDoUser, update);
                         break;
 
                     case Commands.Help:
-                        toDoService.ShowHelp(update.Message.From.Username);
+                        toDoService.ShowHelp(_userService.GetUser(toDoUser.TelegramUserId));
                         break;
 
                     case Commands.Info:
@@ -118,9 +115,19 @@ namespace NailBot
                         toDoService.ShowTasks();
                         break;
 
+                    case Commands.Showalltasks:
+                        //вызов метода рендера задач
+                        toDoService.ShowAllTasks();
+                        break;
+
                     case Commands.Removetask:
                         //вызов метода удаления задачи
                         _toDoService.Delete(inputs.taskGuid);                         
+                        break;
+
+                    case Commands.Completetask:
+                        //вызов метода удаления задачи
+                        _toDoService.MarkCompleted(inputs.taskGuid);
                         break;
 
                     case Commands.Exit:

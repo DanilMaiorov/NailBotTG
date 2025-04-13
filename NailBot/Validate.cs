@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Otus.ToDoList.ConsoleBot.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,6 +52,36 @@ namespace NailBot
                 throw new TaskLengthLimitException(resultStr, strLength);
             }
             throw new ArgumentException("Введена строка из пробелов или пустая строка");
+        }
+
+        // метод валидации задачи
+        internal static (string, string, Guid) ValidateTask(string input, string cutInput, Guid taskGuid)
+        {
+            //сохраню исходный ввод пользака
+            string startInput = input;
+
+
+            if (input.StartsWith("/removetask "))
+                input = "/removetask";
+            else
+                input = "/completetask";
+
+            //перенес проверку на длину списка задач сюда
+            if (Init.tasksList.Count != 0)
+            {
+                cutInput = startInput.Substring(input.Length);
+
+                bool success = int.TryParse(cutInput, out int taskNumber);
+
+                if (success && (taskNumber > 0 && taskNumber <= Init.tasksList.Count))
+                {
+                    taskGuid = Init.tasksList[taskNumber - 1].Id;
+                    return (input, cutInput, taskGuid);
+                }
+                else
+                    throw new ArgumentException($"Введён некорректный номер задачи.\n");
+                }
+            return (input, cutInput, taskGuid);
         }
     }
 }
