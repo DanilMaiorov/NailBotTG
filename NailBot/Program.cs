@@ -16,11 +16,13 @@ namespace NailBot
             if (args.Length != 0)
                 isFinish = true;
 
+            Init start = new Init();
+
             while (!isFinish)
             {
                 try
                 {
-                    Init.Start();
+                    start.Start();
                     isFinish = true;
                 }
                 catch (Exception ex)

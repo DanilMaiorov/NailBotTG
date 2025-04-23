@@ -16,7 +16,7 @@ namespace NailBot
         {
             int counter = 0;
 
-            if (user.UserId == Guid.Empty)
+            if (user == null)
             {
                 Init.botClient.SendMessage(update.Message.Chat, $"Список доступных команд для незарегистрированного юзера:");
                 foreach (T command in Enum.GetValues(typeof(T)))

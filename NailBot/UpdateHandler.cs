@@ -1,17 +1,13 @@
 ﻿using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using static NailBot.IUserService;
-
 
 namespace NailBot
 {
+    public enum Commands
+    {
+        Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Completetask, Exit
+    }
+
     internal class UpdateHandler : IUpdateHandler
     {
         //объявляю переменную типа интефрейса IUserService _userService
@@ -27,117 +23,19 @@ namespace NailBot
             _toDoService = toDoService ?? throw new ArgumentNullException(nameof(toDoService));
         }
 
-        enum Commands
-        {
-            Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Completetask, Exit
-        }
-
-        //создаю нового юзера
-        public static ToDoUser toDoUser = new ToDoUser();
-
-        //создаю новый сервис
+        //создаю новый туДуСервис
         ToDoService toDoService = new ToDoService();
 
-        public bool answer = true;
+        //создаю новый юзерСервис
+        UserService userService = new UserService();
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
-
-            toDoService.Uppp = update;
-
             try
             {
-                //тут запрашиваю начальные ограничения длины задачи и их количества
-                if (update.Message.Id == 1)
-                {
-                    //передаю в newService созданный экземпляр Chat
-                    toDoService.Chat = update.Message.Chat;
+                //вызов метода обработки команд
+                toDoService.CommandsHandle(_userService, toDoService, _toDoService, update);
 
-                    Init.maxTaskAmount = toDoService.CheckMaxAmount(toDoService.Chat);
-
-                    Init.maxTaskLenght = toDoService.CheckMaxLength(toDoService.Chat);
-
-                    botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
-
-                    Commands.Start.CommandsRender(toDoUser, update);
-
-                    return;
-                }
-
-                string input = update.Message.Text;
-
-                Commands command;
-
-                //регулярка на реплейс циферного значения Enum
-                input = input.NumberReplacer();
-
-                //верну тут кортежем
-                (string inputCommand, string inputText, Guid taskGuid) inputs = toDoService.InputCheck(input);
-
-
-                //реплейс слэша для приведения к Enum 
-                input = inputs.Item1.Replace("/", string.Empty);
-
-                if (toDoUser.UserId == Guid.Empty)
-                {
-                    if (input != "start" && input != "help" && input != "info" && input != "exit")
-                        input = "unregistered user command";
-                }
-
-                //приведение к типу Enum
-                if (Enum.TryParse<Commands>(input, true, out var result))
-                    command = result;
-                else
-                    command = default;
-
-                switch (command)
-                {
-                    case Commands.Start:
-                        toDoUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
-                        Commands.Start.CommandsRender(toDoUser, update);
-                        break;
-
-                    case Commands.Help:
-                        toDoService.ShowHelp(_userService.GetUser(toDoUser.TelegramUserId));
-                        break;
-
-                    case Commands.Info:
-                        toDoService.ShowInfo();
-                        break;
-
-                    case Commands.Addtask:
-                        //вызов метода добавления задачи
-                        _toDoService.Add(toDoUser, inputs.inputText);
-                        break;
-
-                    case Commands.Showtasks:
-                        //вызов метода рендера задач
-                        toDoService.ShowTasks();
-                        break;
-
-                    case Commands.Showalltasks:
-                        //вызов метода рендера задач
-                        toDoService.ShowAllTasks();
-                        break;
-
-                    case Commands.Removetask:
-                        //вызов метода удаления задачи
-                        _toDoService.Delete(inputs.taskGuid);                         
-                        break;
-
-                    case Commands.Completetask:
-                        //вызов метода удаления задачи
-                        _toDoService.MarkCompleted(inputs.taskGuid);
-                        break;
-
-                    case Commands.Exit:
-                        Program.Main([input]);
-                        break;
-                    default:
-                        botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Commands.Start.CommandsRender(toDoUser, update);
-                        break;
-                }
             }
             catch (ArgumentException ex)
             {

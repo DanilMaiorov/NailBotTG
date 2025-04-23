@@ -55,7 +55,7 @@ namespace NailBot
         }
 
         // метод валидации задачи
-        internal static (string, string, Guid) ValidateTask(string input, string cutInput, Guid taskGuid)
+        internal static (string, string, Guid) ValidateTask(string input, string cutInput, Guid taskGuid, List<ToDoItem> tasksList)
         {
             //сохраню исходный ввод пользака
             string startInput = input;
@@ -67,15 +67,15 @@ namespace NailBot
                 input = "/completetask";
 
             //перенес проверку на длину списка задач сюда
-            if (Init.tasksList.Count != 0)
+            if (tasksList.Count != 0)
             {
                 cutInput = startInput.Substring(input.Length);
 
                 bool success = int.TryParse(cutInput, out int taskNumber);
 
-                if (success && (taskNumber > 0 && taskNumber <= Init.tasksList.Count))
+                if (success && (taskNumber > 0 && taskNumber <= tasksList.Count))
                 {
-                    taskGuid = Init.tasksList[taskNumber - 1].Id;
+                    taskGuid = tasksList[taskNumber - 1].Id;
                     return (input, cutInput, taskGuid);
                 }
                 else

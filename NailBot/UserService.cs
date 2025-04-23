@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Otus.ToDoList.ConsoleBot.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,24 +9,32 @@ namespace NailBot
 {
     internal class UserService : IUserService
     {
+        private ToDoUser currentUser;
+        public ToDoUser CurrentUser
+        {
+            get { return currentUser; }
+            set { currentUser = value; }
+        }
+
         public ToDoUser RegisterUser(long telegramUserId, string telegramUserName) 
         {
-            return new ToDoUser
+            CurrentUser = new ToDoUser
             {
                 UserId = Guid.NewGuid(),
                 TelegramUserId = telegramUserId,
                 TelegramUserName = telegramUserName,
                 RegisteredAt = DateTime.Now
             };
+            
+            return CurrentUser;
         }
 
         public ToDoUser? GetUser(long telegramUserId) 
         {
-            if (telegramUserId != 0)
-                //сделал поле toDoUser статическим в UpdateHandler
-                return UpdateHandler.toDoUser;
-            else
-                return new ToDoUser();
+            if (CurrentUser == null)
+                return null;
+
+            return currentUser;
         }
     }
 }

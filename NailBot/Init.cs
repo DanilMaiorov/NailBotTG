@@ -17,73 +17,31 @@ namespace NailBot
 {
     public class Init
     {
-        //количество задач при запуске программы
-        public static int maxTaskAmount = 0;
-
-        //длина задачи при запуске программы
-        public static int maxTaskLenght = 0;
-
-        //дефолтное имя пользака
-        public static string userName = "Незнакомец";
-
-        //объявление списка задач в виде List
-        public static List<ToDoItem> tasksList = new List<ToDoItem>();
-
-        //объявление списка задач в виде Array
-        public static ToDoItem[] tasksArray = [];
-
-
-
-
-
         //создаю экземпляр бота
         public static ConsoleBotClient botClient = new ConsoleBotClient();
-        public static ITelegramBotClient telegramBotClient = botClient;
+        public static ITelegramBotClient telegramBotClient = new ConsoleBotClient();
 
 
-        //создаю экземпляр UserService
-        static UserService userService = new UserService();
-        public static IUserService iuserService = userService;
+        //создаю экземпляр IUserService
+        public static IUserService iuserService = new UserService();
 
-
-        //создаю экземпляр ToDoService
-        static ToDoService toDoService = new ToDoService();
-        public static IToDoService itoDoService = toDoService;
-
+        //создаю экземпляр IToDoService
+        public static IToDoService itoDoService = new ToDoService();
 
         //создаю экземпляр объекта хендлера
-        static internal UpdateHandler handler = new UpdateHandler(iuserService, itoDoService);
+        internal UpdateHandler handler = new UpdateHandler(iuserService, itoDoService);
 
         //создаю экземпляр объекта апдейт
-        public static Update update = new Update();
+        public Update update = new Update();
 
-        public static void Start()
+        public void Start()
         {
-
             //запуск бота
             botClient.StartReceiving(handler);
-
-            string startInput = Validate.ValidateString(Console.ReadLine());
-
-            while (Handle())
-            {
-                startInput = Validate.ValidateString(Console.ReadLine());
-            }
-        }
-
-        public static bool Handle()
-        {
-
-            handler.HandleUpdateAsync(telegramBotClient, update);
-
-            Console.WriteLine(handler);
-
-            return handler.answer;
         }
 
         public static void Stop()
         {
-            
             //userName = userName != "Пользователь" ? userName : "Незнакомец";
             Console.WriteLine();
       
