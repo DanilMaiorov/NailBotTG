@@ -27,14 +27,14 @@ namespace NailBot
         ToDoService toDoService = new ToDoService();
 
         //создаю новый юзерСервис
-        UserService userService = new UserService();
+        //UserService userService = new UserService();
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
             try
             {
                 //вызов метода обработки команд
-                toDoService.CommandsHandle(_userService, toDoService, _toDoService, update);
+                toDoService.CommandsHandle(_userService, update);
 
             }
             catch (ArgumentException ex)

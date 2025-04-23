@@ -252,7 +252,7 @@ namespace NailBot
     
 
         //метод обработки команд
-        public void CommandsHandle(IUserService _userService, ToDoService toDoService, IToDoService _toDoService, Update update)
+        public void CommandsHandle(IUserService _userService, Update update)
         {
             //получаю текущего юзера
             var currentUser = _userService.GetUser(update.Message.From.Id);
@@ -261,11 +261,11 @@ namespace NailBot
             if (update.Message.Id == 1)
             {
                 //передаю в newService созданный экземпляр Chat
-                toDoService.Chat = update.Message.Chat;
+                Chat = update.Message.Chat;
 
-                toDoService.MaxTaskAmount = toDoService.CheckMaxAmount(toDoService.Chat);
+                MaxTaskAmount = CheckMaxAmount(Chat);
 
-                toDoService.MaxTaskLenght = toDoService.CheckMaxLength(toDoService.Chat);
+                MaxTaskLenght = CheckMaxLength(Chat);
 
                 Init.botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
@@ -322,27 +322,27 @@ namespace NailBot
 
                 case Commands.Addtask:
                     //вызов метода добавления задачи
-                    toDoService.Add(currentUser, inputs.Item2);
+                    Add(currentUser, inputs.Item2);
                     break;
 
                 case Commands.Showtasks:
                     //вызов метода рендера задач
-                    toDoService.ShowTasks();
+                    ShowTasks();
                     break;
 
                 case Commands.Showalltasks:
                     //вызов метода рендера задач
-                    toDoService.ShowAllTasks();
+                    ShowAllTasks();
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи
-                    toDoService.Delete(inputs.Item3);
+                    Delete(inputs.Item3);
                     break;
 
                 case Commands.Completetask:
                     //вызов метода удаления задачи
-                    toDoService.MarkCompleted(inputs.Item3);
+                    MarkCompleted(inputs.Item3);
                     break;
 
                 case Commands.Exit:
