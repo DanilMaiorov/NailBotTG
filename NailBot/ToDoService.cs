@@ -12,8 +12,12 @@ namespace NailBot
 {
     class ToDoService : IToDoService
     {
+
+        //ДОПИСАЛ ПОЛЯ В ИНТЕРФЕЙСЕ
         //объявление списка задач в виде List
-        List<ToDoItem> tasksList = new List<ToDoItem>();
+        public List<ToDoItem> TasksList { get ; set ; } = new List<ToDoItem>();
+
+
 
         //количество задач при запуске программы
         private int maxTaskAmount;
@@ -31,12 +35,19 @@ namespace NailBot
             set { maxTaskLenght = value; }
         }
 
+
+
+
         //создам экземляр чата, чтобы передавать в SendMessage
         private static Chat chat;
+
+
         public Chat Chat {
             get { return chat; }
             set { chat = value; }
         }
+
+        
 
         ////МЕТОДЫ КОМАНД
         ////метод команды Help
@@ -76,7 +87,7 @@ namespace NailBot
         ///добавлю параметр по умолчанию для команды showalltasks и буду передавать в него true
         public void ShowTasks(bool allTasks = false)
         {
-            if (tasksList.Count == 0)
+            if (TasksList.Count == 0)
                 Init.botClient.SendMessage(chat, $"Список задач пуст.\n");
             else
             {
@@ -85,12 +96,12 @@ namespace NailBot
                 if (!allTasks)
                 {
                     //проверяю есть ли активные задачи
-                    var completedTasks = tasksList.Where(x => x.State == ToDoItemState.Active).ToList();
+                    var completedTasks = TasksList.Where(x => x.State == ToDoItemState.Active).ToList();
 
                     if (completedTasks.Count > 0)
                     {
                         Init.botClient.SendMessage(chat, $"Список активных задач:");
-                        foreach (ToDoItem task in tasksList)
+                        foreach (ToDoItem task in TasksList)
                         {
                             if (task.State != ToDoItemState.Active)
                                 continue;
@@ -105,7 +116,7 @@ namespace NailBot
                 else
                 {
                     Init.botClient.SendMessage(chat, $"Список всех задач:");
-                    foreach (ToDoItem task in tasksList)
+                    foreach (ToDoItem task in TasksList)
                     {
                         taskCounter++;
                         Init.botClient.SendMessage(chat, $"{taskCounter}) ({(task.State)}) {task.Name} - {task.CreatedAt} - {task.Id}");
@@ -124,7 +135,7 @@ namespace NailBot
         public ToDoItem Add(ToDoUser user, string name)
         {
             //проверяю длину листа и выбрасываю исключение если больше лимита
-            if (tasksList.Count >= maxTaskAmount)
+            if (TasksList.Count >= maxTaskAmount)
                 throw new TaskCountLimitException(maxTaskAmount);
 
             //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
@@ -142,7 +153,7 @@ namespace NailBot
                 StateChangedAt = DateTime.Now,
             };
 
-            tasksList.Add(newToDoItem);
+            TasksList.Add(newToDoItem);
 
             Init.botClient.SendMessage(chat, $"Задача \"{newTask}\" добавлена в список задач.\n");
 
@@ -161,15 +172,17 @@ namespace NailBot
             }   
             
             //достану удаляемый объект задачи
-            var removedProducts = tasksList.Where(x => x.Id == id).ToList();
+            var removedProducts = TasksList.Where(x => x.Id == id).ToList();
 
             //удаляю задачу
-            tasksList.RemoveAll(x => x.Id == id);
+            TasksList.RemoveAll(x => x.Id == id);
 
             Init.botClient.SendMessage(chat, $"Задача {removedProducts[0].Name} удалена.\n");
 
             ShowTasks();
         }
+
+
 
         // реализация метода интерфейса MarkCompleted
         public void MarkCompleted(Guid id)
@@ -182,7 +195,7 @@ namespace NailBot
             }
 
             //найду в списке необходимую задачу
-            var completedTask = tasksList.FirstOrDefault(u => u.Id == id);
+            var completedTask = TasksList.FirstOrDefault(u => u.Id == id);
 
             if (completedTask != null)
                 //выполню её
@@ -190,7 +203,6 @@ namespace NailBot
 
             Init.botClient.SendMessage(chat, $"Задача {completedTask.Name} выполнена.\n");
         }
-
 
         //метод проверки корректного ввода команд /addtask и /removetask
         public (string, string, Guid) InputCheck(string input)  
@@ -209,10 +221,10 @@ namespace NailBot
                 else if (input.StartsWith("/removetask ") || input.StartsWith("/completetask "))
                 {
                     //верну данные кортежем
-                    (string command, string inputText, Guid taskGuid) inputData = Validate.ValidateTask(input, cutInput, taskGuid, tasksList);
+                    (string command, Guid taskGuid) inputData = Validate.ValidateTask(input, taskGuid, TasksList);
 
                     input = inputData.command;
-                    cutInput = inputData.inputText;
+                    //cutInput = inputData.inputText;
                     taskGuid = inputData.taskGuid;
                 }
                 else
@@ -224,7 +236,7 @@ namespace NailBot
         //проверка дубликатов
         void CheckDuplicate(string newTask)
         {
-            foreach (var item in tasksList)
+            foreach (var item in TasksList)
             {
                 if (item.Name == newTask)
                     throw new DuplicateTaskException(newTask);
@@ -248,130 +260,6 @@ namespace NailBot
 
             return maxTaskLenght;
         }
-
-    
-
-        //метод обработки команд
-        public void CommandsHandle(IUserService _userService, Update update)
-        {
-            //получаю текущего юзера
-            var currentUser = _userService.GetUser(update.Message.From.Id);
-
-            //тут запрашиваю начальные ограничения длины задачи и их количества
-            if (update.Message.Id == 1)
-            {
-                //передаю в newService созданный экземпляр Chat
-                Chat = update.Message.Chat;
-
-                MaxTaskAmount = CheckMaxAmount(Chat);
-
-                MaxTaskLenght = CheckMaxLength(Chat);
-
-                Init.botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
-
-                Commands.Start.CommandsRender(currentUser, update);
-
-                return;
-            }
-
-            string input = update.Message.Text;
-
-            Commands command;
-
-            //регулярка на реплейс циферного значения Enum
-            input = input.NumberReplacer();
-
-            //верну тут кортежем
-            (string inputCommand, string inputText, Guid taskGuid) inputs = InputCheck(input);
-
-            //реплейс слэша для приведения к Enum 
-            input = inputs.Item1.Replace("/", string.Empty);
-
-            if (currentUser == null)
-            {
-                if (input != "start" && input != "help" && input != "info" && input != "exit")
-                    input = "unregistered user command";
-            }
-
-            //приведение к типу Enum
-            if (Enum.TryParse<Commands>(input, true, out var result))
-                command = result;
-            else
-                command = default;
-
-
-            switch (command)
-            {
-                case Commands.Start:
-
-                    if (currentUser == null)
-                        //регаю нового юзера
-                        currentUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
-
-                    //рендерю список команд
-                    Commands.Start.CommandsRender(currentUser, update);
-                    break;
-
-                case Commands.Help:
-                    ShowHelp(currentUser);
-                    break;
-
-                case Commands.Info:
-                    ShowInfo();
-                    break;
-
-                case Commands.Addtask:
-                    //вызов метода добавления задачи
-                    Add(currentUser, inputs.Item2);
-                    break;
-
-                case Commands.Showtasks:
-                    //вызов метода рендера задач
-                    ShowTasks();
-                    break;
-
-                case Commands.Showalltasks:
-                    //вызов метода рендера задач
-                    ShowAllTasks();
-                    break;
-
-                case Commands.Removetask:
-                    //вызов метода удаления задачи
-                    Delete(inputs.Item3);
-                    break;
-
-                case Commands.Completetask:
-                    //вызов метода удаления задачи
-                    MarkCompleted(inputs.Item3);
-                    break;
-
-                case Commands.Exit:
-                    //Program.Main([input]);
-                    Console.WriteLine("Exit");
-                    break;
-                default:
-                    Init.botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                    Commands.Start.CommandsRender(currentUser, update);
-                    break;
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         //ДЛЯ ДАЛЬНЕЙШЕЙ РАБОТЫ
         public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId)

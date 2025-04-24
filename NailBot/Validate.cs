@@ -55,11 +55,10 @@ namespace NailBot
         }
 
         // метод валидации задачи
-        internal static (string, string, Guid) ValidateTask(string input, string cutInput, Guid taskGuid, List<ToDoItem> tasksList)
+        internal static (string, Guid) ValidateTask(string input, Guid taskGuid, List<ToDoItem> tasksList)
         {
             //сохраню исходный ввод пользака
             string startInput = input;
-
 
             if (input.StartsWith("/removetask "))
                 input = "/removetask";
@@ -69,19 +68,17 @@ namespace NailBot
             //перенес проверку на длину списка задач сюда
             if (tasksList.Count != 0)
             {
-                cutInput = startInput.Substring(input.Length);
-
-                bool success = int.TryParse(cutInput, out int taskNumber);
-
-                if (success && (taskNumber > 0 && taskNumber <= tasksList.Count))
-                {
-                    taskGuid = tasksList[taskNumber - 1].Id;
-                    return (input, cutInput, taskGuid);
-                }
-                else
+                //делаю проверку введенного Guid задачи
+                if (!Guid.TryParse(startInput.Substring(input.Length), out taskGuid))
                     throw new ArgumentException($"Введён некорректный номер задачи.\n");
+
+                if (tasksList.FirstOrDefault(x => x.Id == taskGuid) == null)
+                    throw new ArgumentException($"Введён некорректный номер задачи.\n");
+
+                return (input, taskGuid);
+
                 }
-            return (input, cutInput, taskGuid);
+            return (input, taskGuid);
         }
     }
 }

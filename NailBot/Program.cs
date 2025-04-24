@@ -12,17 +12,13 @@ namespace NailBot
             //переменная проверки выхода из программы
             bool isFinish = false;
 
-
-            if (args.Length != 0)
-                isFinish = true;
-
-            Init start = new Init();
+            Init StartBot = new Init();
 
             while (!isFinish)
             {
                 try
                 {
-                    start.Start();
+                    StartBot.Start();
                     isFinish = true;
                 }
                 catch (Exception ex)
