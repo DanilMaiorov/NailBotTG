@@ -13,11 +13,9 @@ namespace NailBot
     class ToDoService : IToDoService
     {
 
-        //ДОПИСАЛ ПОЛЯ В ИНТЕРФЕЙСЕ
+        //ДОПИСАЛ ПОЛЯ В ИНТЕРФЕЙСЕ И РЕАЛИЗОВАЛ ИХ
         //объявление списка задач в виде List
         public List<ToDoItem> TasksList { get ; set ; } = new List<ToDoItem>();
-
-
 
         //количество задач при запуске программы
         private int maxTaskAmount;
@@ -35,19 +33,12 @@ namespace NailBot
             set { maxTaskLenght = value; }
         }
 
-
-
-
         //создам экземляр чата, чтобы передавать в SendMessage
         private static Chat chat;
-
-
         public Chat Chat {
             get { return chat; }
             set { chat = value; }
         }
-
-        
 
         ////МЕТОДЫ КОМАНД
         ////метод команды Help
@@ -277,12 +268,3 @@ namespace NailBot
         }
     }
 }
-
-
-//Добавление команды /completetask
-//Добавить обработку новой команды /completetask. При обработке команды использовать метод IToDoService.MarkAsCompleted
-//Пример: / completetask 73c7940a - ca8c - 4327 - 8a15 - 9119bffd1d5e
-//Добавление команды /showalltasks
-//Добавить обработку новой команды /showalltasks. По ней выводить команды с любым State и добавить State в вывод
-//Пример: (Active)Имя задачи - 01.01.2025 00:00:00 - ffbfe448 - 4b39 - 4778 - 98aa - 1aed98f7eed8
-//Обновить /help

@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Text.RegularExpressions;
-using static NailBot.Extensions;
-using static NailBot.StartValues;
-using Otus.ToDoList.ConsoleBot;
+﻿using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
-using static System.Net.Mime.MediaTypeNames;
-using System.Xml.Serialization;
-using System.Xml.Linq;
 
 namespace NailBot
 {

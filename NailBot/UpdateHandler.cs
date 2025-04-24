@@ -42,6 +42,8 @@ namespace NailBot
                 _toDoService.MaxTaskLenght = toDoService.MaxTaskLenght;
                 _toDoService.TasksList = toDoService.TasksList;
 
+
+
                 //тут запрашиваю начальные ограничения длины задачи и их количества
                 if (update.Message.Id == 1)
                 {
@@ -83,7 +85,6 @@ namespace NailBot
                     command = result;
                 else
                     command = default;
-
 
                 switch (command)
                 {
@@ -137,9 +138,6 @@ namespace NailBot
                         Commands.Start.CommandsRender(currentUser, update);
                         break;
                 }
-
-
-
             }
             catch (ArgumentException ex)
             {
