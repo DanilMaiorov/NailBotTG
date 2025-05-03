@@ -1,0 +1,40 @@
+﻿using NailBot.Core.DataAccess;
+using NailBot.Core.Entities;
+using Otus.ToDoList.ConsoleBot.Types;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NailBot.Infrastructure.DataAccess
+{
+    internal class InMemoryUserRepository : IUserRepository
+    {
+        public List<ToDoUser> UsersList = new List<ToDoUser>();
+
+        public void Add(ToDoUser user)
+        {
+            Console.WriteLine($"{user.TelegramUserName} добавлен в UsersList");
+            UsersList.Add(user);
+        }
+
+        public ToDoUser? GetUserByTelegramUserId(long telegramUserId)
+        {
+            var user = UsersList.FirstOrDefault(x => x.TelegramUserId == telegramUserId);
+
+            if (user != null)
+                return user;
+
+            return null;
+        }
+
+
+
+        public ToDoUser? GetUser(Guid userId)
+        {
+            Console.WriteLine("InMemoryUserRepository : IUserRepository___GetUser");
+            throw new NotImplementedException();
+        }
+    }
+}
