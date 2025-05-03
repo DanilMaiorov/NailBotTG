@@ -5,6 +5,10 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
+using NailBot.TelegramBot;
+using NailBot.Core.Services;
+using NailBot.Core.DataAccess;
+using NailBot.Infrastructure.DataAccess;
 
 namespace NailBot
 {
@@ -15,9 +19,13 @@ namespace NailBot
             //создаю экземпляр бота
             var botClient = new ConsoleBotClient();
 
+            //экземпляры репозиториев
+            var userRepository = new InMemoryUserRepository();
+            var toDoRepository = new InMemoryToDoRepository();
+
             //объявляю переменную типа интефрейса IUserService _userService
-            var _userService = new UserService();
-            var _toDoService = new ToDoService();
+            var _userService = new UserService(userRepository);
+            var _toDoService = new ToDoService(toDoRepository);
 
             Init StartBot = new Init(botClient, _userService, _toDoService);
             
