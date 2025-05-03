@@ -11,6 +11,7 @@ namespace NailBot.Infrastructure.DataAccess
 {
     internal class InMemoryUserRepository : IUserRepository
     {
+        //хранилище пользаков
         public List<ToDoUser> UsersList = new List<ToDoUser>();
 
         public void Add(ToDoUser user)
@@ -28,8 +29,6 @@ namespace NailBot.Infrastructure.DataAccess
 
             return null;
         }
-
-
 
         public ToDoUser? GetUser(Guid userId)
         {

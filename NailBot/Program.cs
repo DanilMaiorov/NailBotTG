@@ -27,7 +27,9 @@ namespace NailBot
             var _userService = new UserService(userRepository);
             var _toDoService = new ToDoService(toDoRepository);
 
-            Init StartBot = new Init(botClient, _userService, _toDoService);
+            var _toDoReportService = new ToDoReportService(toDoRepository);
+
+            Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService);
             
             //переменная проверки выхода из программы
             bool isFinish = false;

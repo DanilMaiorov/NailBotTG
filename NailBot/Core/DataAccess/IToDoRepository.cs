@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NailBot.Core.DataAccess
 {
-    internal interface IToDoRepository
+    public interface IToDoRepository
     {
         IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId);
         //Возвращает ToDoItem для UserId со статусом Active

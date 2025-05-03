@@ -12,64 +12,52 @@ namespace NailBot.Infrastructure.DataAccess
 {
     internal class InMemoryToDoRepository : IToDoRepository
     {
-        public List<ToDoItem> ToDoList = new List<ToDoItem>();
 
-        //бот для сообщений
-        private ITelegramBotClient _botClient;
-        public ITelegramBotClient BotClient
-        {
-            get { return _botClient; }
-            set { _botClient = value; }
-        }
-        private static Chat chat;
-        public Chat Chat
-        {
-            get { return chat; }
-            set { chat = value; }
-        }
+        public List<ToDoItem> ToDoList = new List<ToDoItem>();
 
         public void Add(ToDoItem item)
         {
             ToDoList.Add(item);
         }
 
-        public int CountActive(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Delete(Guid id)
         {
             ToDoList.RemoveAll(x => x.Id == id);
         }
-
-        public bool ExistsByName(Guid userId, string name)
+        
+        public int CountActive(Guid userId)
         {
-            throw new NotImplementedException();
+            return GetActiveByUserId(userId).Count();
         }
-
-        public ToDoItem? Get(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-
 
         public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId)
         {
             return ToDoList
-                .Where(x => x.State == ToDoItemState.Active)
+                .Where(x => x.User.UserId == userId && x.State == ToDoItemState.Active)
                 .ToList()
                 .AsReadOnly();
         }
 
         public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId)
         {
-            return ToDoList;
+            return ToDoList
+                .Where(x => x.User.UserId == userId)
+                .ToList()
+                .AsReadOnly();
         }
 
 
 
+
+
+        public bool ExistsByName(Guid userId, string name)
+        {
+            throw new NotImplementedException();
+        }
+        public ToDoItem? Get(Guid id)
+        { 
+            throw new NotImplementedException();
+        }
         public void Update(ToDoItem item)
         {
             throw new NotImplementedException();

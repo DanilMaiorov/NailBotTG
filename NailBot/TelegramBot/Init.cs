@@ -13,13 +13,17 @@ namespace NailBot.TelegramBot
         private readonly IUserService _userService;
         private readonly IToDoService _toDoService;
 
-        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService)
+        private readonly IToDoReportService _toDoReportService;
+
+        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService, IToDoReportService toDoReportService)
         {
             _botClient = botClient;
             _userService = userService;
             _toDoService = toDoService;
 
-            _updateHandler = new UpdateHandler(userService, toDoService);
+            _toDoReportService = toDoReportService;
+
+            _updateHandler = new UpdateHandler(userService, toDoService, toDoReportService);
         }
 
         public void Start()

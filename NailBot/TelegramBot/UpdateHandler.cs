@@ -19,19 +19,21 @@ namespace NailBot.TelegramBot
         private readonly IUserService _userService;
         private readonly IToDoService _toDoService;
 
-        private readonly ToDoService toDoService;
+        private readonly IToDoReportService _toDoReportService;
 
+        private readonly ToDoService toDoService;
         private readonly UserService userService;
 
-        public UpdateHandler(IUserService iuserService, IToDoService itoDoService)
+        public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService)
         {
             _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
             _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
 
+            _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
+
             //явно приведу к типу
             toDoService = (ToDoService)itoDoService;
             userService = (UserService)iuserService;
-
         }
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
@@ -137,6 +139,8 @@ namespace NailBot.TelegramBot
                     case Commands.Report:
                         //вызов метода удаления задачи
                         Console.WriteLine("Report");
+                        var stats = _toDoReportService.GetUserStats(currentUser.UserId);
+                        botClient.SendMessage(update.Message.Chat, $"Статистика по задачам на {stats.generatedAt}. Всего: {stats.total}; Завершенных: {stats.completed}; Активных: {stats.active};");
                         break;
 
                     case Commands.Exit:

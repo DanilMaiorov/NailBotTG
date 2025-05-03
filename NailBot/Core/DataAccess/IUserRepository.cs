@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NailBot.Core.DataAccess
 {
-    internal interface IUserRepository
+    public interface IUserRepository
     {
         ToDoUser? GetUser(Guid userId);
         ToDoUser? GetUserByTelegramUserId(long telegramUserId);

@@ -21,18 +21,13 @@ namespace NailBot.Core.Services
             _toDoRepository = toDoRepository;
         }
 
-        //вспомогательный Guid UserId
+        //вспомогательный Guid UserId и IReadOnlyList<ToDoItem>
         private Guid userId;
         public Guid UserId
         {
             get { return userId; }
             set { userId = value; }
         }
-
-
-
-        //объявление списка задач в виде List
-        public List<ToDoItem> TasksList = new List<ToDoItem>();
 
         IReadOnlyList<ToDoItem> allTasks;
         IReadOnlyList<ToDoItem> activeTasks;
@@ -111,53 +106,50 @@ namespace NailBot.Core.Services
             _botClient.SendMessage(chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
         }
 
-        //////метод рендера списка активных задач 
-        /////добавлю параметр по умолчанию для команды showalltasks и буду передавать в него true
-        //public void ShowTasks(bool allTasks = false)
-        //{
-        //    if (TasksList.Count == 0)
-        //        _botClient.SendMessage(chat, $"Список задач пуст.\n");
-        //    else
-        //    {
-        //        int taskCounter = 0;
+        ////метод рендера списка задач 
+        ///добавлю параметр по умолчанию для команды showalltasks и буду передавать в него true
+        public void ShowTasks(Guid userId, bool isActive = false)
+        {
+            IReadOnlyList<ToDoItem> tasks;
 
-        //        if (!allTasks)
-        //        {
-        //            //проверяю есть ли активные задачи
-        //            var completedTasks = TasksList.Where(x => x.State == ToDoItemState.Active).ToList();
+            if (!isActive)
+                tasks = GetAllByUserId(userId);
+            else
+                tasks = GetActiveByUserId(userId);
 
-        //            if (completedTasks.Count > 0)
-        //            {
-        //                _botClient.SendMessage(chat, $"Список активных задач:");
-        //                foreach (ToDoItem task in TasksList)
-        //                {
-        //                    if (task.State != ToDoItemState.Active)
-        //                        continue;
+            if (tasks.Count == 0)
+            {
+                if (isActive)
+                    _botClient.SendMessage(chat, $"Список задач пуст.\n");
+                else
+                    _botClient.SendMessage(chat, $"Aктивных задач нет");
+            }
+            else
+            {
+                if (isActive)
+                {
+                    _botClient.SendMessage(chat, $"Список активных задач:");
+                    TasksRender(tasks);
+                }
+                else
+                {
+                    _botClient.SendMessage(chat, $"Список всех задач:");
+                    TasksRender(tasks);
+                }
+            }
+        }
 
-        //                    taskCounter++;
-        //                    _botClient.SendMessage(chat, $"{taskCounter}) {task.Name} - {task.CreatedAt} - {task.Id}");
-        //                }
-        //            }
-        //            else
-        //                _botClient.SendMessage(chat, $"Активных задач нет");
-        //        }
-        //        else
-        //        {
-        //            _botClient.SendMessage(chat, $"Список всех задач:");
-        //            foreach (ToDoItem task in TasksList)
-        //            {
-        //                taskCounter++;
-        //                _botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
-        //            }
-        //        }
-        //    }
-        //}
+        private void TasksRender(IReadOnlyList<ToDoItem> tasks)
+        {
+            int taskCounter = 0;
 
-        ////метод рендера всего списка задач
-        //public void ShowAllTasks()
-        //{
-        //    ShowTasks(true);
-        //}
+            foreach (ToDoItem task in tasks)
+            {
+                taskCounter++;
+                _botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
+            }
+        }
+
 
         // реализация метода интерфейса Add
         public ToDoItem Add(ToDoUser user, string name)
@@ -197,7 +189,7 @@ namespace NailBot.Core.Services
         {
             GetAllByUserId(UserId);
             //проверка на наличие переданной задачи
-            if (allTasks.Count == 0)
+            if (id == Guid.Empty)
             {
                 _botClient.SendMessage(chat, $"Ваш список задач пуст, удалять нечего.\n");
                 return;
@@ -209,7 +201,7 @@ namespace NailBot.Core.Services
             //удаляю задачу
             _toDoRepository.Delete(id);
 
-            _botClient.SendMessage(chat, $"Задача {removedProducts} удалена.\n");
+            _botClient.SendMessage(chat, $"Задача {removedProducts.Name} удалена.\n");
         }
 
         // реализация метода интерфейса MarkCompleted
@@ -278,48 +270,7 @@ namespace NailBot.Core.Services
 
         public void CheckMaxLength(Chat chat) => MaxTaskLenght = maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи", chat, _botClient);
 
-        ///добавлю параметр по умолчанию для команды showalltasks и буду передавать в него true
-        public void ShowTasks(Guid userId, bool isActive = false)
-        {
-            IReadOnlyList<ToDoItem> tasks;
 
-            if (!isActive)
-                tasks = GetAllByUserId(userId);
-            else
-                tasks = GetActiveByUserId(userId);
-
-            if (tasks.Count == 0)
-            {
-                if (isActive)
-                    _botClient.SendMessage(chat, $"Список задач пуст.\n");
-                else
-                    _botClient.SendMessage(chat, $"Aктивных задач нет");
-            }
-            else
-            {
-                if (isActive)
-                {
-                    _botClient.SendMessage(chat, $"Список активных задач:");
-                    TasksRender(tasks);
-                }
-                else
-                {
-                    _botClient.SendMessage(chat, $"Список всех задач:");
-                    TasksRender(tasks);
-                }
-            }
-        }
-
-        private void TasksRender(IReadOnlyList<ToDoItem> tasks)
-        {
-            int taskCounter = 0;
-
-            foreach (ToDoItem task in tasks)
-            {
-                taskCounter++;
-                _botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
-            }
-        }
 
 
         //ДЛЯ ДАЛЬНЕЙШЕЙ РАБОТЫ
