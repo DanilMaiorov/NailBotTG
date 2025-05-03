@@ -5,26 +5,26 @@ namespace NailBot
 {
     public class Init
     {
-        //создаю экземпляр бота
-        public static ConsoleBotClient botClient = new ConsoleBotClient();
-        public static ITelegramBotClient telegramBotClient = new ConsoleBotClient();
+        private readonly ITelegramBotClient _botClient;
 
-        //создаю экземпляр IUserService
-        public static IUserService iuserService = new UserService();
+        private readonly IUpdateHandler _updateHandler;
 
-        //создаю экземпляр IToDoService
-        public static IToDoService itoDoService = new ToDoService();
+        private readonly IUserService _userService;
+        private readonly IToDoService _toDoService;
 
-        //создаю экземпляр объекта хендлера
-        internal UpdateHandler handler = new UpdateHandler(iuserService, itoDoService);
+        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService)
+        {
+            _botClient = botClient;
+            _userService = userService;
+            _toDoService = toDoService;
 
-        //создаю экземпляр объекта апдейт
-        public Update update = new Update();
+            _updateHandler = new UpdateHandler(userService, toDoService);
+        }
 
         public void Start()
         {
             //запуск бота
-            botClient.StartReceiving(handler);
+            _botClient.StartReceiving(_updateHandler);
         }
 
         public static void Stop()

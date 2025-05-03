@@ -25,7 +25,7 @@ namespace NailBot
                 TelegramUserName = telegramUserName,
                 RegisteredAt = DateTime.Now
             };
-            
+
             return CurrentUser;
         }
 

@@ -1,6 +1,7 @@
 ﻿using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Channels;
 
 namespace NailBot
 {
@@ -11,38 +12,33 @@ namespace NailBot
 
     internal class UpdateHandler : IUpdateHandler
     {
-        //объявляю переменную типа интефрейса IUserService _userService
         private readonly IUserService _userService;
-
-        //объявляю переменную типа интефрейса IToDoService _toDoService
         private readonly IToDoService _toDoService;
 
-        // Получаем IUserService и IToDoService через конструктор
-        public UpdateHandler(IUserService userService, IToDoService toDoService)
+        private readonly ToDoService toDoService;
+
+        private readonly UserService userService;
+
+        public UpdateHandler(IUserService iuserService, IToDoService itoDoService)
         {
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _toDoService = toDoService ?? throw new ArgumentNullException(nameof(toDoService));
+            _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
+            _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
+
+            //явно приведу к типу
+            toDoService = (ToDoService)itoDoService;
+            userService = (UserService)iuserService;
         }
-
-        //создаю новый туДуСервис
-        ToDoService toDoService = new ToDoService();
-
-        //создаю новый юзерСервис
-        //UserService userService = new UserService();
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
+            Console.WriteLine(toDoService.Equals(_toDoService));
             try
             {
                 //получаю текущего юзера
                 var currentUser = _userService.GetUser(update.Message.From.Id);
 
-                //присвою так
-                _toDoService.MaxTaskAmount = toDoService.MaxTaskAmount;
-                _toDoService.MaxTaskLenght = toDoService.MaxTaskLenght;
-                _toDoService.TasksList = toDoService.TasksList;
-
-
+                //передаю бота
+                toDoService.BotClient = botClient;
 
                 //тут запрашиваю начальные ограничения длины задачи и их количества
                 if (update.Message.Id == 1)
@@ -50,13 +46,13 @@ namespace NailBot
                     //передаю в newService созданный экземпляр Chat
                     toDoService.Chat = update.Message.Chat;
 
-                    toDoService.MaxTaskAmount = toDoService.CheckMaxAmount(toDoService.Chat);
+                    toDoService.CheckMaxAmount(toDoService.Chat);
 
-                    toDoService.MaxTaskLenght = toDoService.CheckMaxLength(toDoService.Chat);
+                    toDoService.CheckMaxLength(toDoService.Chat);
 
-                    Init.botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
+                    botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
-                    Commands.Start.CommandsRender(currentUser, update);
+                    Commands.Start.CommandsRender(currentUser, update, botClient);
 
                     return;
                 }
@@ -94,7 +90,7 @@ namespace NailBot
                             currentUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
 
                         //рендерю список команд
-                        Commands.Start.CommandsRender(currentUser, update);
+                        Commands.Start.CommandsRender(currentUser, update, botClient);
                         break;
 
                     case Commands.Help:
@@ -134,8 +130,8 @@ namespace NailBot
                         Console.WriteLine("Exit");
                         break;
                     default:
-                        Init.botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Commands.Start.CommandsRender(currentUser, update);
+                        botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
+                        Commands.Start.CommandsRender(currentUser, update, botClient);
                         break;
                 }
             }

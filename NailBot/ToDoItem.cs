@@ -20,17 +20,3 @@ namespace NailBot
         public DateTime? StateChangedAt { get; set; }
     }
 }
-
-
-//Добавление класса ToDoItem
-
-
-//Добавить класс ToDoItem
-//Свойства
-//Guid Id
-//User User
-//string Name
-//DateTime CreatedAt
-//ToDoItemState State
-//DateTime? StateChangedAt - обновляется при изменении State
-//Добавить использование класса ToDoItem вместо хранения только имени задачи
