@@ -107,6 +107,8 @@ namespace NailBot.TelegramBot
                         break;
 
                     case Commands.Info:
+
+                        _toDoService.Find(currentUser, "asd");
                         toDoService.ShowInfo();
                         break;
 

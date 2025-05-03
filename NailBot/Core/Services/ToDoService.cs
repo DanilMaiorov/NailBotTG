@@ -10,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace NailBot.Core.Services
 {
@@ -32,11 +33,7 @@ namespace NailBot.Core.Services
         IReadOnlyList<ToDoItem> allTasks;
         IReadOnlyList<ToDoItem> activeTasks;
 
-
-
-
-
-
+        IReadOnlyList<ToDoItem> findedTasks;
 
 
 
@@ -71,6 +68,13 @@ namespace NailBot.Core.Services
             get { return _botClient; }
             set { _botClient = value; }
         }
+
+        //Возвращает IReadOnlyList<ToDoItem> для UserId
+        public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId) => allTasks = _toDoRepository.GetAllByUserId(userId);
+        //Возвращает IReadOnlyList<ToDoItem> для UserId со статусом Active
+        public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId) => activeTasks = _toDoRepository.GetActiveByUserId(userId);
+        
+
 
         ////МЕТОДЫ КОМАНД
         ////метод команды Help
@@ -112,7 +116,7 @@ namespace NailBot.Core.Services
         {
             IReadOnlyList<ToDoItem> tasks;
 
-            if (!isActive)
+            if (isActive)
                 tasks = GetAllByUserId(userId);
             else
                 tasks = GetActiveByUserId(userId);
@@ -129,17 +133,17 @@ namespace NailBot.Core.Services
                 if (isActive)
                 {
                     _botClient.SendMessage(chat, $"Список активных задач:");
-                    TasksRender(tasks);
+                    TasksListRender(tasks);
                 }
                 else
                 {
                     _botClient.SendMessage(chat, $"Список всех задач:");
-                    TasksRender(tasks);
+                    TasksListRender(tasks);
                 }
             }
         }
 
-        private void TasksRender(IReadOnlyList<ToDoItem> tasks)
+        private void TasksListRender(IReadOnlyList<ToDoItem> tasks)
         {
             int taskCounter = 0;
 
@@ -149,7 +153,6 @@ namespace NailBot.Core.Services
                 _botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
             }
         }
-
 
         // реализация метода интерфейса Add
         public ToDoItem Add(ToDoUser user, string name)
@@ -273,15 +276,26 @@ namespace NailBot.Core.Services
 
 
 
-        //ДЛЯ ДАЛЬНЕЙШЕЙ РАБОТЫ
-        public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId) {
-            return allTasks = _toDoRepository.GetAllByUserId(userId);
-         }
-            
-        //Возвращает ToDoItem для UserId со статусом Active
-        public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId)
+
+
+        public IReadOnlyList<ToDoItem> Find(ToDoUser user, string namePrefix)
         {
-            return activeTasks = _toDoRepository.GetActiveByUserId(userId);
+            if (allTasks.Count == 0)
+            {
+                _botClient.SendMessage(chat, $"Ваш список задач пуст, искать нечего.\n");
+                return findedTasks;
+            }
+
+            bool isContain = _toDoRepository.ExistsByName(user.UserId, namePrefix);
+
+            if (!isContain)
+            {
+                return findedTasks;
+            }
+
+            
+
+            return findedTasks = _toDoRepository.Find(user.UserId, item => item.Name.Contains(namePrefix));
         }
-}
     }
+}

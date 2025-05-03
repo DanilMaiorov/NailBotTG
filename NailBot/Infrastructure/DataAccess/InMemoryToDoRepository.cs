@@ -46,14 +46,29 @@ namespace NailBot.Infrastructure.DataAccess
                 .AsReadOnly();
         }
 
+        //Метод должен возвращать все задачи пользователя, которые удовлетворяют предикату.
+        public IReadOnlyList<ToDoItem> Find(Guid userId, Func<ToDoItem, bool> predicate)
+        {
+
+            foreach (var item in ToDoList)
+            {
+                
+            }
 
 
-
+            return ToDoList
+                .Where(x => x.User.UserId == userId)
+                .Where(predicate)
+                .ToList();
+        }
 
         public bool ExistsByName(Guid userId, string name)
         {
-            throw new NotImplementedException();
+            return ToDoList
+                .Where(x => x.User.UserId == userId)
+                .Any(x => x.Name.StartsWith(name)); 
         }
+
         public ToDoItem? Get(Guid id)
         { 
             throw new NotImplementedException();
@@ -62,5 +77,7 @@ namespace NailBot.Infrastructure.DataAccess
         {
             throw new NotImplementedException();
         }
+
+
     }
 }
