@@ -46,7 +46,6 @@ namespace NailBot
             return str;
         }
 
-
         //метод присваивания значений длин
         public static int GetStartValues(this int value, string str, Chat chat, ITelegramBotClient botClient)
         {
@@ -54,11 +53,9 @@ namespace NailBot
             {
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
                 botClient.SendMessage(chat, str);
-                return value = Validate.ParseAndValidateInt(Console.ReadLine(), 1, 100);
+                return value = Validate.ParseAndValidateInt(Console.ReadLine());
             }
             return value;
         }
-
-
     }
 }
