@@ -42,12 +42,16 @@ namespace NailBot.Core.Services
 
         public ToDoUser? GetUser(long telegramUserId)
         {
-            CurrentUser = _userRepository.GetUserByTelegramUserId(telegramUserId);
-
-            if (CurrentUser == null)
+            if (_userRepository.GetUserByTelegramUserId(telegramUserId) == null)
                 return null;
+
+            CurrentUser = _userRepository.GetUser(CurrentUser.UserId);
 
             return currentUser;
         }
+
+        
+
+        
     }
 }

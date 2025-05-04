@@ -11,7 +11,7 @@ namespace NailBot.TelegramBot
 {
     public enum Commands
     {
-        Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Completetask, Report, Exit
+        Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Find, Completetask, Report, Exit
     }
 
     internal class UpdateHandler : IUpdateHandler
@@ -107,8 +107,6 @@ namespace NailBot.TelegramBot
                         break;
 
                     case Commands.Info:
-
-                        _toDoService.Find(currentUser, "asd");
                         toDoService.ShowInfo();
                         break;
 
@@ -136,6 +134,11 @@ namespace NailBot.TelegramBot
                     case Commands.Completetask:
                         //вызов метода удаления задачи
                         _toDoService.MarkCompleted(inputs.taskGuid);
+                        break;
+
+                    case Commands.Find:
+                        //вызов метода удаления задачи
+                        _toDoService.Find(currentUser, inputs.inputText);
                         break;
 
                     case Commands.Report:

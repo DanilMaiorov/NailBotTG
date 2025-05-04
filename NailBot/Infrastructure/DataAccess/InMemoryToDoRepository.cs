@@ -12,7 +12,6 @@ namespace NailBot.Infrastructure.DataAccess
 {
     internal class InMemoryToDoRepository : IToDoRepository
     {
-
         public List<ToDoItem> ToDoList = new List<ToDoItem>();
 
         public void Add(ToDoItem item)
@@ -49,13 +48,6 @@ namespace NailBot.Infrastructure.DataAccess
         //Метод должен возвращать все задачи пользователя, которые удовлетворяют предикату.
         public IReadOnlyList<ToDoItem> Find(Guid userId, Func<ToDoItem, bool> predicate)
         {
-
-            foreach (var item in ToDoList)
-            {
-                
-            }
-
-
             return ToDoList
                 .Where(x => x.User.UserId == userId)
                 .Where(predicate)
@@ -64,10 +56,16 @@ namespace NailBot.Infrastructure.DataAccess
 
         public bool ExistsByName(Guid userId, string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+
             return ToDoList
                 .Where(x => x.User.UserId == userId)
                 .Any(x => x.Name.StartsWith(name)); 
         }
+
+
+
 
         public ToDoItem? Get(Guid id)
         { 
@@ -77,7 +75,5 @@ namespace NailBot.Infrastructure.DataAccess
         {
             throw new NotImplementedException();
         }
-
-
     }
 }
