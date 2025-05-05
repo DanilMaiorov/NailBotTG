@@ -3,15 +3,24 @@ using System;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
+using Otus.ToDoList.ConsoleBot;
+using Otus.ToDoList.ConsoleBot.Types;
+
 namespace NailBot
 {
     internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            //здороваемся только 1 раз при запуске бота
-            Console.WriteLine($"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
+            //создаю экземпляр бота
+            var botClient = new ConsoleBotClient();
 
+            //объявляю переменную типа интефрейса IUserService _userService
+            var _userService = new UserService();
+            var _toDoService = new ToDoService();
+
+            Init StartBot = new Init(botClient, _userService, _toDoService);
+            
             //переменная проверки выхода из программы
             bool isFinish = false;
 
@@ -19,24 +28,8 @@ namespace NailBot
             {
                 try
                 {
-                    Init.Start(Init.maxTaskAmount, Init.maxTaskLenght);
+                    StartBot.Start();
                     isFinish = true;
-                }
-                catch (ArgumentException ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-                catch (TaskCountLimitException ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-                catch (TaskLengthLimitException ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-                catch (DuplicateTaskException ex)
-                {
-                    Console.WriteLine(ex.Message);
                 }
                 catch (Exception ex)
                 {
@@ -49,6 +42,7 @@ namespace NailBot
                     }
                 }
             }
+            Init.Stop();
         }
     }
 }
