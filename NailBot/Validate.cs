@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Otus.ToDoList.ConsoleBot.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,41 +12,21 @@ namespace NailBot
     public static class Validate
     {
         //метод валидации и парсинга числа
-        internal static int ParseAndValidateInt(string? str, int min, int max)
+        internal static int ParseAndValidateInt(string? str)
         {
             //выбрасываю ошибки и отображаю их во внешнем catch в Main как InnerException
 
             if (string.IsNullOrWhiteSpace(str))
                 throw new ArgumentException("Введена строка из пробелов или пустая строка");
 
-            bool parsingRelust = int.TryParse(str, out int limit);
+            bool parsingRelust = int.TryParse(str, out int res);
 
             if (parsingRelust)
-                if (limit > 0 && limit < 100)
-                    return limit;
+                if (res > 0 && res < 100)
+                    return res;
 
             throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
 
-            //тут я написал ещё 1 try catch чтобы в Main можно было прокидывать просто через throw с полным StackTrace и во внешнем catch обращаться к InnerException
-
-            //try
-            //{
-            //    if (string.IsNullOrWhiteSpace(str))
-            //        throw new ArgumentException("Введена строка из пробелов или пустая строка");
-
-            //    bool parsingRelust = int.TryParse(str, out int limit);
-
-            //    if (parsingRelust)
-            //    {
-            //        if (limit > 1 && limit < 100)
-            //            return limit;
-            //    }
-            //    throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
-            //}
-            //catch (ArgumentException ex)
-            //{
-            //    throw new ArgumentException("Произошла непредвиденная ошибка", ex);
-            //}
         }
 
         //метод валидации строки
@@ -71,6 +52,33 @@ namespace NailBot
                 throw new TaskLengthLimitException(resultStr, strLength);
             }
             throw new ArgumentException("Введена строка из пробелов или пустая строка");
+        }
+
+        // метод валидации задачи
+        internal static (string, Guid) ValidateTask(string input, Guid taskGuid, List<ToDoItem> tasksList)
+        {
+            //сохраню исходный ввод пользака
+            string startInput = input;
+
+            if (input.StartsWith("/removetask "))
+                input = "/removetask";
+            else
+                input = "/completetask";
+
+            //перенес проверку на длину списка задач сюда
+            if (tasksList.Count != 0)
+            {
+                //делаю проверку введенного Guid задачи
+                if (!Guid.TryParse(startInput.Substring(input.Length), out taskGuid))
+                    throw new ArgumentException($"Введён некорректный номер задачи.\n");
+
+                if (tasksList.FirstOrDefault(x => x.Id == taskGuid) == null)
+                    throw new ArgumentException($"Введён некорректный номер задачи.\n");
+
+                return (input, taskGuid);
+
+                }
+            return (input, taskGuid);
         }
     }
 }
