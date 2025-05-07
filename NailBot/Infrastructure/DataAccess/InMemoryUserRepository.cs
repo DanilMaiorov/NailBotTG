@@ -30,10 +30,6 @@ namespace NailBot.Infrastructure.DataAccess
             return null;
         }
 
-        public ToDoUser? GetUser(Guid userId)
-        {
-            Console.WriteLine("InMemoryUserRepository : IUserRepository___GetUser");
-            throw new NotImplementedException();
-        }
+        public ToDoUser? GetUser(Guid userId) => UsersList.FirstOrDefault(x => x.UserId == userId);
     }
 }

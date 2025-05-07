@@ -12,7 +12,7 @@ using NailBot.Infrastructure.DataAccess;
 
 namespace NailBot
 {
-    internal class Program
+    internal class Program//ЧИСТОВИК
     {
         public static void Main(string[] args)
         {
