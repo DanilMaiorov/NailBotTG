@@ -50,13 +50,14 @@ namespace NailBot.Infrastructure.DataAccess
         public bool ExistsByName(Guid userId, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
+            {
                 return false;
+            }
 
             return ToDoList
                 .Where(x => x.User.UserId == userId)
-                .Any(x => x.Name.StartsWith(name)); 
+                .Any(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase)); 
         }
-
 
         public ToDoItem? Get(Guid id)
         {
@@ -65,11 +66,11 @@ namespace NailBot.Infrastructure.DataAccess
                 .FirstOrDefault(x => x.Id == id);
         }
 
-
-
         public void Update(ToDoItem item)
         {
-            throw new NotImplementedException();
+            item.State = ToDoItemState.Completed;
+
+            item.StateChangedAt = DateTime.Now;
         }
     }
 }

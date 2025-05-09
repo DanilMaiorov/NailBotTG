@@ -10,17 +10,10 @@ namespace NailBot.Core.Services
         {
             _userRepository = userRepository;
         }
-   
-        private ToDoUser currentUser;
-        public ToDoUser CurrentUser
-        {
-            get { return currentUser; }
-            set { currentUser = value; }
-        }
 
         public ToDoUser RegisterUser(long telegramUserId, string telegramUserName)
         {
-            CurrentUser = new ToDoUser
+            var newUser = new ToDoUser
             {
                 UserId = Guid.NewGuid(),
                 TelegramUserId = telegramUserId,
@@ -29,25 +22,21 @@ namespace NailBot.Core.Services
             };
 
             //добавлю юзера в репозиторий
-            _userRepository.Add(CurrentUser);
+            _userRepository.Add(newUser);
 
-            return CurrentUser;
+            return newUser;
         }
 
         public ToDoUser? GetUser(long telegramUserId)
         {
+            var user = _userRepository.GetUserByTelegramUserId(telegramUserId);
 
+            if (user != null)
+            {
+                return _userRepository.GetUser(user.UserId);
+            }
 
-            if (_userRepository.GetUserByTelegramUserId(telegramUserId) == null)
-                return null;
-
-            CurrentUser = _userRepository.GetUser(CurrentUser.UserId);
-
-            return currentUser;
+            return null;
         }
-
-        
-
-        
     }
 }

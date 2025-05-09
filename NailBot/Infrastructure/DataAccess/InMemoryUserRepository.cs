@@ -10,7 +10,6 @@ namespace NailBot.Infrastructure.DataAccess
 
         public void Add(ToDoUser user)
         {
-            Console.WriteLine($"{user.TelegramUserName} добавлен в UsersList");
             UsersList.Add(user);
         }
 
@@ -19,11 +18,17 @@ namespace NailBot.Infrastructure.DataAccess
             var user = UsersList.FirstOrDefault(x => x.TelegramUserId == telegramUserId);
 
             if (user != null)
+            {
                 return user;
+            }
 
             return null;
         }
 
-        public ToDoUser? GetUser(Guid userId) => UsersList.FirstOrDefault(x => x.UserId == userId);
+        public ToDoUser? GetUser(Guid userId)
+        {
+            return UsersList.FirstOrDefault(x => x.UserId == userId);
+        }
+            
     }
 }

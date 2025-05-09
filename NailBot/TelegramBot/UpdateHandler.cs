@@ -35,6 +35,8 @@ namespace NailBot.TelegramBot
 
         public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
+            //получаю экземпляр чата
+            var currentChat = toDoService.GetChat(update);
             try
             {
                 //получаю текущего юзера
@@ -43,12 +45,9 @@ namespace NailBot.TelegramBot
                 //тут запрашиваю начальные ограничения длины задачи и их количества
                 if (update.Message.Id == 1)
                 {
-                    //передаю в newService созданный экземпляр Chat
-                    toDoService.Chat = update.Message.Chat;
+                    botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
-                    botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
-
-                    Commands.Start.CommandsRender(currentUser, update, botClient);
+                    Commands.Start.CommandsRender(currentUser, currentChat, botClient);
 
                     return;
                 }
@@ -69,15 +68,21 @@ namespace NailBot.TelegramBot
                 if (currentUser == null)
                 {
                     if (input != "start" && input != "help" && input != "info" && input != "exit")
+                    {
                         input = "unregistered user command";
+                    }
                 }
 
                 //приведение к типу Enum
                 if (Enum.TryParse<Commands>(input, true, out var result))
+                {
                     command = result;
+                }
                 else
+                {
                     command = default;
-
+                }
+                    
                 switch (command)
                 {
                     case Commands.Start:
@@ -86,7 +91,7 @@ namespace NailBot.TelegramBot
                             currentUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
 
                         //рендерю список команд
-                        Commands.Start.CommandsRender(currentUser, update, botClient);
+                        Commands.Start.CommandsRender(currentUser, currentChat, botClient);
                         break;
 
                     case Commands.Help:
@@ -104,7 +109,6 @@ namespace NailBot.TelegramBot
 
                     case Commands.Showtasks:
                         //вызов метода рендера задач
-                        //_toDoService.GetAllByUserId(currentUser.UserId);
                         toDoService.ShowTasks(currentUser.UserId);
                         break;
 
@@ -119,59 +123,58 @@ namespace NailBot.TelegramBot
                         break;
 
                     case Commands.Completetask:
-                        //вызов метода удаления задачи
+                        //вызов метода выполнения задачи
                         _toDoService.MarkCompleted(inputs.taskGuid);
                         break;
 
                     case Commands.Find:
-                        //вызов метода удаления задачи
+                        //вызов метода поиска задачи
                         _toDoService.Find(currentUser, inputs.inputText);
                         break;
 
                     case Commands.Report:
-                        //вызов метода удаления задачи
-                        Console.WriteLine("Report");
+                        //вызов метода печати отчета
                         var stats = _toDoReportService.GetUserStats(currentUser.UserId);
-                        botClient.SendMessage(update.Message.Chat, $"Статистика по задачам на {stats.generatedAt}. Всего: {stats.total}; Завершенных: {stats.completed}; Активных: {stats.active};");
+                        botClient.SendMessage(currentChat, $"Статистика по задачам на {stats.generatedAt}. Всего: {stats.total}; Завершенных: {stats.completed}; Активных: {stats.active};");
                         break;
 
                     case Commands.Exit:
                         Console.WriteLine("Exit");
                         break;
                     default:
-                        botClient.SendMessage(update.Message.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                        Commands.Start.CommandsRender(currentUser, update, botClient);
+                        botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
+                        Commands.Start.CommandsRender(currentUser, currentChat, botClient);
                         break;
                 }
             }
             catch (ArgumentException ex)
             {
-                botClient.SendMessage(update.Message.Chat, ex.Message);
+                botClient.SendMessage(currentChat, ex.Message);
 
                 if (update.Message.Id == 1)
                     HandleUpdateAsync(botClient, update);
             }
             catch (TaskCountLimitException ex)
             {
-                botClient.SendMessage(update.Message.Chat, ex.Message);
+                botClient.SendMessage(currentChat, ex.Message);
 
                 if (update.Message.Id == 1)
                     HandleUpdateAsync(botClient, update);
             }
             catch (TaskLengthLimitException ex)
             {
-                botClient.SendMessage(update.Message.Chat, ex.Message);
+                botClient.SendMessage(currentChat, ex.Message);
 
                 if (update.Message.Id == 1)
                     HandleUpdateAsync(botClient, update);
             }
             catch (DuplicateTaskException ex)
             {
-                botClient.SendMessage(update.Message.Chat, ex.Message);
+                botClient.SendMessage(currentChat, ex.Message);
             }
             catch (Exception ex)
             {
-                botClient.SendMessage(update.Message.Chat, $"Произошла непредвиденная ошибка");
+                botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка");
                 throw;
             }
             return;
