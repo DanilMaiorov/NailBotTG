@@ -1,19 +1,11 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
-using Otus.ToDoList.ConsoleBot.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NailBot.Core.Services
 {
     public class ToDoReportService : IToDoReportService
     {
         private readonly IToDoRepository _toDoRepository;
-        public ToDoReportService() { }
-
         public ToDoReportService(IToDoRepository toDoRepository) 
         {
             _toDoRepository = toDoRepository;
@@ -23,7 +15,7 @@ namespace NailBot.Core.Services
         {
             var tasks = _toDoRepository.GetAllByUserId(userId);
             int total = tasks.Count();
-            int active = _toDoRepository.CountActive(userId);
+            int active = tasks.Count(x => x.User.UserId == userId && x.State == ToDoItemState.Active);
             int completed = total - active;
 
             return (total, completed, active, DateTime.Now);

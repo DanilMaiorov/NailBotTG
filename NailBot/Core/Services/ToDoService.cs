@@ -2,90 +2,60 @@
 using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
 using NailBot.Helpers;
+using NailBot.TelegramBot;
 using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace NailBot.Core.Services
 {
+    //заведу делегат
+    //delegate IReadOnlyList<ToDoItem> ListGetter(Guid userId);
+
     class ToDoService : IToDoService
     {
         private readonly IToDoRepository _toDoRepository;
-        public ToDoService(IToDoRepository toDoRepository)
+
+        private readonly ITelegramBotClient _botClient;
+
+        public ToDoService(IToDoRepository toDoRepository, ITelegramBotClient botClient)
         {
             _toDoRepository = toDoRepository;
-        }
+            _botClient = botClient;
 
-        //вспомогательный Guid UserId и IReadOnlyList<ToDoItem>
-        private Guid userId;
-        public Guid UserId
-        {
-            get { return userId; }
-            set { userId = value; }
+            maxTaskAmount = CheckMaxAmount();
+            maxTaskLenght = CheckMaxLength();
         }
-        //буду прихранивать списки
-        IReadOnlyList<ToDoItem> allTasks = new List<ToDoItem>();
-        IReadOnlyList<ToDoItem> activeTasks = new List<ToDoItem>();
-        IReadOnlyList<ToDoItem> findedTasks = new List<ToDoItem>();
-
 
         //количество задач при запуске программы
         private int maxTaskAmount;
-        public int MaxTaskAmount
-        {
-            get { return maxTaskAmount; }
-            set { maxTaskAmount = value; }
-        }
 
         //длина задачи при запуске программы
         private int maxTaskLenght;
-        public int MaxTaskLenght
-        {
-            get { return maxTaskLenght; }
-            set { maxTaskLenght = value; }
-        }
+
 
         //создам экземляр чата, чтобы передавать в SendMessage
-        private static Chat chat;
-        public Chat Chat
-        {
-            get { return chat; }
-            set { chat = value; }
-        }
+        public Chat Chat { get; set; }        
 
-        //бот для сообщений
-        private ITelegramBotClient _botClient;
-        public ITelegramBotClient BotClient
-        {
-            get { return _botClient; }
-            set { _botClient = value; }
-        }
 
         //Возвращает IReadOnlyList<ToDoItem> для UserId
-        public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId) => allTasks = _toDoRepository.GetAllByUserId(userId);
+        public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId) => _toDoRepository.GetAllByUserId(userId);
         //Возвращает IReadOnlyList<ToDoItem> для UserId со статусом Active
-        public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId) => activeTasks = _toDoRepository.GetActiveByUserId(userId);
+        public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId) => _toDoRepository.GetActiveByUserId(userId);
 
         // реализация метода интерфейса Add
         public ToDoItem Add(ToDoUser user, string name)
         {
-            GetAllByUserId(user.UserId);
+            var tasks = GetAllByUserId(user.UserId);
 
             //проверяю длину листа и выбрасываю исключение если больше лимита
-            if (allTasks.Count >= maxTaskAmount)
+            if (tasks.Count >= maxTaskAmount)
                 throw new TaskCountLimitException(maxTaskAmount);
 
             //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
             string newTask = Validate.ValidateString(name, maxTaskLenght);
 
             //проверяю дубликаты введённой задачи
-            CheckDuplicate(newTask);
+            CheckDuplicate(newTask, user);
 
             ToDoItem newToDoItem = new ToDoItem
             {
@@ -99,7 +69,7 @@ namespace NailBot.Core.Services
             //добавляю в репозиторий
             _toDoRepository.Add(newToDoItem);
 
-            _botClient.SendMessage(chat, $"Задача \"{newTask}\" добавлена в список задач.\n");
+            _botClient.SendMessage(Chat, $"Задача \"{newTask}\" добавлена в список задач.\n");
 
             //возвращаю новый объект задачи
             return newToDoItem;
@@ -108,11 +78,21 @@ namespace NailBot.Core.Services
         // реализация метода интерфейса Delete
         public void Delete(Guid id)
         {
-            GetAllByUserId(UserId);
+
+            var item = _toDoRepository.Get(id);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            var allTasks = GetAllByUserId(item.User.UserId);
+
+
             //проверка на наличие переданной задачи
             if (id == Guid.Empty)
             {
-                _botClient.SendMessage(chat, $"Ваш список задач пуст, удалять нечего.\n");
+                _botClient.SendMessage(Chat, $"Ваш список задач пуст, удалять нечего.\n");
                 return;
             }
 
@@ -122,18 +102,25 @@ namespace NailBot.Core.Services
             //удаляю задачу
             _toDoRepository.Delete(id);
 
-            _botClient.SendMessage(chat, $"Задача {removedProducts.Name} удалена.\n");
+            _botClient.SendMessage(Chat, $"Задача {removedProducts.Name} удалена.\n");
         }
 
         // реализация метода интерфейса MarkCompleted
         public void MarkCompleted(Guid id)
         {
-            GetAllByUserId(UserId);
+            var item = _toDoRepository.Get(id);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            var allTasks = GetAllByUserId(item.User.UserId);
 
             //проверка на наличие переданной задачи
             if (id == Guid.Empty)
             {
-                _botClient.SendMessage(chat, $"Ваш список задач пуст, выполнять нечего.\n");
+                _botClient.SendMessage(Chat, $"Ваш список задач пуст, выполнять нечего.\n");
                 return;
             }
 
@@ -144,29 +131,31 @@ namespace NailBot.Core.Services
                 //выполню её
                 completedTask.State = ToDoItemState.Completed;
 
-            _botClient.SendMessage(chat, $"Задача {completedTask.Name} выполнена.\n");
+            _botClient.SendMessage(Chat, $"Задача {completedTask.Name} выполнена.\n");
         }
 
         // реализация метода интерфейса Find
         public IReadOnlyList<ToDoItem> Find(ToDoUser user, string namePrefix)
         {
-            if (allTasks.Count == 0)
+            var tasks = GetAllByUserId(user.UserId);
+
+            if (tasks.Count == 0)
             {
-                _botClient.SendMessage(chat, $"Ваш список задач пуст, искать нечего.\n");
-                return findedTasks;
+                _botClient.SendMessage(Chat, $"Ваш список задач пуст, искать нечего.\n");
+                return null;
             }
 
             bool isContain = _toDoRepository.ExistsByName(user.UserId, namePrefix);
 
             if (!isContain)
             {
-                _botClient.SendMessage(chat, $"Задач, начинающихся на {namePrefix} не найдено.\n");
-                return findedTasks;
+                _botClient.SendMessage(Chat, $"Задач, начинающихся на {namePrefix} не найдено.\n");
+                return null;
             }
 
-            findedTasks = _toDoRepository.Find(user.UserId, item => item.Name.Contains(namePrefix));
+            var findedTasks = _toDoRepository.Find(user.UserId, item => item.Name.Contains(namePrefix));
 
-            ShowTasks(UserId, false, findedTasks);
+            ShowTasks(user.UserId, false, findedTasks);
 
             return findedTasks;
         }
@@ -178,7 +167,7 @@ namespace NailBot.Core.Services
         {
             if (user == null)
             {
-                _botClient.SendMessage(chat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
+                _botClient.SendMessage(Chat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
                 $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
@@ -186,7 +175,7 @@ namespace NailBot.Core.Services
             }
             else
             {
-                _botClient.SendMessage(chat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
+                _botClient.SendMessage(Chat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
                 $"Введя команду \"/addtask\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
@@ -203,7 +192,7 @@ namespace NailBot.Core.Services
         public void ShowInfo()
         {
             DateTime releaseDate = new DateTime(2025, 02, 08);
-            _botClient.SendMessage(chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
+            _botClient.SendMessage(Chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
         }
 
         ////метод рендера списка задач 
@@ -216,7 +205,7 @@ namespace NailBot.Core.Services
             if (tasksList.Count == 0)
             {
                 string emptyMessage = isActive ? "Список задач пуст.\n" : "Aктивных задач нет";
-                _botClient.SendMessage(chat, emptyMessage);
+                _botClient.SendMessage(Chat, emptyMessage);
                 return;
             }
 
@@ -224,7 +213,7 @@ namespace NailBot.Core.Services
             string message = tasks != null ? "Список найденных задач:"
                 : (isActive ? "Список всех задач:" : "Список активных задач:");
 
-            _botClient.SendMessage(chat, message);
+            _botClient.SendMessage(Chat, message);
             TasksListRender(tasksList);
         }
         #endregion
@@ -233,8 +222,11 @@ namespace NailBot.Core.Services
         #region Вспомогательные методы
         //ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
         //метод проверки корректного ввода команд /addtask и /removetask
-        public (string, string, Guid) InputCheck(string input)
+        public (string, string, Guid) InputCheck(string input, ToDoUser currentUser)
         {
+            
+
+
             string cutInput = "";
 
             Guid taskGuid = Guid.Empty;
@@ -253,6 +245,7 @@ namespace NailBot.Core.Services
                 }
                 else if (input.StartsWith("/removetask ") || input.StartsWith("/completetask "))
                 {
+                    var allTasks = GetAllByUserId(currentUser.UserId);
                     //верну данные кортежем
                     (string command, Guid taskGuid) inputData = Validate.ValidateTask(input, taskGuid, allTasks);
 
@@ -266,20 +259,27 @@ namespace NailBot.Core.Services
         }
 
         //проверка дубликатов
-        void CheckDuplicate(string newTask)
+        void CheckDuplicate(string newTask, ToDoUser currentUser)
         {
-            foreach (var item in allTasks)
+            if (GetAllByUserId(currentUser.UserId).Any(item => item.Name == newTask))
             {
-                if (item.Name == newTask)
-                    throw new DuplicateTaskException(newTask);
+                throw new DuplicateTaskException(newTask);
             }
+                
         }
 
         //валидация начальных значений задач
-        public void CheckMaxAmount(Chat chat) => MaxTaskAmount = maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач", chat, _botClient);
+        public int CheckMaxAmount()
+        {
+            return maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач");
+        } 
         
         //валидация начальных значений задач
-        public void CheckMaxLength(Chat chat) => MaxTaskLenght = maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи", chat, _botClient);
+        public int CheckMaxLength()
+        {
+            return maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи");
+        }
+            
         
         //рендер списк задач
         private void TasksListRender(IReadOnlyList<ToDoItem> tasks)
@@ -289,7 +289,7 @@ namespace NailBot.Core.Services
             foreach (ToDoItem task in tasks)
             {
                 taskCounter++;
-                _botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
+                _botClient.SendMessage(Chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
             }
         }
         #endregion

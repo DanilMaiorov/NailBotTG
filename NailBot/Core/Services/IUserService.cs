@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NailBot.Core.Entities;
+﻿using NailBot.Core.Entities;
 
 namespace NailBot.Core.Services
 {

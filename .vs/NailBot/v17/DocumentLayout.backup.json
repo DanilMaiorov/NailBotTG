@@ -3,36 +3,48 @@
   "WorkspaceRootPath": "C:\\Users\\genzel\\Desktop\\Nail\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\infrastructure\\dataaccess\\inmemorytodorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\infrastructure\\dataaccess\\inmemorytodorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\infrastructure\\dataaccess\\inmemoryuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\infrastructure\\dataaccess\\inmemoryuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\core\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\core\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\core\\services\\todoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\core\\services\\todoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\telegrambot\\updatehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\telegrambot\\updatehandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\telegrambot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\telegrambot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\core\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\core\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\infrastructure\\dataaccess\\inmemorytodorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\infrastructure\\dataaccess\\inmemorytodorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\infrastructure\\dataaccess\\inmemoryuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\infrastructure\\dataaccess\\inmemoryuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\telegrambot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\telegrambot\\init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\helpers\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\helpers\\validate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\helpers\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\helpers\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\core\\services\\todoreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\core\\services\\todoreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\core\\services\\itodoreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\core\\services\\itodoreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|c:\\users\\genzel\\desktop\\nail\\nailbot\\core\\dataaccess\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A93DB3E2-38A2-488F-8F19-E759BED277E0}|NailBot\\NailBot.csproj|solutionrelative:nailbot\\core\\dataaccess\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -41,8 +53,8 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 942,
-          "SelectedChildIndex": 5,
+          "DockedWidth": 1162,
+          "SelectedChildIndex": 13,
           "Children": [
             {
               "$type": "Bookmark",
@@ -62,90 +74,133 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
+              "Title": "ToDoService.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\ToDoService.cs",
+              "RelativeDocumentMoniker": "NailBot\\Core\\Services\\ToDoService.cs",
+              "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\ToDoService.cs",
+              "RelativeToolTip": "NailBot\\Core\\Services\\ToDoService.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAIwCgAAABaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T18:31:32.563Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ToDoReportService.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\ToDoReportService.cs",
+              "RelativeDocumentMoniker": "NailBot\\Core\\Services\\ToDoReportService.cs",
+              "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\ToDoReportService.cs",
+              "RelativeToolTip": "NailBot\\Core\\Services\\ToDoReportService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T18:31:28.265Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IToDoReportService.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\IToDoReportService.cs",
+              "RelativeDocumentMoniker": "NailBot\\Core\\Services\\IToDoReportService.cs",
+              "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\IToDoReportService.cs",
+              "RelativeToolTip": "NailBot\\Core\\Services\\IToDoReportService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAQAAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T18:31:01.989Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\DataAccess\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "NailBot\\Core\\DataAccess\\IUserRepository.cs",
+              "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\DataAccess\\IUserRepository.cs",
+              "RelativeToolTip": "NailBot\\Core\\DataAccess\\IUserRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T18:30:14.852Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "UserService.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\UserService.cs",
               "RelativeDocumentMoniker": "NailBot\\Core\\Services\\UserService.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Core\\Services\\UserService.cs",
               "RelativeToolTip": "NailBot\\Core\\Services\\UserService.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAgwC0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABoAAAAAAAAAAAD4vy4AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T17:36:22.839Z"
+              "WhenOpened": "2025-05-05T17:36:22.839Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 8,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Program.cs",
               "RelativeDocumentMoniker": "NailBot\\Program.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Program.cs",
               "RelativeToolTip": "NailBot\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-05T17:34:15.277Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "UpdateHandler.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\TelegramBot\\UpdateHandler.cs",
               "RelativeDocumentMoniker": "NailBot\\TelegramBot\\UpdateHandler.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\TelegramBot\\UpdateHandler.cs",
               "RelativeToolTip": "NailBot\\TelegramBot\\UpdateHandler.cs",
-              "ViewState": "AgIAAJIAAAAAAAAAAADwv8AAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAWwK4AAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-05T17:34:01.388Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Init.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\TelegramBot\\Init.cs",
               "RelativeDocumentMoniker": "NailBot\\TelegramBot\\Init.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\TelegramBot\\Init.cs",
               "RelativeToolTip": "NailBot\\TelegramBot\\Init.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAqwB4AAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T17:33:57.273Z"
+              "WhenOpened": "2025-05-05T17:33:57.273Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "InMemoryUserRepository.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Infrastructure\\DataAccess\\InMemoryUserRepository.cs",
               "RelativeDocumentMoniker": "NailBot\\Infrastructure\\DataAccess\\InMemoryUserRepository.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Infrastructure\\DataAccess\\InMemoryUserRepository.cs",
               "RelativeToolTip": "NailBot\\Infrastructure\\DataAccess\\InMemoryUserRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T17:33:52.41Z"
+              "WhenOpened": "2025-05-05T17:33:52.41Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
               "Title": "InMemoryToDoRepository.cs",
               "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Infrastructure\\DataAccess\\InMemoryToDoRepository.cs",
               "RelativeDocumentMoniker": "NailBot\\Infrastructure\\DataAccess\\InMemoryToDoRepository.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Infrastructure\\DataAccess\\InMemoryToDoRepository.cs",
               "RelativeToolTip": "NailBot\\Infrastructure\\DataAccess\\InMemoryToDoRepository.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAQwE8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAowD0AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-05T17:33:47.653Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Extensions.cs",
-              "DocumentMoniker": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Helpers\\Extensions.cs",
-              "RelativeDocumentMoniker": "NailBot\\Helpers\\Extensions.cs",
-              "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Helpers\\Extensions.cs",
-              "RelativeToolTip": "NailBot\\Helpers\\Extensions.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAA9wD4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T17:32:09.687Z"
             },
             {
               "$type": "Document",
@@ -155,9 +210,10 @@
               "RelativeDocumentMoniker": "NailBot\\Helpers\\Validate.cs",
               "ToolTip": "C:\\Users\\genzel\\Desktop\\Nail\\NailBot\\Helpers\\Validate.cs",
               "RelativeToolTip": "NailBot\\Helpers\\Validate.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAwwFYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAADIAAAAAAAAAAAAIwEQAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T17:32:08.63Z"
+              "WhenOpened": "2025-05-05T17:32:08.63Z",
+              "EditorCaption": ""
             }
           ]
         }

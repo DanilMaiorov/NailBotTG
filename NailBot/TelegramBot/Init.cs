@@ -1,6 +1,5 @@
 ﻿using NailBot.Core.Services;
 using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
 
 namespace NailBot.TelegramBot
 {

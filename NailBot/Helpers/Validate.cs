@@ -16,8 +16,6 @@ namespace NailBot.Helpers
         //метод валидации и парсинга числа
         internal static int ParseAndValidateInt(string? str)
         {
-            //выбрасываю ошибки и отображаю их во внешнем catch в Main как InnerException
-
             if (string.IsNullOrWhiteSpace(str))
                 throw new ArgumentException("Введена строка из пробелов или пустая строка");
 
@@ -29,6 +27,17 @@ namespace NailBot.Helpers
 
             throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
 
+            ////выбрасываю ошибки и отображаю их во внешнем catch в Main как InnerException
+            //if (string.IsNullOrWhiteSpace(str))
+            //    throw new ArgumentException("Введена строка из пробелов или пустая строка");
+
+            //bool parsingRelust = int.TryParse(str, out int res);
+
+            //if (parsingRelust)
+            //    if (res > 0 && res < 100)
+            //        return res;
+
+            //throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
         }
 
         //метод валидации строки

@@ -1,11 +1,6 @@
 ﻿using Otus.ToDoList.ConsoleBot.Types;
 using Otus.ToDoList.ConsoleBot;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using NailBot.Core.Entities;
 
 namespace NailBot.Helpers
@@ -48,15 +43,62 @@ namespace NailBot.Helpers
         }
 
         //метод присваивания значений длин
-        public static int GetStartValues(this int value, string str, Chat chat, ITelegramBotClient botClient)
+        public static int GetStartValues(this int value, string message)
         {
             while (value == 0)
             {
                 //спрашиваем при запуске программы до тех пор пока не получим валидное значение
-                botClient.SendMessage(chat, str);
-                return value = Validate.ParseAndValidateInt(Console.ReadLine());
+                //Console.WriteLine(message);
+                //value = Validate.ParseAndValidateInt(Console.ReadLine(), out int result);
+                //return value = result;
+
+                while (true)
+                {
+                    try
+                    {
+                        Console.WriteLine(message);
+                        return value = Validate.ParseAndValidateInt(Console.ReadLine());
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+
+
+
+
+
             }
             return value;
         }
     }
 }
+
+//while (true)
+//{
+//    try
+//    {
+//        bool parsingRelust = int.TryParse(str, out int res);
+
+//        //выбрасываю ошибки и отображаю их во внешнем catch в Main как InnerException
+//        if (string.IsNullOrWhiteSpace(str))
+//            throw new ArgumentException("Введена строка из пробелов или пустая строка");
+
+//        if (parsingRelust)
+//        {
+//            if (res > 0 && res < 100)
+//            {
+//                result = res;
+//                break;
+//            }
+
+//        }
+//        throw new ArgumentException("Ошибка ввода, ожидаемый ввод: число от 1 до 100");
+//    }
+//    catch (ArgumentException ex)
+//    {
+//        Console.WriteLine(ex);
+//    }
+//}
+

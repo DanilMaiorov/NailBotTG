@@ -1,11 +1,8 @@
-﻿using NailBot.Core.Entities;
-using NailBot.Core.Exceptions;
+﻿using NailBot.Core.Exceptions;
 using NailBot.Core.Services;
 using NailBot.Helpers;
 using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Channels;
 
 namespace NailBot.TelegramBot
 {
@@ -41,23 +38,13 @@ namespace NailBot.TelegramBot
             try
             {
                 //получаю текущего юзера
-                var currentUser = _userService.GetUser(update.Message.From.Id);
-
-                if (currentUser != null)
-                    toDoService.UserId = currentUser.UserId;
-               
-                //передаю бота
-                toDoService.BotClient = botClient;
+                var currentUser = _userService.GetUser(update.Message.From.Id);           
 
                 //тут запрашиваю начальные ограничения длины задачи и их количества
                 if (update.Message.Id == 1)
                 {
                     //передаю в newService созданный экземпляр Chat
                     toDoService.Chat = update.Message.Chat;
-
-                    toDoService.CheckMaxAmount(toDoService.Chat);
-
-                    toDoService.CheckMaxLength(toDoService.Chat);
 
                     botClient.SendMessage(update.Message.Chat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
 
@@ -74,7 +61,7 @@ namespace NailBot.TelegramBot
                 input = input.NumberReplacer();
 
                 //верну тут кортежем
-                (string inputCommand, string inputText, Guid taskGuid) inputs = toDoService.InputCheck(input);
+                (string inputCommand, string inputText, Guid taskGuid) inputs = toDoService.InputCheck(input, currentUser);
 
                 //реплейс слэша для приведения к Enum 
                 input = inputs.inputCommand.Replace("/", string.Empty);

@@ -1,12 +1,5 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NailBot.Infrastructure.DataAccess
 {
@@ -65,12 +58,15 @@ namespace NailBot.Infrastructure.DataAccess
         }
 
 
-
-
         public ToDoItem? Get(Guid id)
-        { 
-            throw new NotImplementedException();
+        {
+            return ToDoList?
+                .Where(x => x != null)
+                .FirstOrDefault(x => x.Id == id);
         }
+
+
+
         public void Update(ToDoItem item)
         {
             throw new NotImplementedException();

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace NailBot.Core.Exceptions
+﻿namespace NailBot.Core.Exceptions
 {
     //исключение на дубликат задачи
     public class DuplicateTaskException : Exception

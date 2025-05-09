@@ -1,13 +1,6 @@
-﻿
-using System;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
+﻿using Otus.ToDoList.ConsoleBot;
 using NailBot.TelegramBot;
 using NailBot.Core.Services;
-using NailBot.Core.DataAccess;
 using NailBot.Infrastructure.DataAccess;
 
 namespace NailBot
@@ -25,9 +18,10 @@ namespace NailBot
 
             //объявляю переменную типа интефрейса IUserService _userService
             var _userService = new UserService(userRepository);
-            var _toDoService = new ToDoService(toDoRepository);
+            var _toDoService = new ToDoService(toDoRepository , botClient);
 
             var _toDoReportService = new ToDoReportService(toDoRepository);
+
 
             Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService);
             

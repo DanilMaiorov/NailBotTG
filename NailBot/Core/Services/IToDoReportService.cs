@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NailBot.Core.Services
+﻿namespace NailBot.Core.Services
 {
     public interface IToDoReportService
     {
