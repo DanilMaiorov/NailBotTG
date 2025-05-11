@@ -5,6 +5,7 @@ using NailBot.Helpers;
 using NailBot.TelegramBot;
 using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
+using System.Xml.Linq;
 
 namespace NailBot.Core.Services
 {
@@ -15,24 +16,18 @@ namespace NailBot.Core.Services
     {
         private readonly IToDoRepository _toDoRepository;
 
-        private readonly ITelegramBotClient _botClient;
+        //количество задач при запуске программы
+        private readonly int maxTaskAmount;
+        //длина задачи при запуске программы
+        private readonly int maxTaskLenght;
 
         public ToDoService(IToDoRepository toDoRepository, ITelegramBotClient botClient)
         {
             _toDoRepository = toDoRepository;
-            _botClient = botClient;
 
-            maxTaskAmount = CheckMaxAmount();
-            maxTaskLenght = CheckMaxLength();
+            maxTaskAmount = maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач");
+            maxTaskLenght = maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи");
         }
-
-        //количество задач при запуске программы
-        private int maxTaskAmount;
-        //длина задачи при запуске программы
-        private int maxTaskLenght;
-
-        //создам экземляр чата, чтобы передавать в SendMessage
-        public Chat Chat { get; set; }
 
         //Возвращает IReadOnlyList<ToDoItem> для UserId
         public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId) 
@@ -60,7 +55,7 @@ namespace NailBot.Core.Services
             string newTask = Validate.ValidateString(name, maxTaskLenght);
 
             //проверяю дубликаты введённой задачи
-            CheckDuplicate(newTask, tasks);
+            Helper.CheckDuplicate(newTask, tasks);
 
             var newToDoItem = new ToDoItem
             {
@@ -74,8 +69,6 @@ namespace NailBot.Core.Services
             //добавляю в репозиторий
             _toDoRepository.Add(newToDoItem);
 
-            _botClient.SendMessage(Chat, $"Задача \"{newTask}\" добавлена в список задач.\n");
-
             //возвращаю новый объект задачи
             return newToDoItem;
         }
@@ -83,45 +76,21 @@ namespace NailBot.Core.Services
         // реализация метода интерфейса Delete
         public void Delete(Guid id)
         {
-            //проверка на наличие переданной задачи
-            if (id == Guid.Empty)
-            {
-                _botClient.SendMessage(Chat, $"Ваш список задач пуст, удалять нечего.\n");
-                return;
-            }
-
             //достану удаляемый объект задачи
-            var removedProduct = GetTask(id);
+            var removedProduct = GetTask(id, "удалять");
 
-            if (removedProduct != null)
-            {
-                //удаляю задачу
-                _toDoRepository.Delete(id);
-
-                _botClient.SendMessage(Chat, $"Задача {removedProduct.Name} удалена.\n");
-            }
+            //удаляю задачу
+            _toDoRepository.Delete(id);
         }
 
         // реализация метода интерфейса MarkCompleted
         public void MarkCompleted(Guid id)
         {
-            //проверка на наличие переданной задачи
-            if (id == Guid.Empty)
-            {
-                _botClient.SendMessage(Chat, $"Ваш список задач пуст, выполнять нечего.\n");
-                return;
-            }
-
             //достану выполняемый объект задачи
-            var completedTask = GetTask(id);
+            var completedTask = GetTask(id, "выполнять");
 
-            if (completedTask != null)
-            {
-                //выполню её
-                _toDoRepository.Update(completedTask);
-
-                _botClient.SendMessage(Chat, $"Задача {completedTask.Name} выполнена.\n");
-            }           
+            //выполню её
+            _toDoRepository.Update(completedTask);
         }
 
         // реализация метода интерфейса Find
@@ -131,175 +100,38 @@ namespace NailBot.Core.Services
 
             if (tasks.Count == 0)
             {
-                _botClient.SendMessage(Chat, $"Ваш список задач пуст, искать нечего.\n");
-                return null;
+                throw new EmptyTaskListException("искать");
             }
 
             bool isContain = _toDoRepository.ExistsByName(user.UserId, namePrefix);
 
             if (!isContain)
             {
-                _botClient.SendMessage(Chat, $"Задач, начинающихся на {namePrefix} не найдено.\n");
-                return null;
+                throw new ArgumentException($"Задач, начинающихся \"{namePrefix}\" не найдено.\n");
             }
-
-            var findedTasks = _toDoRepository.Find(user.UserId, item => item.Name.Contains(namePrefix));
-
-            ShowTasks(user.UserId, false, findedTasks);
-
-            return findedTasks;
-        }
-
-
-        #region МЕТОДЫ КОМАНД
-        ////метод команды Help
-        public void ShowHelp(ToDoUser user)
-        {
-            if (user == null)
-            {
-                _botClient.SendMessage(Chat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
-                $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n");
-            }
-            else
-            {
-                _botClient.SendMessage(Chat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
-                $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/addtask\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
-                $"Введя команду \"/showtasks\" ты сможешь увидеть список активных задач в списке\n" +
-                $"Введя команду \"/showalltasks\" ты сможешь увидеть список всех задач в списке\n" +
-                $"Введя команду \"/removetask\" *номер задачи*\" ты сможешь удалить задачу из списка задач\n" +
-                $"Введя команду \"/completetask\" *номер задачи*\" ты сможешь отметить задачу из списка как завершенную\n" +
-                $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n");
-            }
-        }
-
-        ////метод команды Info
-        public void ShowInfo()
-        {
-            DateTime releaseDate = new DateTime(2025, 02, 08);
-            _botClient.SendMessage(Chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
-        }
-
-        ////метод рендера списка задач 
-        ///добавлю параметр по умолчанию для команды showalltasks и буду передавать в него true
-        public void ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
-        {
-            //присвою список через оператор null объединения 
-            var tasksList = tasks ?? (isActive ? GetAllByUserId(userId) : GetActiveByUserId(userId));
-
-            if (tasksList.Count == 0)
-            {
-                string emptyMessage = isActive ? "Список задач пуст.\n" : "Aктивных задач нет";
-                _botClient.SendMessage(Chat, emptyMessage);
-                return;
-            }
-
-            //выберу текст меседжа через тернарный оператор
-            string message = tasks != null ? "Список найденных задач:"
-                : (isActive ? "Список всех задач:" : "Список активных задач:");
-
-            _botClient.SendMessage(Chat, message);
-            TasksListRender(tasksList);
-        }
-        #endregion
-
-
-        #region Вспомогательные методы
-        //ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        //метод проверки корректного ввода команд /addtask и /removetask
-        public (string, string, Guid) InputCheck(string input, ToDoUser currentUser)
-        {
-            string cutInput = "";
-
-            Guid taskGuid = Guid.Empty;
-
-            if (input.StartsWith("/addtask") || input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
-            {
-                if (input.StartsWith("/addtask "))
-                {
-                    cutInput = input.Substring(9);
-                    input = "/addtask";
-                } 
-                else if (input.StartsWith("/find "))
-                {
-                    cutInput = input.Substring(6);
-                    input = "/find";
-                }
-                else if (input.StartsWith("/removetask ") || input.StartsWith("/completetask "))
-                {
-                    var allTasks = GetAllByUserId(currentUser.UserId);
-                    //верну данные кортежем
-                    (string command, Guid taskGuid) inputData = Validate.ValidateTask(input, taskGuid, allTasks);
-
-                    input = inputData.command;
-                    taskGuid = inputData.taskGuid;
-                }
-                else
-                {
-                    input = "unregistered user command";
-                }
-                    
-            }
-            return (input, cutInput, taskGuid);
-        }
-
-        //проверка дубликатов
-        void CheckDuplicate(string newTask, IReadOnlyList<ToDoItem> toDoItems)
-        {
-            if (toDoItems.Any(item => item.Name == newTask))
-            {
-                throw new DuplicateTaskException(newTask);
-            }
-        }
-
-        //валидация начальных значений задач
-        public int CheckMaxAmount()
-        {
-            return maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач");
-        } 
-        
-        //валидация начальных значений задач
-        public int CheckMaxLength()
-        {
-            return maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи");
-        }
             
-        //рендер списк задач
-        private void TasksListRender(IReadOnlyList<ToDoItem> tasks)
-        {
-            int taskCounter = 0;
+            //return _toDoRepository.Find(user.UserId, item => item.Name.StartsWith(namePrefix, StringComparison.OrdinalIgnoreCase));
 
-            foreach (ToDoItem task in tasks)
-            {
-                taskCounter++;
-                _botClient.SendMessage(Chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
-            }
+            return _toDoRepository.Find(user.UserId, item =>
+                item.Name.Length >= namePrefix.Length &&
+                item.Name.Substring(0, namePrefix.Length) == namePrefix);
         }
+
 
         //проверка получения задачи
-        ToDoItem? GetTask(Guid id)
+        ToDoItem? GetTask(Guid id, string message)
         {
+            //проверка на наличие переданной задачи
+            if (id == Guid.Empty)
+            {
+                throw new EmptyTaskListException(message);
+            }
+
             var item = _toDoRepository.Get(id);
 
-            if (item == null)
-            {
-                return null;
-            }
-            return GetAllByUserId(item.User.UserId).FirstOrDefault(x => x.Id == id);
+            return item == null
+                ? throw new NullTaskException("Задача не существует или равна null")
+                : GetAllByUserId(item.User.UserId).FirstOrDefault(x => x.Id == id);
         }
-
-        //получение чата
-        public Chat GetChat(Update update)
-        {
-            Chat = update.Message.Chat;
-
-            return Chat;
-        }
-        #endregion
     }
 }

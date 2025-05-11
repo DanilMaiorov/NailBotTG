@@ -39,13 +39,8 @@ namespace NailBot.Helpers
         public static string NumberReplacer(this string str)
         {
             Regex regex = new Regex("^[0-9]$");
-
-            if (regex.IsMatch(str))
-            {
-                str = "uncorrect command";
-            }
                 
-            return str;
+            return regex.IsMatch(str) ? "uncorrect command" : str;
         }
 
         //метод присваивания значений длин

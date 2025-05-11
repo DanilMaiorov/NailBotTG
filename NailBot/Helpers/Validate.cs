@@ -59,7 +59,9 @@ namespace NailBot.Helpers
                 string resultStr = str.Trim();
 
                 if (resultStr.Length < strLength)
+                {
                     return resultStr;
+                }
                 throw new TaskLengthLimitException(resultStr, strLength);
             }
             throw new ArgumentException("Введена строка из пробелов или пустая строка");
@@ -72,22 +74,26 @@ namespace NailBot.Helpers
             string startInput = input;
 
             if (input.StartsWith("/removetask "))
+            {
                 input = "/removetask";
+            }                
             else
+            {
                 input = "/completetask";
+            }
 
-            //перенес проверку на длину списка задач сюда
             if (tasksList.Count != 0)
             {
-                //делаю проверку введенного Guid задачи
                 if (!Guid.TryParse(startInput.Substring(input.Length), out taskGuid))
+                {
                     throw new ArgumentException($"Введён некорректный номер задачи.\n");
+                }
 
                 if (tasksList.FirstOrDefault(x => x.Id == taskGuid) == null)
+                {
                     throw new ArgumentException($"Введён некорректный номер задачи.\n");
-
+                }
                 return (input, taskGuid);
-
             }
             return (input, taskGuid);
         }

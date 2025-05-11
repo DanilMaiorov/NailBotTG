@@ -1,5 +1,6 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
+using NailBot.Core.Exceptions;
 
 namespace NailBot.Infrastructure.DataAccess
 {
@@ -24,6 +25,11 @@ namespace NailBot.Infrastructure.DataAccess
 
         public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId)
         {
+            if (userId == null)
+            {
+                return ToDoList;
+            }
+
             return ToDoList
                 .Where(x => x.User.UserId == userId && x.State == ToDoItemState.Active)
                 .ToList()

@@ -31,12 +31,9 @@ namespace NailBot.Core.Services
         {
             var user = _userRepository.GetUserByTelegramUserId(telegramUserId);
 
-            if (user != null)
-            {
-                return _userRepository.GetUser(user.UserId);
-            }
-
-            return null;
+            return user?.UserId != null 
+                ? _userRepository.GetUser(user.UserId) 
+                : null;
         }
     }
 }
