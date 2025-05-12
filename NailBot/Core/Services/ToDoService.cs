@@ -19,14 +19,14 @@ namespace NailBot.Core.Services
         //количество задач при запуске программы
         private readonly int maxTaskAmount;
         //длина задачи при запуске программы
-        private readonly int maxTaskLenght;
+        private readonly int maxTaskLength;
 
-        public ToDoService(IToDoRepository toDoRepository, ITelegramBotClient botClient)
+        public ToDoService(IToDoRepository toDoRepository, int taskAmount, int taskLength)
         {
             _toDoRepository = toDoRepository;
 
-            maxTaskAmount = maxTaskAmount.GetStartValues("Введите максимально допустимое количество задач");
-            maxTaskLenght = maxTaskLenght.GetStartValues("Введите максимально допустимую длину задачи");
+            maxTaskAmount = taskAmount;
+            maxTaskLength = taskLength;
         }
 
         //Возвращает IReadOnlyList<ToDoItem> для UserId
@@ -52,7 +52,7 @@ namespace NailBot.Core.Services
             }
 
             //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
-            string newTask = Validate.ValidateString(name, maxTaskLenght);
+            string newTask = Validate.ValidateString(name, maxTaskLength);
 
             //проверяю дубликаты введённой задачи
             Helper.CheckDuplicate(newTask, tasks);
@@ -90,6 +90,9 @@ namespace NailBot.Core.Services
             var completedTask = GetTask(id, "выполнять");
 
             //выполню её
+            completedTask.State = ToDoItemState.Completed;
+            completedTask.StateChangedAt = DateTime.Now;
+
             _toDoRepository.Update(completedTask);
         }
 

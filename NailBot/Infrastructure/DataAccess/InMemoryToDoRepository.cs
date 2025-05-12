@@ -1,12 +1,13 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
+using System;
 
 namespace NailBot.Infrastructure.DataAccess
 {
     internal class InMemoryToDoRepository : IToDoRepository
     {
-        public List<ToDoItem> ToDoList = new List<ToDoItem>();
+        private readonly List<ToDoItem> ToDoList = new List<ToDoItem>();
 
         public void Add(ToDoItem item)
         {
@@ -67,16 +68,23 @@ namespace NailBot.Infrastructure.DataAccess
 
         public ToDoItem? Get(Guid id)
         {
-            return ToDoList?
-                .Where(x => x != null)
-                .FirstOrDefault(x => x.Id == id);
+            return ToDoList?.FirstOrDefault(x => x.Id == id);
         }
 
         public void Update(ToDoItem item)
         {
-            item.State = ToDoItemState.Completed;
+            var updateItem = ToDoList.Find(x => x.Id == item.Id);
 
-            item.StateChangedAt = DateTime.Now;
+            var updateIndex = ToDoList.FindIndex(x => x.Id == item.Id);
+
+            if (updateIndex != -1)
+            {
+                ToDoList[updateIndex] = item;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Задча с номером {item.Id} не найдена");
+            }
         }
     }
 }

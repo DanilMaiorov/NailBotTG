@@ -2,6 +2,7 @@
 using NailBot.TelegramBot;
 using NailBot.Core.Services;
 using NailBot.Infrastructure.DataAccess;
+using NailBot.Helpers;
 
 namespace NailBot
 {
@@ -16,12 +17,15 @@ namespace NailBot
             var userRepository = new InMemoryUserRepository();
             var toDoRepository = new InMemoryToDoRepository();
 
+            //стартовые значения длин
+            int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
+            int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+
             //объявляю переменную типа интефрейса IUserService _userService
             var _userService = new UserService(userRepository);
-            var _toDoService = new ToDoService(toDoRepository , botClient);
+            var _toDoService = new ToDoService(toDoRepository , maxTaskAmount, maxTaskLength);
 
             var _toDoReportService = new ToDoReportService(toDoRepository);
-
 
             Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService);
             

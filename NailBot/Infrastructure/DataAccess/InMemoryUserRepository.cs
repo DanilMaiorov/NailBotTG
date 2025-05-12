@@ -6,7 +6,7 @@ namespace NailBot.Infrastructure.DataAccess
     internal class InMemoryUserRepository : IUserRepository
     {
         //хранилище пользаков
-        public List<ToDoUser> UsersList = new List<ToDoUser>();
+        private readonly List<ToDoUser> UsersList = new List<ToDoUser>();
 
         public void Add(ToDoUser user)
         {

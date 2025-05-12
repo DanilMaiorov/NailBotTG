@@ -2,15 +2,10 @@
 using NailBot.Core.Exceptions;
 using Otus.ToDoList.ConsoleBot;
 using Otus.ToDoList.ConsoleBot.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NailBot.Helpers
 {
-    
+
     public static class Helper
     {
         //рендер списка задач
@@ -67,6 +62,28 @@ namespace NailBot.Helpers
             {
                 throw new DuplicateTaskException(newTask);
             }
+        }
+
+        //метод присваивания значений длин
+        public static int GetStartValues(string message)
+        {
+            int value = 0;
+            while (value == 0)
+            {
+                while (true)
+                {
+                    try
+                    {
+                        Console.WriteLine(message);
+                        return value = Validate.ParseAndValidateInt(Console.ReadLine());
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+            return value;
         }
     }
 }

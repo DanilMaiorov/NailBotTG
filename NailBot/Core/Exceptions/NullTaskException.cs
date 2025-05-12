@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NailBot.Core.Exceptions
+﻿namespace NailBot.Core.Exceptions
 {
     internal class NullTaskException : Exception
     {

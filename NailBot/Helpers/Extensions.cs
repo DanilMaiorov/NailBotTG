@@ -43,26 +43,7 @@ namespace NailBot.Helpers
             return regex.IsMatch(str) ? "uncorrect command" : str;
         }
 
-        //метод присваивания значений длин
-        public static int GetStartValues(this int value, string message)
-        {
-            while (value == 0)
-            {
-                while (true)
-                {
-                    try
-                    {
-                        Console.WriteLine(message);
-                        return value = Validate.ParseAndValidateInt(Console.ReadLine());
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-            }
-            return value;
-        }
+
     }
 }
 
