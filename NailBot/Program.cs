@@ -1,25 +1,33 @@
-﻿
-using System;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
+﻿using Otus.ToDoList.ConsoleBot;
+using NailBot.TelegramBot;
+using NailBot.Core.Services;
+using NailBot.Infrastructure.DataAccess;
+using NailBot.Helpers;
 
 namespace NailBot
 {
-    internal class Program
+    internal class Program//ЧИСТОВИК
     {
         public static void Main(string[] args)
         {
             //создаю экземпляр бота
             var botClient = new ConsoleBotClient();
 
-            //объявляю переменную типа интефрейса IUserService _userService
-            var _userService = new UserService();
-            var _toDoService = new ToDoService();
+            //экземпляры репозиториев
+            var userRepository = new InMemoryUserRepository();
+            var toDoRepository = new InMemoryToDoRepository();
 
-            Init StartBot = new Init(botClient, _userService, _toDoService);
+            //стартовые значения длин
+            int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
+            int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+
+            //объявляю переменную типа интефрейса IUserService _userService
+            var _userService = new UserService(userRepository);
+            var _toDoService = new ToDoService(toDoRepository , maxTaskAmount, maxTaskLength);
+
+            var _toDoReportService = new ToDoReportService(toDoRepository);
+
+            Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService);
             
             //переменная проверки выхода из программы
             bool isFinish = false;
