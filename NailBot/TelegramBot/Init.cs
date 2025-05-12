@@ -1,7 +1,7 @@
-﻿using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
+﻿using NailBot.Core.Services;
+using Otus.ToDoList.ConsoleBot;
 
-namespace NailBot
+namespace NailBot.TelegramBot
 {
     public class Init
     {
@@ -12,13 +12,17 @@ namespace NailBot
         private readonly IUserService _userService;
         private readonly IToDoService _toDoService;
 
-        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService)
+        private readonly IToDoReportService _toDoReportService;
+
+        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService, IToDoReportService toDoReportService)
         {
             _botClient = botClient;
             _userService = userService;
             _toDoService = toDoService;
 
-            _updateHandler = new UpdateHandler(userService, toDoService);
+            _toDoReportService = toDoReportService;
+
+            _updateHandler = new UpdateHandler(userService, toDoService, toDoReportService);
         }
 
         public void Start()
@@ -28,7 +32,7 @@ namespace NailBot
         }
 
         public static void Stop()
-        {    
+        {
             //botClient.SendMessage(update.Message.Chat, $"До свидания, {userName}! До новых встреч!");
             Console.ReadKey();
             return;
