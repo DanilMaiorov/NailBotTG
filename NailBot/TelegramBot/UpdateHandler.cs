@@ -37,7 +37,7 @@ internal class UpdateHandler : IUpdateHandler
     {
         //получаю экземпляр чата
         var currentChat = update.Message.Chat;
-
+        Console.WriteLine();
         try
         {            
             //получаю текущего юзера

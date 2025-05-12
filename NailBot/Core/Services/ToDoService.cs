@@ -16,9 +16,7 @@ namespace NailBot.Core.Services
     {
         private readonly IToDoRepository _toDoRepository;
 
-        //количество задач при запуске программы
         private readonly int maxTaskAmount;
-        //длина задачи при запуске программы
         private readonly int maxTaskLength;
 
         public ToDoService(IToDoRepository toDoRepository, int taskAmount, int taskLength)
@@ -119,7 +117,6 @@ namespace NailBot.Core.Services
                 item.Name.Length >= namePrefix.Length &&
                 item.Name.Substring(0, namePrefix.Length) == namePrefix);
         }
-
 
         //проверка получения задачи
         ToDoItem? GetTask(Guid id, string message)

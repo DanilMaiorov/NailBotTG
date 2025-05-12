@@ -42,8 +42,6 @@ namespace NailBot.Helpers
                 
             return regex.IsMatch(str) ? "uncorrect command" : str;
         }
-
-
     }
 }
 
