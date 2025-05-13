@@ -1,5 +1,6 @@
 ﻿using NailBot.Core.Services;
 using Otus.ToDoList.ConsoleBot;
+using Otus.ToDoList.ConsoleBot.Types;
 
 namespace NailBot.TelegramBot
 {
@@ -14,28 +15,47 @@ namespace NailBot.TelegramBot
 
         private readonly IToDoReportService _toDoReportService;
 
-        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService, IToDoReportService toDoReportService)
+        private readonly CancellationTokenSource _cts;
+
+        // Предоставляем доступ к обработчику для подписки/отписки извне
+        internal UpdateHandler BotUpdateHandler => (UpdateHandler)_updateHandler;
+
+        public Init(ITelegramBotClient botClient, IUserService userService, IToDoService toDoService, IToDoReportService toDoReportService, CancellationTokenSource cts)
         {
             _botClient = botClient;
             _userService = userService;
             _toDoService = toDoService;
 
             _toDoReportService = toDoReportService;
+            _cts = cts;
 
-            _updateHandler = new UpdateHandler(userService, toDoService, toDoReportService);
+            _updateHandler = new UpdateHandler(userService, toDoService, toDoReportService, cts);
         }
 
         public void Start()
         {
-            //запуск бота
-            _botClient.StartReceiving(_updateHandler);
+            if (_updateHandler is UpdateHandler castHandler)
+            {
+                //подписываюсь на события
+                castHandler.OnHandleUpdateStarted += castHandler.HandleStart;
+                castHandler.OnHandleUpdateCompleted += castHandler.HandleComplete;
+
+                try
+                {
+                    _botClient.StartReceiving(_updateHandler, _cts.Token);
+                }
+                finally
+                {
+                    //отписываюсь от событий
+                    castHandler.OnHandleUpdateStarted -= castHandler.HandleStart;
+                    castHandler.OnHandleUpdateCompleted -= castHandler.HandleComplete;
+                }
+            }
         }
 
-        public static void Stop()
+        public void Stop()
         {
-            //botClient.SendMessage(update.Message.Chat, $"До свидания, {userName}! До новых встреч!");
-            Console.ReadKey();
-            return;
+            Console.WriteLine($"До свидания! До новых встреч!");
         }
     }
 }

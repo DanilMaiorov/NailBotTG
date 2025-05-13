@@ -1,7 +1,5 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
-using NailBot.Core.Exceptions;
-using System;
 
 namespace NailBot.Infrastructure.DataAccess
 {
@@ -45,7 +43,6 @@ namespace NailBot.Infrastructure.DataAccess
                 .AsReadOnly();
         }
 
-        //Метод должен возвращать все задачи пользователя, которые удовлетворяют предикату.
         public IReadOnlyList<ToDoItem> Find(Guid userId, Func<ToDoItem, bool> predicate)
         {
             return ToDoList

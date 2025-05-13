@@ -10,34 +10,36 @@ namespace NailBot
     {
         public static void Main(string[] args)
         {
-            //создаю экземпляр бота
             var botClient = new ConsoleBotClient();
 
-            //экземпляры репозиториев
             var userRepository = new InMemoryUserRepository();
             var toDoRepository = new InMemoryToDoRepository();
 
             //стартовые значения длин
-            int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
-            int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+            //int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
+            //int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+            int maxTaskAmount = 20;
+            int maxTaskLength = 25;
 
-            //объявляю переменную типа интефрейса IUserService _userService
             var _userService = new UserService(userRepository);
             var _toDoService = new ToDoService(toDoRepository , maxTaskAmount, maxTaskLength);
 
             var _toDoReportService = new ToDoReportService(toDoRepository);
 
-            Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService);
-            
-            //переменная проверки выхода из программы
-            bool isFinish = false;
+            //объявлю CancellationTokenSource
+            var cts = new CancellationTokenSource();
 
-            while (!isFinish)
-            {
+            Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService, cts);
+            
                 try
                 {
+                    //подписываюсь на события
+                    //StartBot.BotUpdateHandler.OnHandleUpdateStarted += StartBot.BotUpdateHandler.HandleStart;
+                    //StartBot.BotUpdateHandler.OnHandleUpdateCompleted += StartBot.BotUpdateHandler.HandleComplete;
+
+                    //стартую бота
                     StartBot.Start();
-                    isFinish = true;
+
                 }
                 catch (Exception ex)
                 {
@@ -49,8 +51,17 @@ namespace NailBot
                         Console.WriteLine($"Источник внутреннего исключения: {ex.InnerException.StackTrace}\n");
                     }
                 }
-            }
-            Init.Stop();
+                finally
+                {               
+                    //отписываюсь от событий
+                    //StartBot.BotUpdateHandler.OnHandleUpdateStarted -= StartBot.BotUpdateHandler.HandleStart;
+                    //StartBot.BotUpdateHandler.OnHandleUpdateCompleted -= StartBot.BotUpdateHandler.HandleComplete;
+
+                    //ториожу бота,, прощаюсь
+                    StartBot.Stop();
+                }
+
+                
         }
     }
 }

@@ -8,13 +8,13 @@ namespace NailBot.Helpers
     public static class Extensions
     {
         //метод рендера списка команд
-        public static void CommandsRender<T>(this T array, ToDoUser user, Chat chat, ITelegramBotClient botClient) where T : Enum
+        public async static Task CommandsRender<T>(this T array, ToDoUser user, Chat chat, ITelegramBotClient botClient, CancellationToken ct) where T : Enum
         {
             int counter = 0;
 
             if (user == null)
             {
-                botClient.SendMessage(chat, $"Список доступных команд для незарегистрированного юзера:");
+                await botClient.SendMessage(chat, $"Список доступных команд для незарегистрированного юзера:", ct);
                 foreach (T command in Enum.GetValues(typeof(T)))
                 {
                     if (command.ToString() == "Start" || command.ToString() == "Help" || command.ToString() == "Info" || command.ToString() == "Exit")
@@ -25,7 +25,7 @@ namespace NailBot.Helpers
             }
             else
             {
-                botClient.SendMessage(chat, $"Список доступных команд:");
+                await botClient.SendMessage(chat, $"Список доступных команд:", ct);
 
                 foreach (T command in Enum.GetValues(typeof(T)))
                 {

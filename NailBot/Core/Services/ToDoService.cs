@@ -9,9 +9,6 @@ using System.Xml.Linq;
 
 namespace NailBot.Core.Services
 {
-    //заведу делегат
-    //delegate IReadOnlyList<ToDoItem> ListGetter(Guid userId);
-
     class ToDoService : IToDoService
     {
         private readonly IToDoRepository _toDoRepository;
@@ -27,12 +24,12 @@ namespace NailBot.Core.Services
             maxTaskLength = taskLength;
         }
 
-        //Возвращает IReadOnlyList<ToDoItem> для UserId
+        //реализация метода интерфейса GetAllByUserId
         public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId) 
         {
             return _toDoRepository.GetAllByUserId(userId);
-        } 
-        //Возвращает IReadOnlyList<ToDoItem> для UserId со статусом Active
+        }
+        //реализация метода интерфейса GetActiveByUserId
         public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId) 
         {
             return _toDoRepository.GetActiveByUserId(userId);
@@ -43,16 +40,13 @@ namespace NailBot.Core.Services
         {
             var tasks = GetAllByUserId(user.UserId);
 
-            //проверяю длину листа и выбрасываю исключение если больше лимита
             if (tasks.Count >= maxTaskAmount)
             {
                 throw new TaskCountLimitException(maxTaskAmount);
             }
 
-            //валидация строки c проверкой длины введёной задачи и выброс необходимого исключения - ДОБАВИЛ ПЕРЕГУЗКУ МЕТОДА ValidateString
             string newTask = Validate.ValidateString(name, maxTaskLength);
 
-            //проверяю дубликаты введённой задачи
             Helper.CheckDuplicate(newTask, tasks);
 
             var newToDoItem = new ToDoItem
@@ -64,30 +58,24 @@ namespace NailBot.Core.Services
                 StateChangedAt = DateTime.Now,
             };
 
-            //добавляю в репозиторий
             _toDoRepository.Add(newToDoItem);
 
-            //возвращаю новый объект задачи
             return newToDoItem;
         }
 
         // реализация метода интерфейса Delete
         public void Delete(Guid id)
         {
-            //достану удаляемый объект задачи
             var removedProduct = GetTask(id, "удалять");
 
-            //удаляю задачу
             _toDoRepository.Delete(id);
         }
 
         // реализация метода интерфейса MarkCompleted
         public void MarkCompleted(Guid id)
         {
-            //достану выполняемый объект задачи
             var completedTask = GetTask(id, "выполнять");
 
-            //выполню её
             completedTask.State = ToDoItemState.Completed;
             completedTask.StateChangedAt = DateTime.Now;
 
@@ -111,8 +99,6 @@ namespace NailBot.Core.Services
                 throw new ArgumentException($"Задач, начинающихся \"{namePrefix}\" не найдено.\n");
             }
             
-            //return _toDoRepository.Find(user.UserId, item => item.Name.StartsWith(namePrefix, StringComparison.OrdinalIgnoreCase));
-
             return _toDoRepository.Find(user.UserId, item =>
                 item.Name.Length >= namePrefix.Length &&
                 item.Name.Substring(0, namePrefix.Length) == namePrefix);
@@ -121,7 +107,6 @@ namespace NailBot.Core.Services
         //проверка получения задачи
         ToDoItem? GetTask(Guid id, string message)
         {
-            //проверка на наличие переданной задачи
             if (id == Guid.Empty)
             {
                 throw new EmptyTaskListException(message);

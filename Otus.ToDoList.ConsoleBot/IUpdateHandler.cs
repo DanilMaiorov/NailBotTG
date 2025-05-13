@@ -3,5 +3,6 @@
 namespace Otus.ToDoList.ConsoleBot;
 public interface IUpdateHandler
 {
-    void HandleUpdateAsync(ITelegramBotClient botClient, Update update);
+    Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct);
+    Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken ct);
 }
