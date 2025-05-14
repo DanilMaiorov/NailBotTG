@@ -5,78 +5,106 @@ namespace NailBot.Infrastructure.DataAccess
 {
     internal class InMemoryToDoRepository : IToDoRepository
     {
-        private readonly List<ToDoItem> ToDoList = new List<ToDoItem>();
+        private readonly List<ToDoItem> ToDoList = [];
 
-        public void Add(ToDoItem item)
+        public async Task Add(ToDoItem item)
         {
             ToDoList.Add(item);
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
             ToDoList.RemoveAll(x => x.Id == id);
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
         }
         
-        public int CountActive(Guid userId)
+        public async Task<int> CountActive(Guid userId)
         {
-            return GetActiveByUserId(userId).Count();
+            var countList = await GetActiveByUserId(userId);
+
+            return countList.Count;
         }
 
-        public IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId)
+        public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId)
         {
-            if (userId == null)
+            if (userId == Guid.Empty)
             {
-                return ToDoList;
+                return ToDoList.AsReadOnly();
             }
 
-            return ToDoList
+            var result = ToDoList
                 .Where(x => x.User.UserId == userId && x.State == ToDoItemState.Active)
                 .ToList()
                 .AsReadOnly();
+
+            return await Task.FromResult(result);
         }
 
-        public IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId)
+        public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId)
         {
-            return ToDoList
+            var result = ToDoList
                 .Where(x => x.User.UserId == userId)
                 .ToList()
                 .AsReadOnly();
+
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
+
+            return result;
         }
 
-        public IReadOnlyList<ToDoItem> Find(Guid userId, Func<ToDoItem, bool> predicate)
+        public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate)
         {
-            return ToDoList
+            var result = ToDoList
                 .Where(x => x.User.UserId == userId)
                 .Where(predicate)
                 .ToList();
+
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
+
+            return result;
         }
 
-        public bool ExistsByName(Guid userId, string name)
+        public async Task<bool> ExistsByName(Guid userId, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 return false;
             }
-
-            return ToDoList
+            var result = ToDoList
                 .Where(x => x.User.UserId == userId)
-                .Any(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase)); 
+                .Any(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
+
+            return result;
         }
 
-        public ToDoItem? Get(Guid id)
+        public async Task<ToDoItem?> Get(Guid id)
         {
-            return ToDoList?.FirstOrDefault(x => x.Id == id);
+            var item = ToDoList.FirstOrDefault(x => x.Id == id);
+
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
+
+            return item;
         }
 
-        public void Update(ToDoItem item)
+        public async Task Update(ToDoItem item)
         {
-            var updateItem = ToDoList.Find(x => x.Id == item.Id);
-
             var updateIndex = ToDoList.FindIndex(x => x.Id == item.Id);
 
             if (updateIndex != -1)
             {
                 ToDoList[updateIndex] = item;
+
+                //сделаю искусственную задержку для асинхронности
+                await Task.Delay(1);
             }
             else
             {

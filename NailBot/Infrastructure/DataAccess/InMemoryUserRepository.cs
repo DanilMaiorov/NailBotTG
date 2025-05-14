@@ -6,23 +6,33 @@ namespace NailBot.Infrastructure.DataAccess
     internal class InMemoryUserRepository : IUserRepository
     {
         //хранилище пользаков
-        private readonly List<ToDoUser> UsersList = new List<ToDoUser>();
+        private readonly List<ToDoUser> UsersList = [];
 
-        public void Add(ToDoUser user)
+        public async Task Add(ToDoUser user)
         {
             UsersList.Add(user);
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
         }
 
-        public ToDoUser? GetUserByTelegramUserId(long telegramUserId)
+        public async Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId)
         {
             var user = UsersList.FirstOrDefault(x => x.TelegramUserId == telegramUserId);
 
-            return user ?? null;
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
+
+            return user;
         }
 
-        public ToDoUser? GetUser(Guid userId)
+        public async Task<ToDoUser?> GetUser(Guid userId)
         {
-            return UsersList.FirstOrDefault(x => x.UserId == userId);
+            var user = UsersList.FirstOrDefault(x => x.UserId == userId);
+
+            //сделаю искусственную задержку для асинхронности
+            await Task.Delay(1);
+
+            return user;
         }
     }
 }

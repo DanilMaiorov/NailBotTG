@@ -49,10 +49,10 @@ internal class UpdateHandler : IUpdateHandler
         string message = "";
         try
         {
-            var currentUser = _userService.GetUser(update.Message.From.Id);
+            var currentUser = await _userService.GetUser(update.Message.From.Id);
 
             var currentUserTaskList = currentUser != null
-                ? _toDoService.GetAllByUserId(currentUser.UserId)
+                ? await _toDoService.GetAllByUserId(currentUser.UserId)
                 : null;
 
             if (update.Message.Id == 1)
@@ -105,7 +105,7 @@ internal class UpdateHandler : IUpdateHandler
                 case Commands.Start:
                     if (currentUser == null)
                     {
-                        currentUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
+                        currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
                     }
 
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
@@ -120,7 +120,7 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Addtask:
-                    var newTask = _toDoService.Add(currentUser, inputText);
+                    var newTask = await _toDoService.Add(currentUser, inputText);
                     await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", ct);
                     break;
 
@@ -144,17 +144,17 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Find:
-                    var findedTasks = _toDoService.Find(currentUser, inputText);
+                    var findedTasks = await _toDoService.Find(currentUser, inputText);
                     await ShowTasks(currentUser.UserId, false, findedTasks);
                     break;
 
                 case Commands.Report:
-                    var (total, completed, active, generatedAt) = _toDoReportService.GetUserStats(currentUser.UserId);
+                    var (total, completed, active, generatedAt) = await _toDoReportService.GetUserStats(currentUser.UserId);
                     await botClient.SendMessage(currentChat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", ct);
                     break;
 
                 case Commands.Exit:
-                    await botClient.SendMessage(currentChat, "Нажмите любую клавишу для остановки бота", ct);
+                    await botClient.SendMessage(currentChat, "Нажмите Ввод для остановки бота", ct);
                     _cts.Cancel();
                     //throw new OperationCanceledException(ct);
                     break;
@@ -206,8 +206,8 @@ internal class UpdateHandler : IUpdateHandler
         {
             //присвою список через оператор null объединения 
             var tasksList = tasks ?? (isActive 
-                ? _toDoService.GetAllByUserId(userId) 
-                : _toDoService.GetActiveByUserId(userId));
+                ? await _toDoService.GetAllByUserId(userId) 
+                : await _toDoService.GetActiveByUserId(userId));
 
             if (tasksList.Count == 0) 
             {
@@ -258,8 +258,6 @@ internal class UpdateHandler : IUpdateHandler
             await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", ct);
         }
         #endregion
-
-
     }
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken ct)

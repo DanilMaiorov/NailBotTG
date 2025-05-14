@@ -16,10 +16,12 @@ namespace NailBot
             var toDoRepository = new InMemoryToDoRepository();
 
             //стартовые значения длин
-            //int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
-            //int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
-            int maxTaskAmount = 20;
-            int maxTaskLength = 25;
+            int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
+            int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+
+            //для ускоренного дебага
+            //int maxTaskAmount = 20;
+            //int maxTaskLength = 25;
 
             var _userService = new UserService(userRepository);
             var _toDoService = new ToDoService(toDoRepository , maxTaskAmount, maxTaskLength);
