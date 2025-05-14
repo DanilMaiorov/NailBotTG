@@ -11,9 +11,9 @@ namespace NailBot.Core.Services
             _toDoRepository = toDoRepository;
         }
 
-        public async Task<(int total, int completed, int active, DateTime generatedAt)> GetUserStats(Guid userId)
+        public async Task<(int total, int completed, int active, DateTime generatedAt)> GetUserStats(Guid userId, CancellationToken ct)
         {
-            var tasks = await _toDoRepository.GetAllByUserId(userId);
+            var tasks = await _toDoRepository.GetAllByUserId(userId, ct);
             int total = tasks.Count;
             int active = tasks.Count(x => x.User.UserId == userId && x.State == ToDoItemState.Active);
             int completed = total - active;

@@ -49,10 +49,10 @@ internal class UpdateHandler : IUpdateHandler
         string message = "";
         try
         {
-            var currentUser = await _userService.GetUser(update.Message.From.Id);
+            var currentUser = await _userService.GetUser(update.Message.From.Id, ct);
 
             var currentUserTaskList = currentUser != null
-                ? await _toDoService.GetAllByUserId(currentUser.UserId)
+                ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
                 : null;
 
             if (update.Message.Id == 1)
@@ -79,8 +79,6 @@ internal class UpdateHandler : IUpdateHandler
 
             input = inputCommand.Replace("/", string.Empty);
 
-
-
             if (currentUser == null)
             {
                 if (input != "start" && input != "help" && input != "info" && input != "exit")
@@ -105,7 +103,7 @@ internal class UpdateHandler : IUpdateHandler
                 case Commands.Start:
                     if (currentUser == null)
                     {
-                        currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
+                        currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username, ct);
                     }
 
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
@@ -120,7 +118,7 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Addtask:
-                    var newTask = await _toDoService.Add(currentUser, inputText);
+                    var newTask = await _toDoService.Add(currentUser, inputText, ct);
                     await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", ct);
                     break;
 
@@ -134,22 +132,22 @@ internal class UpdateHandler : IUpdateHandler
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи
-                    _toDoService.Delete(taskGuid);
+                    await _toDoService.Delete(taskGuid, ct);
                     await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", ct);
                     break;
 
                 case Commands.Completetask:
-                    _toDoService.MarkCompleted(taskGuid);
+                    await _toDoService.MarkCompleted(taskGuid, ct);
                     await botClient.SendMessage(currentChat, $"Задача {taskGuid} выполнена.\n", ct);
                     break;
 
                 case Commands.Find:
-                    var findedTasks = await _toDoService.Find(currentUser, inputText);
+                    var findedTasks = await _toDoService.Find(currentUser, inputText, ct);
                     await ShowTasks(currentUser.UserId, false, findedTasks);
                     break;
 
                 case Commands.Report:
-                    var (total, completed, active, generatedAt) = await _toDoReportService.GetUserStats(currentUser.UserId);
+                    var (total, completed, active, generatedAt) = await _toDoReportService.GetUserStats(currentUser.UserId, ct);
                     await botClient.SendMessage(currentChat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", ct);
                     break;
 
@@ -206,8 +204,8 @@ internal class UpdateHandler : IUpdateHandler
         {
             //присвою список через оператор null объединения 
             var tasksList = tasks ?? (isActive 
-                ? await _toDoService.GetAllByUserId(userId) 
-                : await _toDoService.GetActiveByUserId(userId));
+                ? await _toDoService.GetAllByUserId(userId, ct) 
+                : await _toDoService.GetActiveByUserId(userId, ct));
 
             if (tasksList.Count == 0) 
             {
