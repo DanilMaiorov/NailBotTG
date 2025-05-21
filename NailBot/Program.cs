@@ -10,61 +10,46 @@ namespace NailBot
     {
         public static void Main(string[] args)
         {
-            var botClient = new ConsoleBotClient();
+            ITelegramBotClient _botClient = new ConsoleBotClient();
 
             var userRepository = new InMemoryUserRepository();
             var toDoRepository = new InMemoryToDoRepository();
 
             //стартовые значения длин
-            int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
-            int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+            //int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
+            //int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
 
             //для ускоренного дебага
-            //int maxTaskAmount = 20;
-            //int maxTaskLength = 25;
+            int maxTaskAmount = 20;
+            int maxTaskLength = 25;
 
-            var _userService = new UserService(userRepository);
-            var _toDoService = new ToDoService(toDoRepository , maxTaskAmount, maxTaskLength);
+            IUserService _userService = new UserService(userRepository);
+            IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
 
-            var _toDoReportService = new ToDoReportService(toDoRepository);
+            IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
 
             //объявлю CancellationTokenSource
-            var cts = new CancellationTokenSource();
+            using var cts = new CancellationTokenSource();
 
-            Init StartBot = new Init(botClient, _userService, _toDoService, _toDoReportService, cts);
-            
+            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
+
+            if (_updateHandler is UpdateHandler castHandler)
+            {
+                //подписываюсь на события
+                castHandler.OnHandleUpdateStarted += castHandler.HandleStart;
+                castHandler.OnHandleUpdateCompleted += castHandler.HandleComplete;
+
                 try
                 {
-                    //подписываюсь на события
-                    //StartBot.BotUpdateHandler.OnHandleUpdateStarted += StartBot.BotUpdateHandler.HandleStart;
-                    //StartBot.BotUpdateHandler.OnHandleUpdateCompleted += StartBot.BotUpdateHandler.HandleComplete;
-
-                    //стартую бота
-                    StartBot.Start();
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Произошла непредвиденная ошибка");
-                    Console.WriteLine($"Стек трейс основного исключения: {ex.StackTrace}\n");
-                    if (ex.InnerException != null)
-                    {
-                        Console.WriteLine($"Внутреннее исключение: {ex.InnerException.Message}\n");
-                        Console.WriteLine($"Источник внутреннего исключения: {ex.InnerException.StackTrace}\n");
-                    }
+                    _botClient.StartReceiving(_updateHandler, cts.Token);
                 }
                 finally
-                {               
+                {
                     //отписываюсь от событий
-                    //StartBot.BotUpdateHandler.OnHandleUpdateStarted -= StartBot.BotUpdateHandler.HandleStart;
-                    //StartBot.BotUpdateHandler.OnHandleUpdateCompleted -= StartBot.BotUpdateHandler.HandleComplete;
-
-                    //ториожу бота,, прощаюсь
-                    StartBot.Stop();
+                    castHandler.OnHandleUpdateStarted -= castHandler.HandleStart;
+                    castHandler.OnHandleUpdateCompleted -= castHandler.HandleComplete;
                 }
-
-                
+            }
         }
     }
 }
-

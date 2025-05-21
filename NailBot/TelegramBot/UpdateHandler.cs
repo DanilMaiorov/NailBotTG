@@ -22,24 +22,24 @@ internal class UpdateHandler : IUpdateHandler
     private readonly UserService userService;
 
     //добавлю токен сорс
-    private readonly CancellationTokenSource _cts;
+    private readonly CancellationToken _ct;
 
     //добавлю 2 события
     public event MessageEventHandler OnHandleUpdateStarted;
     public event MessageEventHandler OnHandleUpdateCompleted;
 
-    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, CancellationTokenSource cts)
+    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, CancellationToken ct)
     {
         _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
         _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
 
         _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
 
-        _cts = cts;
+        _ct = ct;
 
         //явно приведу к типу
-        toDoService = (ToDoService)itoDoService;
-        userService = (UserService)iuserService;
+        //toDoService = (ToDoService)itoDoService;
+        //userService = (UserService)iuserService;
     }
 
 
@@ -152,8 +152,7 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Exit:
-                    await botClient.SendMessage(currentChat, "Нажмите Ввод для остановки бота", ct);
-                    _cts.Cancel();
+                    await botClient.SendMessage(currentChat, "Нажмите CTRL+C (Ввод) для остановки бота", ct);
                     //throw new OperationCanceledException(ct);
                     break;
                 default:
