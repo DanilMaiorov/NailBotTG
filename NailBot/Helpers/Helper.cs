@@ -9,14 +9,14 @@ namespace NailBot.Helpers
     public static class Helper
     {
         //рендер списка задач
-        public static void TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat)
+        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
         {
             int taskCounter = 0;
 
             foreach (ToDoItem task in tasks)
             {
                 taskCounter++;
-                botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}");
+                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}", ct);
             }
         }
 

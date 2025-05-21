@@ -4,5 +4,4 @@ namespace Otus.ToDoList.ConsoleBot.Types;
 public class Update
 {
     public Message Message { get; init; }
-
 }

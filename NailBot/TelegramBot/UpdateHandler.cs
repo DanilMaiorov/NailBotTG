@@ -1,5 +1,4 @@
 ﻿using NailBot.Core.Entities;
-using NailBot.Core.Exceptions;
 using NailBot.Core.Services;
 using NailBot.Helpers;
 using Otus.ToDoList.ConsoleBot;
@@ -11,65 +10,74 @@ public enum Commands
     Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Find, Completetask, Report, Exit
 }
 
+internal delegate void MessageEventHandler(string message);
+
 internal class UpdateHandler : IUpdateHandler
 {
     private readonly IUserService _userService;
     private readonly IToDoService _toDoService;
-
     private readonly IToDoReportService _toDoReportService;
 
     private readonly ToDoService toDoService;
     private readonly UserService userService;
 
-    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService)
+    //добавлю токен сорс
+    private readonly CancellationToken _ct;
+
+    //добавлю 2 события
+    public event MessageEventHandler OnHandleUpdateStarted;
+    public event MessageEventHandler OnHandleUpdateCompleted;
+
+    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, CancellationToken ct)
     {
         _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
         _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
 
         _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
 
+        _ct = ct;
+
         //явно приведу к типу
-        toDoService = (ToDoService)itoDoService;
-        userService = (UserService)iuserService;
+        //toDoService = (ToDoService)itoDoService;
+        //userService = (UserService)iuserService;
     }
 
-    public void HandleUpdateAsync(ITelegramBotClient botClient, Update update)
+
+    public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        //получаю экземпляр чата
         var currentChat = update.Message.Chat;
-
+        string message = "";
         try
-        {            
-            //получаю текущего юзера
-            var currentUser = _userService.GetUser(update.Message.From.Id);
+        {
+            var currentUser = await _userService.GetUser(update.Message.From.Id, ct);
 
-            //получаю весь список задач текущего юзера если user не null
             var currentUserTaskList = currentUser != null
-                ? _toDoService.GetAllByUserId(currentUser.UserId) 
+                ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
                 : null;
-            
-            //тут запрашиваю начальные ограничения длины задачи и их количества
+
             if (update.Message.Id == 1)
             {
-                botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n");
+                await botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n", ct);
 
-                Commands.Start.CommandsRender(currentUser, currentChat, botClient);
+                await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
 
                 return;
             }
 
             string input = update.Message.Text;
 
+            //присваиваю начальное значение введёного сообщения
+            message = input;
+            //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
+            OnHandleUpdateStarted?.Invoke(message);
+
             Commands command;
 
-            //регулярка на реплейс циферного значения Enum
             input = input.NumberReplacer();
 
-            //верну тут кортежем
-            (string inputCommand, string inputText, Guid taskGuid) inputs = Helper.InputCheck(input, currentUserTaskList);
+            (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input, currentUserTaskList);
 
-            //реплейс слэша для приведения к Enum 
-            input = inputs.inputCommand.Replace("/", string.Empty);
+            input = inputCommand.Replace("/", string.Empty);
 
             if (currentUser == null)
             {
@@ -79,7 +87,6 @@ internal class UpdateHandler : IUpdateHandler
                 }
             }
 
-            //приведение к типу Enum
             if (Enum.TryParse<Commands>(input, true, out var result))
             {
                 command = result;
@@ -88,127 +95,121 @@ internal class UpdateHandler : IUpdateHandler
             {
                 command = default;
             }
-                
+
+            //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
+            OnHandleUpdateCompleted?.Invoke(message);
             switch (command)
             {
                 case Commands.Start:
                     if (currentUser == null)
-                        //регаю нового юзера
-                        currentUser = _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username);
+                    {
+                        currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username, ct);
+                    }
 
-                    //рендерю список команд
-                    Commands.Start.CommandsRender(currentUser, currentChat, botClient);
+                    await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
 
                 case Commands.Help:
-                    ShowHelp(currentUser);
+                    await ShowHelp(currentUser);
                     break;
 
                 case Commands.Info:
-                    ShowInfo();
+                    await ShowInfo();
                     break;
 
                 case Commands.Addtask:
-                    //вызов метода добавления задачи
-                    var newTask = _toDoService.Add(currentUser, inputs.inputText);
-
-                    botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n");
+                    var newTask = await _toDoService.Add(currentUser, inputText, ct);
+                    await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", ct);
                     break;
 
                 case Commands.Showtasks:
-                    //вызов метода рендера задач
-                    ShowTasks(currentUser.UserId);
+                    await ShowTasks(currentUser.UserId);
                     break;
 
                 case Commands.Showalltasks:
-                    //вызов метода рендера задач
-                    ShowTasks(currentUser.UserId, true);
+                    await ShowTasks(currentUser.UserId, true);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи
-                    _toDoService.Delete(inputs.taskGuid);
-
-                    botClient.SendMessage(currentChat, $"Задача {inputs.taskGuid} удалена.\n");
+                    await _toDoService.Delete(taskGuid, ct);
+                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", ct);
                     break;
 
                 case Commands.Completetask:
-                    //вызов метода выполнения задачи
-                    _toDoService.MarkCompleted(inputs.taskGuid);
-
-                    botClient.SendMessage(currentChat, $"Задача {inputs.taskGuid} выполнена.\n");
+                    await _toDoService.MarkCompleted(taskGuid, ct);
+                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} выполнена.\n", ct);
                     break;
 
                 case Commands.Find:
-                    //вызов метода поиска задачи
-                    var findedTasks = _toDoService.Find(currentUser, inputs.inputText);
-                    ShowTasks(currentUser.UserId, false, findedTasks);
+                    var findedTasks = await _toDoService.Find(currentUser, inputText, ct);
+                    await ShowTasks(currentUser.UserId, false, findedTasks);
                     break;
 
                 case Commands.Report:
-                    //вызов метода печати отчета
-                    var stats = _toDoReportService.GetUserStats(currentUser.UserId);
-                    botClient.SendMessage(currentChat, $"Статистика по задачам на {stats.generatedAt}. Всего: {stats.total}; Завершенных: {stats.completed}; Активных: {stats.active};");
+                    var (total, completed, active, generatedAt) = await _toDoReportService.GetUserStats(currentUser.UserId, ct);
+                    await botClient.SendMessage(currentChat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", ct);
                     break;
 
                 case Commands.Exit:
-                    Console.WriteLine("Exit");
+                    await botClient.SendMessage(currentChat, "Нажмите CTRL+C (Ввод) для остановки бота", ct);
+                    //throw new OperationCanceledException(ct);
                     break;
-                
                 default:
-                    botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n");
-                    Commands.Start.CommandsRender(currentUser, currentChat, botClient);
+                    await botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", ct);
+                    await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
             }
         }
-        catch (ArgumentException ex)
-        {
-            botClient.SendMessage(currentChat, ex.Message);
+        #region КАСТОМНЫЕ ИСКЛЮЧЕНИЯ
+        //catch (ArgumentException ex)
+        //{
+        //    await botClient.SendMessage(currentChat, ex.Message, ct);
 
-            if (update.Message.Id == 1)
-                HandleUpdateAsync(botClient, update);
-        }
-        catch (TaskCountLimitException ex)
-        {
-            botClient.SendMessage(currentChat, ex.Message);
+        //    if (update.Message.Id == 1)
+        //        await HandleUpdateAsync(botClient, update, ct);
+        //}
+        //catch (TaskCountLimitException ex)
+        //{
+        //    await botClient.SendMessage(currentChat, ex.Message, ct);
 
-            if (update.Message.Id == 1)
-                HandleUpdateAsync(botClient, update);
-        }
-        catch (TaskLengthLimitException ex)
-        {
-            botClient.SendMessage(currentChat, ex.Message);
+        //    if (update.Message.Id == 1)
+        //        await HandleUpdateAsync(botClient, update, ct);
+        //}
+        //catch (TaskLengthLimitException ex)
+        //{
+        //    await botClient.SendMessage(currentChat, ex.Message, ct);
 
-            if (update.Message.Id == 1)
-                HandleUpdateAsync(botClient, update);
-        }
-        catch (DuplicateTaskException ex)
+        //    if (update.Message.Id == 1)
+        //        await HandleUpdateAsync(botClient, update, ct);
+        //}
+        //catch (DuplicateTaskException ex)
+        //{
+        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //}
+        //catch (EmptyTaskListException ex)
+        //{
+        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //}
+        #endregion
+
+        catch (Exception)
         {
-            botClient.SendMessage(currentChat, ex.Message);
-        }
-        catch (EmptyTaskListException ex)
-        {
-            botClient.SendMessage(currentChat, ex.Message);
-        }
-        catch (Exception ex)
-        {
-            botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка");
+            //await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", ct);
             throw;
         }
-
         #region МЕТОДЫ КОМАНД
-        ////метод команд ShowTasks и ShowAllTasks
-        void ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
+        async Task ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
         {
             //присвою список через оператор null объединения 
             var tasksList = tasks ?? (isActive 
-                ? _toDoService.GetAllByUserId(userId) 
-                : _toDoService.GetActiveByUserId(userId));
+                ? await _toDoService.GetAllByUserId(userId, ct) 
+                : await _toDoService.GetActiveByUserId(userId, ct));
 
             if (tasksList.Count == 0) 
             {
                 string emptyMessage = isActive ? "Список задач пуст.\n" : "Aктивных задач нет";
-                botClient.SendMessage(currentChat, emptyMessage);
+                await botClient.SendMessage(currentChat, emptyMessage, ct);
                 return;
             }
 
@@ -216,25 +217,24 @@ internal class UpdateHandler : IUpdateHandler
             string message = tasks != null ? "Список найденных задач:"
                 : (isActive ? "Список всех задач:" : "Список активных задач:");
 
-            botClient.SendMessage(currentChat, message);
+            await botClient.SendMessage(currentChat, message, ct);
 
-            Helper.TasksListRender(tasksList, botClient, currentChat);
+            await Helper.TasksListRender(tasksList, botClient, currentChat, ct);
         }
 
-        ////метод команды Help
-        void ShowHelp(ToDoUser user)
+        async Task ShowHelp(ToDoUser user)
         {
             if (user == null)
             {
-                botClient.SendMessage(currentChat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
+                await botClient.SendMessage(currentChat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
                 $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n");
+                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", ct);
             }
             else
             {
-                botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
+                await botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
                 $"Введя команду \"/addtask\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
@@ -245,16 +245,34 @@ internal class UpdateHandler : IUpdateHandler
                 $"Введя команду \"/find\" *название задачи*\" ты сможешь увидеть список всех задач начинающихся с названия задачи\n" +
                 $"Введя команду \"/report\" ты получишь отчёт по задачам\n" +
                 $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n");
+                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", ct);
             }
         }
 
-        ////метод команды Info
-        void ShowInfo()
+        async Task ShowInfo()
         {
             DateTime releaseDate = new DateTime(2025, 02, 08);
-            botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n");
+            await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", ct);
         }
         #endregion
+    }
+
+    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        Console.WriteLine($"Обработанное исключение: {exception.Message}");
+
+        return Task.CompletedTask;
+    }
+
+    public void HandleStart(string message)
+    {
+        Console.WriteLine($"Началась обработка сообщения \"{message}\"\n");
+    }
+
+    public void HandleComplete(string message)
+    {
+        Console.WriteLine($"Закончилась обработка сообщения \"{message}\"\n");
     }
 }

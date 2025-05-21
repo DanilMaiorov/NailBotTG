@@ -3,6 +3,6 @@
 namespace Otus.ToDoList.ConsoleBot;
 public interface ITelegramBotClient
 {
-    void StartReceiving(IUpdateHandler handler);
-    void SendMessage(Chat chat, string text);
+    void StartReceiving(IUpdateHandler handler, CancellationToken ct);
+    Task SendMessage(Chat chat, string text, CancellationToken ct);
 }

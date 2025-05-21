@@ -11,7 +11,7 @@ namespace NailBot.Core.Services
             _userRepository = userRepository;
         }
 
-        public ToDoUser RegisterUser(long telegramUserId, string telegramUserName)
+        public async Task<ToDoUser> RegisterUser(long telegramUserId, string telegramUserName, CancellationToken ct)
         {
             var newUser = new ToDoUser
             {
@@ -21,18 +21,17 @@ namespace NailBot.Core.Services
                 RegisteredAt = DateTime.Now
             };
 
-            //добавлю юзера в репозиторий
-            _userRepository.Add(newUser);
+            await _userRepository.Add(newUser, ct);
 
             return newUser;
         }
 
-        public ToDoUser? GetUser(long telegramUserId)
+        public async Task<ToDoUser?> GetUser(long telegramUserId, CancellationToken ct)
         {
-            var user = _userRepository.GetUserByTelegramUserId(telegramUserId);
+            var user = await _userRepository.GetUserByTelegramUserId(telegramUserId, ct);
 
             return user?.UserId != null 
-                ? _userRepository.GetUser(user.UserId) 
+                ? await _userRepository.GetUser(user.UserId, ct)
                 : null;
         }
     }
