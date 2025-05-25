@@ -42,6 +42,7 @@ namespace NailBot
                 try
                 {
                     _botClient.StartReceiving(_updateHandler, cts.Token);
+                    Console.WriteLine("asd");
                 }
                 finally
                 {
