@@ -1,7 +1,9 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
+using System.Text;
+using System.Threading.Tasks;
+using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace NailBot.Helpers
 {
@@ -9,22 +11,26 @@ namespace NailBot.Helpers
     public static class Helper
     {
         //рендер списка задач
-        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
+        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, Telegram.Bot.ITelegramBotClient botClient, Telegram.Bot.Types.Chat chat, CancellationToken ct)
         {
             int taskCounter = 0;
+
+            var builder = new StringBuilder();
 
             foreach (ToDoItem task in tasks)
             {
                 taskCounter++;
-                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}", ct);
+                //builder.AppendLine($"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - ```{task.Id}```");
+                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+                await botClient.SendMessage(chat, $"```csharp\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
             }
+            //await botClient.SendMessage(chat, builder.ToString(), cancellationToken: ct);
         }
 
         //метод проверки корректного ввода команд /addtask, /removetask, /completetask, /find
         public static (string, string, Guid) InputCheck(string input, IReadOnlyList<ToDoItem> currentUserTaskList = null)
         {
             string cutInput = "";
-
             Guid taskGuid = Guid.Empty;
 
             if (input.StartsWith("/addtask") || input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))

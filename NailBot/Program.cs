@@ -1,19 +1,36 @@
-﻿using Otus.ToDoList.ConsoleBot;
-using NailBot.TelegramBot;
+﻿using NailBot.TelegramBot;
 using NailBot.Core.Services;
 using NailBot.Infrastructure.DataAccess;
 using NailBot.Helpers;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types;
+using System.Diagnostics;
 
 namespace NailBot
 {
     internal class Program//ЧИСТОВИК
     {
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
-            ITelegramBotClient _botClient = new ConsoleBotClient();
+            string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
 
-            var userRepository = new InMemoryUserRepository();
-            var toDoRepository = new InMemoryToDoRepository();
+            if (string.IsNullOrEmpty(token))
+            {
+                Console.WriteLine("Bot token not found. Please set the TELEGRAM_BOT_TOKEN environment variable.");
+                return;
+            }
+
+            var botClient = new TelegramBotClient(token);
+
+            ReceiverOptions receiverOptions = new()
+            {
+                AllowedUpdates = Array.Empty<UpdateType>() // принимаю любой тип
+            };
+
+            //объявлю CancellationTokenSource
+            using var cts = new CancellationTokenSource();
 
             //стартовые значения длин
             //int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
@@ -23,13 +40,12 @@ namespace NailBot
             int maxTaskAmount = 20;
             int maxTaskLength = 25;
 
+            var userRepository = new InMemoryUserRepository();
+            var toDoRepository = new InMemoryToDoRepository();
+
             IUserService _userService = new UserService(userRepository);
             IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
-
             IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
-
-            //объявлю CancellationTokenSource
-            using var cts = new CancellationTokenSource();
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
 
@@ -41,8 +57,27 @@ namespace NailBot
 
                 try
                 {
-                    _botClient.StartReceiving(_updateHandler, cts.Token);
-                    Console.WriteLine("asd");
+                    botClient.StartReceiving(
+                        _updateHandler,
+                        receiverOptions: receiverOptions,
+                        cancellationToken: cts.Token
+                    );
+
+                    //запускаю цикл, которые будет работать пока не нажму А
+                    while (true)
+                    {
+                        Console.WriteLine("Нажми A и Ввод для остановки и выхода из бота");
+                        var s = Console.ReadLine();
+
+                        if (s?.ToUpper() == "A")
+                        {
+                            cts.Cancel();
+                            Console.WriteLine("Бот остановлен");
+                            break;
+                        }
+                        var me = await botClient.GetMe();
+                        Console.WriteLine($"{me.FirstName} запущен!");
+                    }
                 }
                 finally
                 {

@@ -3,8 +3,6 @@ using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
 using NailBot.Helpers;
 using NailBot.TelegramBot;
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
 using System.Xml.Linq;
 
 namespace NailBot.Core.Services

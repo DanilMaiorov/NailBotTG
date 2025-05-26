@@ -1,14 +1,28 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Services;
 using NailBot.Helpers;
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
+using System;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NailBot.TelegramBot;
 public enum Commands
 {
-    Start = 1, Help, Info, Addtask, Showtasks, Showalltasks, Removetask, Find, Completetask, Report, Exit
+    Start = 1, 
+    Help, 
+    Info, 
+    Addtask, 
+    Showtasks, 
+    Showalltasks, 
+    Removetask, 
+    Find, 
+    Completetask, 
+    Report, 
+    Exit
 }
+
 
 internal delegate void MessageEventHandler(string message);
 
@@ -18,10 +32,7 @@ internal class UpdateHandler : IUpdateHandler
     private readonly IToDoService _toDoService;
     private readonly IToDoReportService _toDoReportService;
 
-    private readonly ToDoService toDoService;
-    private readonly UserService userService;
-
-    //добавлю токен сорс
+    //добавлю токен
     private readonly CancellationToken _ct;
 
     //добавлю 2 события
@@ -36,17 +47,39 @@ internal class UpdateHandler : IUpdateHandler
         _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
 
         _ct = ct;
-
-        //явно приведу к типу
-        //toDoService = (ToDoService)itoDoService;
-        //userService = (UserService)iuserService;
     }
-
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
         var currentChat = update.Message.Chat;
         string message = "";
+
+
+        //инициализирую клавиатуры
+        //кнопка для /start
+        ReplyKeyboardMarkup keyboardStart = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/start")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = true
+        };
+
+        //кнопки для зареганных юзеров
+        ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/showalltasks"),
+                new KeyboardButton("/showtasks"),
+                new KeyboardButton("/report")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = false
+        };
+
         try
         {
             var currentUser = await _userService.GetUser(update.Message.From.Id, ct);
@@ -57,17 +90,24 @@ internal class UpdateHandler : IUpdateHandler
 
             if (update.Message.Id == 1)
             {
-                await botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! Введите команду для начала работы или выхода из бота.\n", ct);
-
-                await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
-
+                await botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! \n", cancellationToken: ct);
                 return;
             }
+
+            if (currentUser == null)
+            {
+                if (update.Message.Text != "/start")
+                {
+                    await botClient.SendMessage(currentChat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: keyboardStart, cancellationToken: ct);
+                    return;
+                }
+            } 
 
             string input = update.Message.Text;
 
             //присваиваю начальное значение введёного сообщения
             message = input;
+
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(message);
 
@@ -79,12 +119,9 @@ internal class UpdateHandler : IUpdateHandler
 
             input = inputCommand.Replace("/", string.Empty);
 
-            if (currentUser == null)
+            if (currentUser == null && input != "start")
             {
-                if (input != "start" && input != "help" && input != "info" && input != "exit")
-                {
-                    input = "unregistered user command";
-                }
+                input = "unregistered user command";
             }
 
             if (Enum.TryParse<Commands>(input, true, out var result))
@@ -105,7 +142,7 @@ internal class UpdateHandler : IUpdateHandler
                     {
                         currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username, ct);
                     }
-
+                    await botClient.SendMessage(currentChat, "Спасибо за регистрацию", replyMarkup: keyboardReg, cancellationToken: ct);
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
 
@@ -119,44 +156,43 @@ internal class UpdateHandler : IUpdateHandler
 
                 case Commands.Addtask:
                     var newTask = await _toDoService.Add(currentUser, inputText, ct);
-                    await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", ct);
+                    await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", replyMarkup: keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Showtasks:
-                    await ShowTasks(currentUser.UserId);
+                    await ShowTasks(currentUser.UserId, keyboardReg);
                     break;
 
                 case Commands.Showalltasks:
-                    await ShowTasks(currentUser.UserId, true);
+                    await ShowTasks(currentUser.UserId, keyboardReg, true);
                     break;
 
                 case Commands.Removetask:
                     //вызов метода удаления задачи
                     await _toDoService.Delete(taskGuid, ct);
-                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", ct);
+                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", replyMarkup: keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Completetask:
                     await _toDoService.MarkCompleted(taskGuid, ct);
-                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} выполнена.\n", ct);
+                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} выполнена.\n", replyMarkup: keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Find:
                     var findedTasks = await _toDoService.Find(currentUser, inputText, ct);
-                    await ShowTasks(currentUser.UserId, false, findedTasks);
+                    await ShowTasks(currentUser.UserId, keyboardReg, true, findedTasks);
                     break;
 
                 case Commands.Report:
                     var (total, completed, active, generatedAt) = await _toDoReportService.GetUserStats(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", ct);
+                    await botClient.SendMessage(currentChat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", replyMarkup: keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Exit:
-                    await botClient.SendMessage(currentChat, "Нажмите CTRL+C (Ввод) для остановки бота", ct);
-                    //throw new OperationCanceledException(ct);
+                    await botClient.SendMessage(currentChat, "Нажмите CTRL+C (Ввод) для остановки бота", replyMarkup: keyboardReg, cancellationToken: ct);
                     break;
                 default:
-                    await botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", ct);
+                    await botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", replyMarkup: keyboardReg, cancellationToken: ct);
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
             }
@@ -164,42 +200,42 @@ internal class UpdateHandler : IUpdateHandler
         #region КАСТОМНЫЕ ИСКЛЮЧЕНИЯ
         //catch (ArgumentException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
 
         //    if (update.Message.Id == 1)
         //        await HandleUpdateAsync(botClient, update, ct);
         //}
         //catch (TaskCountLimitException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
 
         //    if (update.Message.Id == 1)
         //        await HandleUpdateAsync(botClient, update, ct);
         //}
         //catch (TaskLengthLimitException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
 
         //    if (update.Message.Id == 1)
         //        await HandleUpdateAsync(botClient, update, ct);
         //}
         //catch (DuplicateTaskException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
         //}
         //catch (EmptyTaskListException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, ct);
+        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
         //}
         #endregion
 
         catch (Exception)
         {
-            //await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", ct);
+            //await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", cancellationToken: ct);
             throw;
         }
         #region МЕТОДЫ КОМАНД
-        async Task ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
+        async Task ShowTasks(Guid userId, ReplyKeyboardMarkup keyboard, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
         {
             //присвою список через оператор null объединения 
             var tasksList = tasks ?? (isActive 
@@ -209,7 +245,7 @@ internal class UpdateHandler : IUpdateHandler
             if (tasksList.Count == 0) 
             {
                 string emptyMessage = isActive ? "Список задач пуст.\n" : "Aктивных задач нет";
-                await botClient.SendMessage(currentChat, emptyMessage, ct);
+                await botClient.SendMessage(currentChat, emptyMessage, replyMarkup: keyboardReg, cancellationToken: ct);
                 return;
             }
 
@@ -217,7 +253,7 @@ internal class UpdateHandler : IUpdateHandler
             string message = tasks != null ? "Список найденных задач:"
                 : (isActive ? "Список всех задач:" : "Список активных задач:");
 
-            await botClient.SendMessage(currentChat, message, ct);
+            await botClient.SendMessage(currentChat, message, replyMarkup: keyboardReg, cancellationToken: ct);
 
             await Helper.TasksListRender(tasksList, botClient, currentChat, ct);
         }
@@ -230,7 +266,7 @@ internal class UpdateHandler : IUpdateHandler
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
                 $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", ct);
+                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: keyboardReg, cancellationToken: ct);
             }
             else
             {
@@ -245,19 +281,19 @@ internal class UpdateHandler : IUpdateHandler
                 $"Введя команду \"/find\" *название задачи*\" ты сможешь увидеть список всех задач начинающихся с названия задачи\n" +
                 $"Введя команду \"/report\" ты получишь отчёт по задачам\n" +
                 $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", ct);
+                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: keyboardReg, cancellationToken: ct);
             }
         }
 
         async Task ShowInfo()
         {
             DateTime releaseDate = new DateTime(2025, 02, 08);
-            await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", ct);
+            await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", replyMarkup: keyboardReg, cancellationToken: ct);
         }
         #endregion
     }
 
-    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken ct)
+    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
