@@ -1,22 +1,53 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
-using Otus.ToDoList.ConsoleBot;
-using Otus.ToDoList.ConsoleBot.Types;
+using System.Text;
+using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NailBot.Helpers
 {
 
     public static class Helper
     {
+
+        //инициализирую клавиатуры
+        //кнопка для /start
+        public static readonly ReplyKeyboardMarkup keyboardStart = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/start")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = true
+        };
+
+        //кнопки для зареганных юзеров
+        public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/showalltasks"),
+                new KeyboardButton("/showtasks"),
+                new KeyboardButton("/report")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = false
+        };
         //рендер списка задач
         public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
         {
             int taskCounter = 0;
 
+            var builder = new StringBuilder();
+
             foreach (ToDoItem task in tasks)
             {
                 taskCounter++;
-                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - {task.Id}", ct);
+                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+                await botClient.SendMessage(chat, $"```csharp\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
             }
         }
 
@@ -24,7 +55,6 @@ namespace NailBot.Helpers
         public static (string, string, Guid) InputCheck(string input, IReadOnlyList<ToDoItem> currentUserTaskList = null)
         {
             string cutInput = "";
-
             Guid taskGuid = Guid.Empty;
 
             if (input.StartsWith("/addtask") || input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))

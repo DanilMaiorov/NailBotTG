@@ -8,9 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Otus.ToDoList.ConsoleBot">
-      <HintPath>..\Otus.ToDoList.ConsoleBot\obj\Debug\net8.0\Otus.ToDoList.ConsoleBot.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Telegram.Bot" Version="22.5.1" />
+    <PackageReference Include="Telegram.Bots.Extensions.Polling" Version="5.9.0" />
   </ItemGroup>
 
 </Project>
