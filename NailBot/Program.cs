@@ -1,12 +1,9 @@
 ﻿using NailBot.TelegramBot;
 using NailBot.Core.Services;
 using NailBot.Infrastructure.DataAccess;
-using NailBot.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types;
-using System.Diagnostics;
 
 namespace NailBot
 {
@@ -26,7 +23,7 @@ namespace NailBot
 
             ReceiverOptions receiverOptions = new()
             {
-                AllowedUpdates = Array.Empty<UpdateType>() // принимаю любой тип
+                AllowedUpdates = [] // принимаю любой тип
             };
 
             //объявлю CancellationTokenSource

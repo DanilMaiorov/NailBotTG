@@ -1,17 +1,43 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
 using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NailBot.Helpers
 {
 
     public static class Helper
     {
+
+        //инициализирую клавиатуры
+        //кнопка для /start
+        public static readonly ReplyKeyboardMarkup keyboardStart = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/start")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = true
+        };
+
+        //кнопки для зареганных юзеров
+        public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/showalltasks"),
+                new KeyboardButton("/showtasks"),
+                new KeyboardButton("/report")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = false
+        };
         //рендер списка задач
-        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, Telegram.Bot.ITelegramBotClient botClient, Telegram.Bot.Types.Chat chat, CancellationToken ct)
+        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
         {
             int taskCounter = 0;
 
@@ -20,11 +46,9 @@ namespace NailBot.Helpers
             foreach (ToDoItem task in tasks)
             {
                 taskCounter++;
-                //builder.AppendLine($"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt} - ```{task.Id}```");
                 await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
                 await botClient.SendMessage(chat, $"```csharp\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
             }
-            //await botClient.SendMessage(chat, builder.ToString(), cancellationToken: ct);
         }
 
         //метод проверки корректного ввода команд /addtask, /removetask, /completetask, /find

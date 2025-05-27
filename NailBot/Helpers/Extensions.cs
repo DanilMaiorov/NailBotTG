@@ -7,7 +7,6 @@ using Telegram.Bot.Types;
 
 namespace NailBot.Helpers
 {
-
     public static class Extensions
     {
         //метод рендера списка команд
@@ -21,7 +20,6 @@ namespace NailBot.Helpers
             var commands = new List<BotCommand>();
 
             //заведу словарик для описания команд
-
             var commandDescriptions = new Dictionary<Commands, string>()
             {
                 { Commands.Start, "Начало работы с ботом, регистрация" },
@@ -67,7 +65,7 @@ namespace NailBot.Helpers
         public static string NumberReplacer(this string str)
         {
             Regex regex = new Regex("^[0-9]$");
-                
+
             return regex.IsMatch(str) ? "uncorrect command" : str;
         }
     }
