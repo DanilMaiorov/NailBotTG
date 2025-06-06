@@ -46,6 +46,44 @@ namespace NailBot
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
 
+
+
+            //удаляю папку с ToDoItem и ToDoUser для проверки работоспособности
+
+            var currentDirectory = Directory.GetCurrentDirectory();
+
+            Console.WriteLine();
+
+            var p = Path.Combine(currentDirectory, "..", "..", "..", "ToDoItemRepository");
+
+            Directory.Delete(p, true);
+
+            if (!Directory.Exists(p))
+            {
+                Directory.CreateDirectory(p);
+            }
+
+
+
+
+
+
+            //проверку на наличие свободного места делать не буду в этом проекте}
+            Console.WriteLine();
+
+
+            Console.WriteLine("cur dir {0}", Environment.CurrentDirectory);
+            Console.WriteLine("sys dir {0}", Environment.SystemDirectory);
+            Console.WriteLine("appdata dir {0}", Environment.SpecialFolder.ApplicationData);
+            Console.WriteLine("personal dir {0}", Environment.SpecialFolder.Personal);
+            Console.WriteLine("Ниже папки");
+            Console.WriteLine("appdata dir {0}", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+            Console.WriteLine("personal dir {0}", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+
+            //проверку на наличие свободного места делать не буду в этом проекте}
+            Console.WriteLine();
+
+
             if (_updateHandler is UpdateHandler castHandler)
             {
                 //подписываюсь на события

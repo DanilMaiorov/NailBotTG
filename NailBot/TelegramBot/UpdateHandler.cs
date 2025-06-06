@@ -71,6 +71,7 @@ internal class UpdateHandler : IUpdateHandler
                 if (update.Message.Text != "/start")
                 {
                     await botClient.SendMessage(currentChat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: Helper.keyboardStart, cancellationToken: ct);
+
                     return;
                 }
             } 

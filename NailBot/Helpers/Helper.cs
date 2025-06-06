@@ -47,7 +47,7 @@ namespace NailBot.Helpers
             {
                 taskCounter++;
                 await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
-                await botClient.SendMessage(chat, $"```csharp\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"```Id задачи\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
             }
         }
 
