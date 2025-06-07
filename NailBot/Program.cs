@@ -37,51 +37,65 @@ namespace NailBot
             int maxTaskAmount = 20;
             int maxTaskLength = 25;
 
+
+
+            //получаю текущую директорию
+            var currentDirectory = Directory.GetCurrentDirectory();
+
+            //имя папки для ToDoItem
+            var toDoItemfolderName = "ToDoItemFolder";
+
+            //создам класс FileToDoRepository
+            var fileToDoRepository = new FileToDoRepository(toDoItemfolderName, currentDirectory);
+
+            Console.WriteLine();
+
+            //собираю путь до неё
+            var path = Path.Combine(currentDirectory, "..", "..", "..", fileToDoRepository.ToDoItemFolderName);
+
+            //var rootDirectory = new DirectoryInfo(path);
+
+
+            if (!Directory.Exists(path))
+            {
+                Console.WriteLine("Папки нет");
+                Console.WriteLine("Создаем папку");
+                Directory.CreateDirectory(path);
+
+                //rootDirectory.CreateSubdirectory("path");
+            }
+            else
+            {
+                Console.WriteLine("Папка есть");
+                //Console.WriteLine("Удаляем папку");
+                //Directory.Delete(path, true);
+            }
+
+
             var userRepository = new InMemoryUserRepository();
             var toDoRepository = new InMemoryToDoRepository();
 
             IUserService _userService = new UserService(userRepository);
-            IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
-            IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
+
+            //IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
+            IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
+
+
+
+            //проверку на наличие свободного места делать не буду в этом проекте
+            Console.WriteLine();
+
+
+
+            //IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
+            IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
 
 
 
-            //удаляю папку с ToDoItem и ToDoUser для проверки работоспособности
-
-            var currentDirectory = Directory.GetCurrentDirectory();
-
-            Console.WriteLine();
-
-            var p = Path.Combine(currentDirectory, "..", "..", "..", "ToDoItemRepository");
-
-            Directory.Delete(p, true);
-
-            if (!Directory.Exists(p))
-            {
-                Directory.CreateDirectory(p);
-            }
 
 
-
-
-
-
-            //проверку на наличие свободного места делать не буду в этом проекте}
-            Console.WriteLine();
-
-
-            Console.WriteLine("cur dir {0}", Environment.CurrentDirectory);
-            Console.WriteLine("sys dir {0}", Environment.SystemDirectory);
-            Console.WriteLine("appdata dir {0}", Environment.SpecialFolder.ApplicationData);
-            Console.WriteLine("personal dir {0}", Environment.SpecialFolder.Personal);
-            Console.WriteLine("Ниже папки");
-            Console.WriteLine("appdata dir {0}", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-            Console.WriteLine("personal dir {0}", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-
-            //проверку на наличие свободного места делать не буду в этом проекте}
-            Console.WriteLine();
 
 
             if (_updateHandler is UpdateHandler castHandler)
