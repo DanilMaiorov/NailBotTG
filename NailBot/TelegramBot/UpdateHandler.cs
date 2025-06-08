@@ -270,6 +270,7 @@ internal class UpdateHandler : IUpdateHandler
     {
         ct.ThrowIfCancellationRequested();
 
+
         Console.WriteLine($"Обработанное исключение: {exception.Message}");
 
         return Task.CompletedTask;

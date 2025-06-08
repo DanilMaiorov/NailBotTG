@@ -78,7 +78,7 @@ namespace NailBot.Core.Services
             completedTask.State = ToDoItemState.Completed;
             completedTask.StateChangedAt = DateTime.Now;
 
-             await _toDoRepository.Update(completedTask, ct);
+            await _toDoRepository.Update(completedTask, ct);
         }
 
         // реализация метода интерфейса Find

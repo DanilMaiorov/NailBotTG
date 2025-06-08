@@ -51,7 +51,7 @@ namespace NailBot
             Console.WriteLine();
 
             //собираю путь до неё
-            var path = Path.Combine(currentDirectory, "..", "..", "..", fileToDoRepository.ToDoItemFolderName);
+            var path = Path.Combine(currentDirectory, fileToDoRepository.ToDoItemFolderName);
 
             //var rootDirectory = new DirectoryInfo(path);
 
@@ -73,7 +73,9 @@ namespace NailBot
 
 
             var userRepository = new InMemoryUserRepository();
-            var toDoRepository = new InMemoryToDoRepository();
+            //var toDoRepository = new InMemoryToDoRepository();
+
+
 
             IUserService _userService = new UserService(userRepository);
 
