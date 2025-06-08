@@ -64,8 +64,9 @@ namespace NailBot.Core.Services
         // реализация метода интерфейса Delete
         public async Task Delete(Guid id, CancellationToken ct)
         {
-            _ = GetTask(id, "удалять", ct);
 
+            await GetTask(id, "удалять", ct);
+            
             await _toDoRepository.Delete(id, ct);
         }
 

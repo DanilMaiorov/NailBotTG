@@ -217,7 +217,7 @@ internal class UpdateHandler : IUpdateHandler
 
             if (tasksList.Count == 0) 
             {
-                string emptyMessage = isActive ? "Список задач пуст.\n" : "Aктивных задач нет";
+                string emptyMessage = isActive ? "Список задач пуст\n" : "Aктивных задач нет";
                 await botClient.SendMessage(currentChat, emptyMessage, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                 return;
             }
