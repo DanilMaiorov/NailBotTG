@@ -45,7 +45,7 @@ namespace NailBot.Infrastructure.DataAccess
         //вспомогательные методы
         
         //получение пути
-        private string GetPath(string directoryName)
+        private async Task<string> GetPath(string directoryName)
         {
             return Path.Combine(_currentDirectory, directoryName);
         }
@@ -53,7 +53,7 @@ namespace NailBot.Infrastructure.DataAccess
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
         private async Task<List<ToDoItem>> GetToDoList(CancellationToken ct)
         {
-            var path = GetPath(_toDoItemFolderName);
+            var path = await GetPath(_toDoItemFolderName);
 
             var toDoList = new List<ToDoItem>();
 
@@ -88,27 +88,15 @@ namespace NailBot.Infrastructure.DataAccess
             return toDoList;
         }
 
-        //Перенос хранения ToDoItem данных в файлы
-        //Создать класс FileToDoRepository, который реализует интерфейс IToDoRepository
-        //Реализовать хранение ToDoItem в отдельных json файлах.
-        //Имя файла: "{ToDoItem.Id}.json"
-        //Имя базовой папки нужно получать через конструктор. Папку нужно создавать если её нет.
-        //Для хранения данных в файлах использовать json формат.Для этого нужно использовать библиотеку System.Text.Json и методы JsonSerializer.Serialize JsonSerializer.Deserialize.Можно использовать асинхронные варианты. Документация
-        //Заменить использование InMemoryToDoRepository на FileToDoRepository в проекте
-
-
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
             var json = JsonSerializer.Serialize(item);
 
-            var rootPath = GetPath(_toDoItemFolderName);
+            var rootPath = await GetPath(_toDoItemFolderName);
 
             var fullPath = Path.Combine(rootPath, $"{item.Id}.json");
 
             File.WriteAllText(fullPath, json);
-
-            //сделаю искусственную задержку для асинхронности
-            await Task.Delay(1, ct);
         }
 
         #region старая реализация public async Task Add(ToDoItem item, CancellationToken ct)
@@ -189,7 +177,7 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task Delete(Guid id, CancellationToken ct)
         {
-            var path = GetPath(_toDoItemFolderName);
+            var path = await GetPath(_toDoItemFolderName);
 
             if (!Directory.Exists(path))
             {
@@ -324,11 +312,9 @@ namespace NailBot.Infrastructure.DataAccess
         #endregion
 
 
-
-
         public async Task Update(ToDoItem item, CancellationToken ct)
         {
-            var path = GetPath(_toDoItemFolderName);
+            var path = await GetPath(_toDoItemFolderName);
 
             if (!Directory.Exists(path))
             {
@@ -376,39 +362,5 @@ namespace NailBot.Infrastructure.DataAccess
         //    }
         //}
         #endregion
-
-
-
-
-
-
-
-        //Перенос хранения ToDoUser данных в файлы
-        //Создать класс FileUserRepository, который реализует интерфейс IUserRepository
-        //Реализовать хранение ToDoUser в отдельных json файлах.
-        //Имя файла: "{ToDoUser.UserId}.json"
-        //Имя базовой папки нужно получать через конструктор.Папку нужно создавать если её нет.
-        //Для хранения данных в файлах использовать JSON формат.Для этого нужно использовать библиотеку System.Text.Json.
-        //Заменить использование InMemoryUserRepository на FileUserRepository в проекте
-
-        //Оптимизация поиска ToDoItem по UserId
-        //Реализовать в FileToDoRepository хранение ToDoItem в отдельных json файлах, сгуппированных по UserId в папках
-        //Имя папки: "{ToDoItem.User.UserId}"
-        //Имя файла: "{ToDoItem.Id}.json"
-
-        //Индекс для оптимизации удаления ToDoItem
-        //Добавить в FileToDoRepository файл индекс в json формате, в котором хранятся связки ToDoItemId и UserId
-        //Наполнять индекс в методе FileToDoRepository.Add
-        //Использовать и обновлять индекс в методе FileToDoRepository.Delete
-        //Если файла индекса нет, то создать файл и наполнить его актуальными данными через сканирование всех папок
-
-        //Ознакомительное примечание (выполнять не нужно):
-        //Для безопасной работы с файлами в многопоточной среде рекомендуется использовать синхронизацию потоков, чтобы в один
-        //момент времени с файлом работал только один поток.Это поможет избежать race conditions, повреждение данных, IO исключений и тд.
-        //Для этого хорошо подходит SemaphoreSlim, так как он поддерживает асинхронность, оптимизирован для внутрипроцессной
-        //синхронизации и не использует объекты ядра ОС. Например, в нашем случае можно было использовать отдельные SemaphoreSlim
-        //для каждого UserId.Данная тема выходит за рамки курса.
-
-
     }
 }

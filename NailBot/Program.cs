@@ -38,67 +38,64 @@ namespace NailBot
             int maxTaskLength = 25;
 
 
-
-            //получаю текущую директорию
+            //получаю текущую директорию для папок юзеров и тудушек
             var currentDirectory = Directory.GetCurrentDirectory();
 
             //имя папки для ToDoItem
             var toDoItemfolderName = "ToDoItemFolder";
 
+            //имя папки для User
+            var userfolderName = "UserFolder";
+
+
+
             //создам класс FileToDoRepository
             var fileToDoRepository = new FileToDoRepository(toDoItemfolderName, currentDirectory);
+            //создам класс FileUserRepository
+            var fileUserRepository = new FileUserRepository(userfolderName, currentDirectory);
 
             Console.WriteLine();
 
-            //собираю путь до неё
-            var path = Path.Combine(currentDirectory, fileToDoRepository.ToDoItemFolderName);
+            //собираю путь до toDoItemfolderName
+            var toDoItemPath = Path.Combine(currentDirectory, fileToDoRepository.ToDoItemFolderName);
+
+            //собираю путь до toDoItemfolderName
+            var userPath = Path.Combine(currentDirectory, fileUserRepository.UserFolderName);
 
             //var rootDirectory = new DirectoryInfo(path);
 
-
-            if (!Directory.Exists(path))
+            //проверка наличия папки с тудушками
+            if (!Directory.Exists(toDoItemPath))
             {
-                Console.WriteLine("Папки нет");
-                Console.WriteLine("Создаем папку");
-                Directory.CreateDirectory(path);
-
+                Directory.CreateDirectory(toDoItemPath);
                 //rootDirectory.CreateSubdirectory("path");
             }
-            else
+
+            //проверка наличия папки с юзерами
+            if (!Directory.Exists(userPath))
             {
-                Console.WriteLine("Папка есть");
-                //Console.WriteLine("Удаляем папку");
-                //Directory.Delete(path, true);
+                Directory.CreateDirectory(userPath);
+                //rootDirectory.CreateSubdirectory("path");
             }
 
-
-            var userRepository = new InMemoryUserRepository();
+            //старые экземпляры классов репо
+            //var userRepository = new InMemoryUserRepository();
             //var toDoRepository = new InMemoryToDoRepository();
 
-
-
-            IUserService _userService = new UserService(userRepository);
-
+            //старые экземпляры классов сервисов
+            //IUserService _userService = new UserService(userRepository
             //IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
+
+            //старые экземпляры классов репорт сервиса
+            //IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
+
+
+            IUserService _userService = new UserService(fileUserRepository);
             IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
 
-
-
-            //проверку на наличие свободного места делать не буду в этом проекте
-            Console.WriteLine();
-
-
-
-            //IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
             IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
-
-
-
-
-
-
 
             if (_updateHandler is UpdateHandler castHandler)
             {
