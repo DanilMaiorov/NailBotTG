@@ -62,20 +62,16 @@ namespace NailBot
             //собираю путь до toDoItemfolderName
             var userPath = Path.Combine(currentDirectory, fileUserRepository.UserFolderName);
 
-            //var rootDirectory = new DirectoryInfo(path);
-
             //проверка наличия папки с тудушками
             if (!Directory.Exists(toDoItemPath))
             {
                 Directory.CreateDirectory(toDoItemPath);
-                //rootDirectory.CreateSubdirectory("path");
             }
 
             //проверка наличия папки с юзерами
             if (!Directory.Exists(userPath))
             {
                 Directory.CreateDirectory(userPath);
-                //rootDirectory.CreateSubdirectory("path");
             }
 
             //старые экземпляры классов репо

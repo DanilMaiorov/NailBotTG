@@ -38,21 +38,21 @@ namespace NailBot.Infrastructure.DataAccess
         //вспомогательные методы
 
         //получение пути
-        private async Task<string> GetPath(string directoryName)
+        private async Task<string> GetPath(string currentDirectory, string directoryName)
         {
-            return Path.Combine(_currentDirectory, directoryName);
+            return Path.Combine(currentDirectory, directoryName);
         }
 
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
         private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
         {
-            var path = await GetPath(_userFolderName);
+            var currentDirectory = await GetPath(_currentDirectory, _userFolderName);
 
             var userList = new List<ToDoUser>();
 
-            if (Directory.Exists(path))
+            if (Directory.Exists(currentDirectory))
             {
-                var files = Directory.EnumerateFiles(path, "*.json");
+                var files = Directory.EnumerateFiles(currentDirectory, "*.json");
 
                 foreach (var file in files)
                 {
@@ -75,7 +75,7 @@ namespace NailBot.Infrastructure.DataAccess
             }
             else
             {
-                throw new DirectoryNotFoundException($"Директория не найдена: {path}");
+                throw new DirectoryNotFoundException($"Директория не найдена: {currentDirectory}");
             }
             return userList;
         }
@@ -84,9 +84,9 @@ namespace NailBot.Infrastructure.DataAccess
         {
             var json = JsonSerializer.Serialize(user);
 
-            var rootPath = await GetPath(_userFolderName);
+            var currentDirectory = await GetPath(_currentDirectory, _userFolderName);
 
-            var fullPath = Path.Combine(rootPath, $"{user.UserId}.json");
+            var fullPath = Path.Combine(currentDirectory, $"{user.UserId}.json");
 
             File.WriteAllText(fullPath, json);
         }
