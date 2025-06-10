@@ -29,10 +29,10 @@ namespace NailBot.Infrastructure.DataAccess
             set { _currentDirectory = value; }
         }
 
-        public FileUserRepository(string userFolderName, string currentDirectory)
+        public FileUserRepository(string userFolderName)
         {
             _userFolderName = userFolderName;
-            _currentDirectory = currentDirectory;
+            _currentDirectory = Directory.GetCurrentDirectory();
         }
 
         //вспомогательные методы
@@ -43,40 +43,47 @@ namespace NailBot.Infrastructure.DataAccess
             return Path.Combine(currentDirectory, directoryName);
         }
 
-        //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
-        private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
+        //проверка корневой директории тудушек
+        private async Task<string> CheckCurrentDirectory()
         {
             var currentDirectory = await GetPath(_currentDirectory, _userFolderName);
 
-            var userList = new List<ToDoUser>();
-
-            if (Directory.Exists(currentDirectory))
-            {
-                var files = Directory.EnumerateFiles(currentDirectory, "*.json");
-
-                foreach (var file in files)
-                {
-                    try
-                    {
-                        string jsonContent = await File.ReadAllTextAsync(file, ct);
-                        var userFromFiles = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
-
-                        userList.Add(userFromFiles);
-                    }
-                    catch (JsonException ex)
-                    {
-                        throw new JsonException($"Ошибка десериализации файла {file}: {ex.Message}");
-                    }
-                    catch (IOException ex)
-                    {
-                        throw new IOException($"Ошибка чтения файла {file}: {ex.Message}");
-                    }
-                }
-            }
-            else
+            if (!Directory.Exists(currentDirectory))
             {
                 throw new DirectoryNotFoundException($"Директория не найдена: {currentDirectory}");
             }
+
+            return currentDirectory;
+        }
+
+        //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
+        private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
+        {
+            var currentDirectory = await CheckCurrentDirectory();
+
+            var userList = new List<ToDoUser>();
+
+            var files = Directory.EnumerateFiles(currentDirectory, "*.json");
+
+            foreach (var file in files)
+            {
+                try
+                {
+                    string jsonContent = await File.ReadAllTextAsync(file, ct);
+                    var userFromFiles = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
+
+                    userList.Add(userFromFiles);
+                }
+                catch (JsonException ex)
+                {
+                    throw new JsonException($"Ошибка десериализации файла {file}: {ex.Message}");
+                }
+                catch (IOException ex)
+                {
+                    throw new IOException($"Ошибка чтения файла {file}: {ex.Message}");
+                }
+            }
+
             return userList;
         }
 
@@ -140,21 +147,5 @@ namespace NailBot.Infrastructure.DataAccess
         #endregion
     }
 
-    //Оптимизация поиска ToDoItem по UserId
-    //Реализовать в FileToDoRepository хранение ToDoItem в отдельных json файлах, сгуппированных по UserId в папках
-    //Имя папки: "{ToDoItem.User.UserId}"
-    //Имя файла: "{ToDoItem.Id}.json"
 
-    //Индекс для оптимизации удаления ToDoItem
-    //Добавить в FileToDoRepository файл индекс в json формате, в котором хранятся связки ToDoItemId и UserId
-    //Наполнять индекс в методе FileToDoRepository.Add
-    //Использовать и обновлять индекс в методе FileToDoRepository.Delete
-    //Если файла индекса нет, то создать файл и наполнить его актуальными данными через сканирование всех папок
-
-    //Ознакомительное примечание (выполнять не нужно):
-    //Для безопасной работы с файлами в многопоточной среде рекомендуется использовать синхронизацию потоков, чтобы в один
-    //момент времени с файлом работал только один поток.Это поможет избежать race conditions, повреждение данных, IO исключений и тд.
-    //Для этого хорошо подходит SemaphoreSlim, так как он поддерживает асинхронность, оптимизирован для внутрипроцессной
-    //синхронизации и не использует объекты ядра ОС. Например, в нашем случае можно было использовать отдельные SemaphoreSlim
-    //для каждого UserId.Данная тема выходит за рамки курса.
 }

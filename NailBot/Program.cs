@@ -9,6 +9,12 @@ namespace NailBot
 {
     internal class Program//ЧИСТОВИК
     {
+        //объявлю имена папок через константы
+        //имя папки для ToDoItem
+        private const string toDoItemfolderName = "ToDoItemFolder";
+        //имя папки для User
+        private const string userfolderName = "UserFolder";
+
         public async static Task Main(string[] args)
         {
             string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
@@ -38,52 +44,11 @@ namespace NailBot
             int maxTaskLength = 25;
 
 
-            //получаю текущую директорию для папок юзеров и тудушек
-            var currentDirectory = Directory.GetCurrentDirectory();
-
-            //имя папки для ToDoItem
-            var toDoItemfolderName = "ToDoItemFolder";
-
-            //имя папки для User
-            var userfolderName = "UserFolder";
-
-
-
             //создам класс FileToDoRepository
-            var fileToDoRepository = new FileToDoRepository(toDoItemfolderName, currentDirectory);
+            var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
+            
             //создам класс FileUserRepository
-            var fileUserRepository = new FileUserRepository(userfolderName, currentDirectory);
-
-            Console.WriteLine();
-
-            //собираю путь до toDoItemfolderName
-            var toDoItemPath = Path.Combine(currentDirectory, fileToDoRepository.ToDoItemFolderName);
-
-            //собираю путь до toDoItemfolderName
-            var userPath = Path.Combine(currentDirectory, fileUserRepository.UserFolderName);
-
-            //проверка наличия папки с тудушками
-            if (!Directory.Exists(toDoItemPath))
-            {
-                Directory.CreateDirectory(toDoItemPath);
-            }
-
-            //проверка наличия папки с юзерами
-            if (!Directory.Exists(userPath))
-            {
-                Directory.CreateDirectory(userPath);
-            }
-
-            //старые экземпляры классов репо
-            //var userRepository = new InMemoryUserRepository();
-            //var toDoRepository = new InMemoryToDoRepository();
-
-            //старые экземпляры классов сервисов
-            //IUserService _userService = new UserService(userRepository
-            //IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
-
-            //старые экземпляры классов репорт сервиса
-            //IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
+            var fileUserRepository = new FileUserRepository(userfolderName);
 
 
             IUserService _userService = new UserService(fileUserRepository);

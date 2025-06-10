@@ -33,17 +33,37 @@ namespace NailBot.Infrastructure.DataAccess
             set { _currentDirectory = value; }
         }
 
-        public FileToDoRepository(string toDoItemFolderName, string currentDirectory)
+        public FileToDoRepository(string toDoItemFolderName)
         {
             _toDoItemFolderName = toDoItemFolderName;
-            _currentDirectory = currentDirectory;
+            _currentDirectory = GetCurrentDirectory2();
+        }
+
+        private string GetCurrentDirectory2()
+        {
+            var directory = Directory.GetCurrentDirectory();
+
+            var currentDirectory = GetPath(directory, _toDoItemFolderName);
+
+            if (!Directory.Exists(currentDirectory))
+            {
+                Directory.CreateDirectory(currentDirectory);
+            }
+
+            return currentDirectory;
         }
 
 
+
         //вспомогательные методы
-        
+
         //получение пути
-        private async Task<string> GetPath(string currentDirectory, string directoryName)
+
+
+        //переписать - убрать async
+        //убрать лишние!!!
+
+        private string GetPath(string currentDirectory, string directoryName)
         {
             return Path.Combine(currentDirectory, directoryName);
         }
@@ -51,13 +71,11 @@ namespace NailBot.Infrastructure.DataAccess
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
         private async Task<List<ToDoItem>> GetToDoList(Guid userId, CancellationToken ct)
         {
-            var currentDirectory = await GetPath(_currentDirectory, _toDoItemFolderName);
-            
             var toDoList = new List<ToDoItem>();
 
-            if (Directory.Exists(currentDirectory))
+            if (Directory.Exists(_currentDirectory))
             {
-                string currentUserDirectory = await GetPath(currentDirectory, userId.ToString());
+                var currentUserDirectory = GetPath(_currentDirectory, userId.ToString());
 
                 if (Directory.Exists(currentUserDirectory))
                 {
@@ -67,11 +85,12 @@ namespace NailBot.Infrastructure.DataAccess
                     {
                         try
                         {
-                            string jsonContent = await File.ReadAllTextAsync(file, ct);
+                            var jsonContent = await File.ReadAllTextAsync(file, ct);
 
                             var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
 
-                            toDoList.Add(toDoItemFromFiles);
+                            if (toDoItemFromFiles != null)
+                                toDoList.Add(toDoItemFromFiles);
                         }
                         catch (JsonException ex)
                         {
@@ -90,36 +109,33 @@ namespace NailBot.Infrastructure.DataAccess
             }
             else
             {
-                throw new DirectoryNotFoundException($"Директория не найдена: {currentDirectory}");
+                throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
             }
             return toDoList;
         }
 
-        //метод получения директории тудуек текущего юзера
-        public async Task<string> GetUserFolderPath(Guid userId, CancellationToken ct)
+        //метод получения директории тудушек текущего юзера
+        private string GetUserFolderPath(Guid userId, CancellationToken ct)
         {
-            string currentDirectory = await GetPath(_currentDirectory, _toDoItemFolderName);
-            string currentUserDirectory = await GetPath(currentDirectory, userId.ToString());
+            string currentUserDirectory = GetPath(_currentDirectory, userId.ToString());
 
             if (!Directory.Exists(currentUserDirectory))
-            {
-                Console.WriteLine("Папки нет - надо создать");
-
                 Directory.CreateDirectory(currentUserDirectory);
-            }
+            
             return currentUserDirectory;
         }
 
+        //TODO со3дать метод GetFileIndex - создать или получить
+        //TODO создать метод обновления GetFileIndex
+        //TODO создать метод удаления GetFileIndex
 
         //проверка корневой директории тудушек
-        private async Task<string> CheckCurrentDirectory()
+        private string CheckCurrentDirectory()
         {
-            var currentDirectory = await GetPath(_currentDirectory, _toDoItemFolderName);
+            var currentDirectory = GetPath(_currentDirectory, _toDoItemFolderName);
 
             if (!Directory.Exists(currentDirectory))
-            {
                 throw new DirectoryNotFoundException($"Директория не найдена: {currentDirectory}");
-            }
 
             return currentDirectory;
         }
@@ -127,14 +143,27 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
-            var json = JsonSerializer.Serialize(item);
+            var currentDirectory = GetUserFolderPath(item.User.UserId, ct);
 
-            var currentDirectory = await GetUserFolderPath(item.User.UserId, ct);
+
+            //TODO вызвать метод GetFileIndex - создать или получить
+
+
+            
+            //обновить GetFileIndex
+
+            var json = JsonSerializer.Serialize(item);
 
             var fullPath = Path.Combine(currentDirectory, $"{item.Id}.json");
 
-            File.WriteAllText(fullPath, json);
+            await File.WriteAllTextAsync(fullPath, json);
         }
+
+        //Индекс для оптимизации удаления ToDoItem
+        //Добавить в FileToDoRepository файл индекс в json формате, в котором хранятся связки ToDoItemId и UserId
+        //Наполнять индекс в методе FileToDoRepository.Add
+        //Использовать и обновлять индекс в методе FileToDoRepository.Delete
+        //Если файла индекса нет, то создать файл и наполнить его актуальными данными через сканирование всех папок
 
         #region старая реализация public async Task Add(ToDoItem item, CancellationToken ct)
         //public async Task Add(ToDoItem item, CancellationToken ct)
@@ -148,9 +177,6 @@ namespace NailBot.Infrastructure.DataAccess
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct)
         {
             var toDoList = await GetToDoList(userId, ct);
-
-            //сделаю искусственную задержку для асинхронности
-            await Task.Delay(1, ct);
 
             return toDoList
                 .Where(x => x.User.UserId == userId)
@@ -179,12 +205,8 @@ namespace NailBot.Infrastructure.DataAccess
             var toDoList = await GetToDoList(userId, ct);
 
             if (userId == Guid.Empty)
-            {
                 return toDoList.AsReadOnly();
-            }
 
-            //сделаю искусственную задержку для асинхронности
-            await Task.Delay(1, ct);
             return toDoList
                 .Where(x => x.User.UserId == userId && x.State == ToDoItemState.Active)
                 .ToList()
@@ -214,15 +236,13 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task Delete(Guid id, CancellationToken ct)
         {
-            var currentDirectory = await CheckCurrentDirectory();
-
-            var deleteItem = Get(id, ct);
+            var deleteItem = await Get(id, ct);
 
             if (deleteItem != null)
             {
-                var currentUserDirectory = await GetPath(currentDirectory, deleteItem.Result.User.UserId.ToString());
+                var currentUserDirectory = GetPath(_currentDirectory, deleteItem.User.UserId.ToString());
 
-                string filePath = Path.Combine(currentUserDirectory, id + ".json");
+                var filePath = Path.Combine(currentUserDirectory, id + ".json");
 
                 if (File.Exists(filePath))
                 {
@@ -253,22 +273,18 @@ namespace NailBot.Infrastructure.DataAccess
 
 
         public async Task<ToDoItem?> Get(Guid id, CancellationToken ct)
-            {
-            var currentDirectory = await CheckCurrentDirectory();
-
-            foreach (var directory in Directory.EnumerateDirectories(currentDirectory))
+        {
+            foreach (var directory in Directory.EnumerateDirectories(_currentDirectory))
             {
                 foreach (var item in Directory.EnumerateFiles(directory))
                 {
                     try
                     {
-                        string jsonContent = await File.ReadAllTextAsync(item, ct);
+                        var jsonContent = await File.ReadAllTextAsync(item, ct);
                         var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
 
-                        if (toDoItemFromFiles.Id == id)
-                        {
+                        if (toDoItemFromFiles?.Id == id)
                             return toDoItemFromFiles;
-                        }
                     }
                     catch (JsonException ex)
                     {
@@ -344,10 +360,8 @@ namespace NailBot.Infrastructure.DataAccess
             var toDoList = await GetToDoList(userId, ct);
 
             if (string.IsNullOrWhiteSpace(name))
-            {
                 return false;
-            }
-
+            
             return toDoList
                 .Where(x => x.User.UserId == userId)
                 .Any(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase)); 
@@ -374,15 +388,13 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task Update(ToDoItem item, CancellationToken ct)
         {
-            var currentDirectory = await CheckCurrentDirectory();
-
-            var updateItem = Get(item.Id, ct);
+            var updateItem = await Get(item.Id, ct);
 
             if (updateItem != null)
             {
-                var currentUserDirectory = await GetPath(currentDirectory, item.User.UserId.ToString());
+                var currentUserDirectory = GetPath(_currentDirectory, item.User.UserId.ToString());
 
-                string filePath = Path.Combine(currentUserDirectory, item.Id + ".json");
+                var filePath = GetPath(currentUserDirectory, item.Id + ".json");
 
                 if (File.Exists(filePath))
                 {
@@ -390,8 +402,7 @@ namespace NailBot.Infrastructure.DataAccess
                     {
                         var json = JsonSerializer.Serialize(item);
 
-                        File.WriteAllText(filePath, json);
-                        Console.WriteLine("Файл изменён.");
+                        await File.WriteAllTextAsync(filePath, json);
                     }
                     catch (IOException ex)
                     {
