@@ -32,56 +32,55 @@ namespace NailBot.Infrastructure.DataAccess
         public FileUserRepository(string userFolderName)
         {
             _userFolderName = userFolderName;
-            _currentDirectory = Directory.GetCurrentDirectory();
+            _currentDirectory = GetCurrentPath();
         }
 
         //вспомогательные методы
 
-        //получение пути
-        private async Task<string> GetPath(string currentDirectory, string directoryName)
+        private string GetCurrentPath()
         {
-            return Path.Combine(currentDirectory, directoryName);
+            var directory = Directory.GetCurrentDirectory();
+
+            var currentPath = Path.Combine(directory, _userFolderName);
+
+            if (!Directory.Exists(currentPath))
+                Directory.CreateDirectory(currentPath);
+            
+            return currentPath;
         }
 
-        //проверка корневой директории тудушек
-        private async Task<string> CheckCurrentDirectory()
-        {
-            var currentDirectory = await GetPath(_currentDirectory, _userFolderName);
-
-            if (!Directory.Exists(currentDirectory))
-            {
-                throw new DirectoryNotFoundException($"Директория не найдена: {currentDirectory}");
-            }
-
-            return currentDirectory;
-        }
 
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
         private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
         {
-            var currentDirectory = await CheckCurrentDirectory();
-
             var userList = new List<ToDoUser>();
 
-            var files = Directory.EnumerateFiles(currentDirectory, "*.json");
-
-            foreach (var file in files)
+            if (Directory.Exists(_currentDirectory))
             {
-                try
-                {
-                    string jsonContent = await File.ReadAllTextAsync(file, ct);
-                    var userFromFiles = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
+                var files = Directory.EnumerateFiles(_currentDirectory, "*.json");
 
-                    userList.Add(userFromFiles);
-                }
-                catch (JsonException ex)
+                foreach (var file in files)
                 {
-                    throw new JsonException($"Ошибка десериализации файла {file}: {ex.Message}");
+                    try
+                    {
+                        string jsonContent = await File.ReadAllTextAsync(file, ct);
+                        var userFromFiles = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
+
+                        userList.Add(userFromFiles);
+                    }
+                    catch (JsonException ex)
+                    {
+                        throw new JsonException($"Ошибка десериализации файла {file}: {ex.Message}");
+                    }
+                    catch (IOException ex)
+                    {
+                        throw new IOException($"Ошибка чтения файла {file}: {ex.Message}");
+                    }
                 }
-                catch (IOException ex)
-                {
-                    throw new IOException($"Ошибка чтения файла {file}: {ex.Message}");
-                }
+            }
+            else
+            {
+                throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
             }
 
             return userList;
@@ -91,11 +90,11 @@ namespace NailBot.Infrastructure.DataAccess
         {
             var json = JsonSerializer.Serialize(user);
 
-            var currentDirectory = await GetPath(_currentDirectory, _userFolderName);
+            var currentDirectory = Path.Combine(_currentDirectory, _userFolderName);
 
             var fullPath = Path.Combine(currentDirectory, $"{user.UserId}.json");
 
-            File.WriteAllText(fullPath, json);
+            await File.WriteAllTextAsync(fullPath, json, ct);
         }
 
         #region старая реализация public async Task Add(ToDoUser user, CancellationToken ct)
