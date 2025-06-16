@@ -93,18 +93,15 @@ internal class UpdateHandler : IUpdateHandler
             input = inputCommand.Replace("/", string.Empty);
 
             if (currentUser == null && input != "start")
-            {
                 input = "unregistered user command";
-            }
+            
 
             if (Enum.TryParse<Commands>(input, true, out var result))
-            {
                 command = result;
-            }
+            
             else
-            {
                 command = default;
-            }
+            
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message);

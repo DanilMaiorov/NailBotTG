@@ -144,9 +144,8 @@ namespace NailBot.Infrastructure.DataAccess
                         if (Guid.TryParse(fileName, out var todoId))
                         {
                             if (File.Exists(filePath))
-                            {
                                 index[todoId] = userGuid;
-                            }
+                            
                         }
                     }
                 }
@@ -165,9 +164,8 @@ namespace NailBot.Infrastructure.DataAccess
                     var directory = Path.GetDirectoryName(_indexPath);
 
                     if (!Directory.Exists(directory))
-                    {
                         Directory.CreateDirectory(directory);
-                    }
+                    
 
                     // создам временный файл индекс
                     tempPath = Path.Combine(directory, $"{Guid.NewGuid()}.tmp");
@@ -180,22 +178,17 @@ namespace NailBot.Infrastructure.DataAccess
                     File.WriteAllText(tempPath, json);
 
                     if (!File.Exists(tempPath))
-                    {
                         throw new IOException($"Не удалось создать временный файл: {tempPath}");
-                    }
+                    
 
                     // атомарная запись через временный файл
-
                     if (File.Exists(_indexPath))
-                    {
                         // заменяю существующий файл
                         File.Replace(tempPath, _indexPath, null);
-                    }
                     else
-                    {
                         // если файл не существует - переименовываю временный файл
                         File.Move(tempPath, _indexPath);
-                    }
+                    
                 }
                 catch (Exception ex)
                 {
@@ -228,13 +221,6 @@ namespace NailBot.Infrastructure.DataAccess
                 }
             }
         }
-
-        //Индекс для оптимизации удаления ToDoItem
-        //Добавить в FileToDoRepository файл индекс в json формате, в котором хранятся связки ToDoItemId и UserId
-        //Наполнять индекс в методе FileToDoRepository.Add
-        //Использовать и обновлять индекс в методе FileToDoRepository.Delete
-        //Если файла индекса нет, то создать файл и наполнить его актуальными данными через сканирование всех папок
-
 
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
@@ -349,7 +335,6 @@ namespace NailBot.Infrastructure.DataAccess
                     try
                     {
                         File.Delete(filePath);
-
                         //обновляю индекс
                         RebuildIndex();
                     }
@@ -381,11 +366,11 @@ namespace NailBot.Infrastructure.DataAccess
 
             if (index.TryGetValue(id, out Guid userId))
             {
-                var userFolderPath = Path.Combine(_currentDirectory, userId.ToString() + ".json");
+                var userFolderPath = Path.Combine(_currentDirectory, userId.ToString());
 
                 if(Directory.Exists(userFolderPath))
                 {
-                    var toDoItemPath = Path.Combine(userFolderPath, id.ToString());
+                    var toDoItemPath = Path.Combine(userFolderPath, id.ToString() + ".json");
 
                     var json = await File.ReadAllTextAsync(toDoItemPath, ct);
 
@@ -393,29 +378,6 @@ namespace NailBot.Infrastructure.DataAccess
                 }
             }
 
-
-            //foreach (var directory in Directory.EnumerateDirectories(_currentDirectory))
-            //{
-            //    foreach (var file in Directory.EnumerateFiles(directory))
-            //    {
-            //        try
-            //        {
-            //            var jsonContent = await File.ReadAllTextAsync(file, ct);
-            //            var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
-
-            //            if (toDoItemFromFiles?.Id == id)
-            //                return toDoItemFromFiles;
-            //        }
-            //        catch (JsonException ex)
-            //        {
-            //            Console.WriteLine($"Ошибка десериализации файла {file}: {ex.Message}");
-            //        }
-            //        catch (IOException ex)
-            //        {
-            //            Console.WriteLine($"Ошибка чтения файла {file}: {ex.Message}");
-            //        }
-            //    }
-            //}
             return null;
         }
 
@@ -508,9 +470,7 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task Update(ToDoItem item, CancellationToken ct)
         {
-            var updateItem = Get(item.Id, ct);
-
-            if (updateItem != null)
+            if (item != null)
             {
                 var currentUserDirectoryPath = Path.Combine(_currentDirectory, item.User.UserId.ToString());
 
