@@ -29,7 +29,7 @@ namespace NailBot.Helpers
         public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
             new[]
             {
-                new KeyboardButton("/showalltasks"),
+                new KeyboardButton("ФВЫВАВЫА"),
                 new KeyboardButton("/showtasks"),
                 new KeyboardButton("/report")
             })
