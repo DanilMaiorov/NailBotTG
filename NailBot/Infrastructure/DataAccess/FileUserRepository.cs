@@ -34,6 +34,8 @@ namespace NailBot.Infrastructure.DataAccess
         }
         public async Task<ToDoUser?> GetUser(Guid userId, CancellationToken ct)
         {
+            var user = Path.Combine(_currentDirectory, userId.ToString()); 
+
             var userList = await GetUserList(ct);
 
             return userList.Find(x => x.UserId == userId);
