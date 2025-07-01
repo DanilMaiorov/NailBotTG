@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using System.Text.Json;
 
 namespace NailBot.Helpers
 {
@@ -28,7 +29,7 @@ namespace NailBot.Helpers
         public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
             new[]
             {
-                new KeyboardButton("/showalltasks"),
+                new KeyboardButton("ФВЫВАВЫА"),
                 new KeyboardButton("/showtasks"),
                 new KeyboardButton("/report")
             })
@@ -47,7 +48,7 @@ namespace NailBot.Helpers
             {
                 taskCounter++;
                 await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
-                await botClient.SendMessage(chat, $"```csharp\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
             }
         }
 
@@ -115,5 +116,6 @@ namespace NailBot.Helpers
             }
             return value;
         }
+
     }
 }

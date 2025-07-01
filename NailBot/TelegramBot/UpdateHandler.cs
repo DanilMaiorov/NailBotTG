@@ -71,6 +71,7 @@ internal class UpdateHandler : IUpdateHandler
                 if (update.Message.Text != "/start")
                 {
                     await botClient.SendMessage(currentChat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: Helper.keyboardStart, cancellationToken: ct);
+
                     return;
                 }
             } 
@@ -92,18 +93,15 @@ internal class UpdateHandler : IUpdateHandler
             input = inputCommand.Replace("/", string.Empty);
 
             if (currentUser == null && input != "start")
-            {
                 input = "unregistered user command";
-            }
+            
 
             if (Enum.TryParse<Commands>(input, true, out var result))
-            {
                 command = result;
-            }
+            
             else
-            {
                 command = default;
-            }
+            
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message);
@@ -216,7 +214,7 @@ internal class UpdateHandler : IUpdateHandler
 
             if (tasksList.Count == 0) 
             {
-                string emptyMessage = isActive ? "Список задач пуст.\n" : "Aктивных задач нет";
+                string emptyMessage = isActive ? "Список задач пуст\n" : "Aктивных задач нет";
                 await botClient.SendMessage(currentChat, emptyMessage, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                 return;
             }
@@ -268,6 +266,7 @@ internal class UpdateHandler : IUpdateHandler
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
+
 
         Console.WriteLine($"Обработанное исключение: {exception.Message}");
 

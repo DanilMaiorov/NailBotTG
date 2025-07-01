@@ -64,20 +64,24 @@ namespace NailBot.Core.Services
         // реализация метода интерфейса Delete
         public async Task Delete(Guid id, CancellationToken ct)
         {
-            _ = GetTask(id, "удалять", ct);
+            var action = "удалять";
 
+            await GetTask(id, action, ct);
+            
             await _toDoRepository.Delete(id, ct);
         }
 
         // реализация метода интерфейса MarkCompleted
         public async Task MarkCompleted(Guid id, CancellationToken ct)
         {
-            var completedTask = await GetTask(id, "выполнять", ct);
+            var action = "выполнять";
+
+            var completedTask = await GetTask(id, action, ct);
 
             completedTask.State = ToDoItemState.Completed;
             completedTask.StateChangedAt = DateTime.Now;
 
-             await _toDoRepository.Update(completedTask, ct);
+            await _toDoRepository.Update(completedTask, ct);
         }
 
         // реализация метода интерфейса Find

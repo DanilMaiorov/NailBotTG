@@ -9,6 +9,12 @@ namespace NailBot
 {
     internal class Program//ЧИСТОВИК
     {
+        //объявлю имена папок через константы
+        //имя папки для ToDoItem
+        private const string toDoItemfolderName = "ToDoItemFolder";
+        //имя папки для User
+        private const string userfolderName = "UserFolder";
+
         public async static Task Main(string[] args)
         {
             string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
@@ -37,12 +43,18 @@ namespace NailBot
             int maxTaskAmount = 20;
             int maxTaskLength = 25;
 
-            var userRepository = new InMemoryUserRepository();
-            var toDoRepository = new InMemoryToDoRepository();
 
-            IUserService _userService = new UserService(userRepository);
-            IToDoService _toDoService = new ToDoService(toDoRepository, maxTaskAmount, maxTaskLength);
-            IToDoReportService _toDoReportService = new ToDoReportService(toDoRepository);
+            //создам класс FileToDoRepository
+            var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
+            
+            //создам класс FileUserRepository
+            var fileUserRepository = new FileUserRepository(userfolderName);
+
+
+            IUserService _userService = new UserService(fileUserRepository);
+            IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
+
+            IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
 
