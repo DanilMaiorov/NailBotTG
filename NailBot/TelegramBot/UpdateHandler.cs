@@ -1,26 +1,13 @@
 ﻿using NailBot.Core.Entities;
+using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
+using NailBot.TelegramBot.Scenarios;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NailBot.TelegramBot;
-public enum Commands
-{
-    Start = 1, 
-    Help, 
-    Info, 
-    Addtask, 
-    Showtasks, 
-    Showalltasks, 
-    Removetask, 
-    Find, 
-    Completetask, 
-    Report, 
-    Exit
-}
 
 internal delegate void MessageEventHandler(string message);
 
@@ -37,12 +24,19 @@ internal class UpdateHandler : IUpdateHandler
     public event MessageEventHandler OnHandleUpdateStarted;
     public event MessageEventHandler OnHandleUpdateCompleted;
 
-    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, CancellationToken ct)
+    //логика сценариев
+    private readonly IEnumerable<IScenario> _scenarios;
+    private readonly IScenarioContextRepository _scenarioContextRepository;
+
+    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, IEnumerable<IScenario> scenarios, IScenarioContextRepository contextRepository, CancellationToken ct)
     {
         _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
         _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
 
         _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
+
+        _scenarios = scenarios;
+        _scenarioContextRepository = contextRepository;
 
         _ct = ct;
     }
@@ -261,6 +255,38 @@ internal class UpdateHandler : IUpdateHandler
             await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         }
         #endregion
+
+        #region МЕТОДЫ СЦЕНАРИЯ
+        //Добавить метод IScenario GetScenario(ScenarioType scenario), который возвращает соответствующий сценарий.Если сценарий не найден, то выбрасывать исключение.
+        IScenario GetScenario(ScenarioType scenario)
+        {
+            throw new NotImplementedException();
+        }
+
+        //Добавить метод Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
+        //Получает сценарий через метод GetScenario
+        //Вызывает метод IScenario.HandleMessageAsync
+        //ЕСЛИ метод вернул ScenarioResult.Completed, TO вызвать IScenarioContextRepository.ResetContext
+        //ИНАЧЕ вызвать IScenarioContextRepository.SetContext
+        async Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
+        {
+            //тут надо написать преобразователь инпута addtask в значение enum
+            var scenario = GetScenario(ScenarioType.AddTask);
+
+            var scenarioResult = await scenario.HandleMessageAsync(botClient, context, update, ct);
+
+            if (scenarioResult == ScenarioResult.Completed)
+            {
+                return await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            }
+
+            //тут вызов GetScenario
+            throw new NotImplementedException();
+        }
+
+        //В метод HandleUpdateAsync добавить получение ScenarioContext через IScenarioContextRepository перед обработкой команд.
+        //ЕСЛИ ScenarioContext найден, ТО вызвать метод ProcessScenario и завершить обработку
+        #region
     }
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
@@ -272,6 +298,10 @@ internal class UpdateHandler : IUpdateHandler
 
         return Task.CompletedTask;
     }
+
+
+
+
 
     public void HandleStart(string message)
     {
