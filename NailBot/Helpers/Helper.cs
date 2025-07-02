@@ -6,13 +6,13 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
+using NailBot.Core.Enums;
 
 namespace NailBot.Helpers
 {
 
     public static class Helper
     {
-
         //инициализирую клавиатуры
         //кнопка для /start
         public static readonly ReplyKeyboardMarkup keyboardStart = new ReplyKeyboardMarkup(
@@ -117,5 +117,24 @@ namespace NailBot.Helpers
             return value;
         }
 
+        /// <summary>
+        /// Преобразует строковое представление в значение указанного перечисления.
+        /// </summary>
+        /// <typeparam name="T">Тип перечисления</typeparam>
+        /// <param name="input">Входная строка для преобразования</param>
+        /// <returns>
+        /// Соответствующее значение перечисления при успешном преобразовании.
+        /// Значение по умолчанию для типа перечисления при неудаче.
+        /// </returns>
+        /// <remarks>
+        /// Сравнение выполняется без учёта регистра. 
+        /// Если входная строка не соответствует ни одному элементу перечисления, возвращается default(T).
+        /// </remarks>
+        public static T GetEnumValue<T>(string input) where T : struct, Enum
+        {
+            return Enum.TryParse<T>(input, true, out var result)
+                ? result
+                : default;
+        }
     }
 }

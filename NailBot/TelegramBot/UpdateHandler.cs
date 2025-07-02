@@ -78,8 +78,6 @@ internal class UpdateHandler : IUpdateHandler
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(message);
 
-            Commands command;
-
             input = input.NumberReplacer();
 
             (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input, currentUserTaskList);
@@ -88,17 +86,26 @@ internal class UpdateHandler : IUpdateHandler
 
             if (currentUser == null && input != "start")
                 input = "unregistered user command";
-            
 
-            if (Enum.TryParse<Commands>(input, true, out var result))
-                command = result;
-            
-            else
-                command = default;
-            
+            //получение значений команд типа Enum
+            Commands command = Helper.GetEnumValue<Commands>(input);
+            ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message);
+
+            //В метод HandleUpdateAsync добавить получение ScenarioContext через IScenarioContextRepository перед обработкой команд.
+            //ЕСЛИ ScenarioContext найден, ТО вызвать метод ProcessScenario и завершить обработку
+            //вызов сценария
+            var scenarioContext = await _scenarioContextRepository.GetContext(update.Message.From.Id, ct);
+
+            if (scenarioContext != null)
+            {
+                await ProcessScenario(scenarioContext, update, ct);
+            }
+
+
+
             switch (command)
             {
                 case Commands.Start:
@@ -258,35 +265,41 @@ internal class UpdateHandler : IUpdateHandler
 
         #region МЕТОДЫ СЦЕНАРИЯ
         //Добавить метод IScenario GetScenario(ScenarioType scenario), который возвращает соответствующий сценарий.Если сценарий не найден, то выбрасывать исключение.
+        /// <summary>
+        /// Возвращает экземпляр сценария по указанному типу.
+        /// </summary>
+        /// <param name="scenario">Тип сценария из перечисления ScenarioType</param>
+        /// <returns>Реализация интерфейса IScenario для запрошенного сценария</returns>
+        /// <exception cref="NotSupportedException">Выбрасывается при передаче неподдерживаемого значения ScenarioType</exception>
         IScenario GetScenario(ScenarioType scenario)
         {
-            throw new NotImplementedException();
+            //if (scenario == ScenarioType.AddTask)
+            //    return new BasicScenario();
+
+            //if (scenario == ScenarioType.Advanced)
+            //    return new AdvancedScenario();
+
+            //if (scenario == ScenarioType.Custom)
+            //    return new CustomScenario();
+
+            throw new NotSupportedException($"Сценарий типа {scenario} не поддерживается");
         }
 
-        //Добавить метод Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
-        //Получает сценарий через метод GetScenario
-        //Вызывает метод IScenario.HandleMessageAsync
-        //ЕСЛИ метод вернул ScenarioResult.Completed, TO вызвать IScenarioContextRepository.ResetContext
-        //ИНАЧЕ вызвать IScenarioContextRepository.SetContext
         async Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
         {
-            //тут надо написать преобразователь инпута addtask в значение enum
             var scenario = GetScenario(ScenarioType.AddTask);
 
             var scenarioResult = await scenario.HandleMessageAsync(botClient, context, update, ct);
 
             if (scenarioResult == ScenarioResult.Completed)
-            {
-                return await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
-            }
-
-            //тут вызов GetScenario
-            throw new NotImplementedException();
+                await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            else
+                await _scenarioContextRepository.SetContext(update.Message.From.Id, context, ct);
         }
 
         //В метод HandleUpdateAsync добавить получение ScenarioContext через IScenarioContextRepository перед обработкой команд.
         //ЕСЛИ ScenarioContext найден, ТО вызвать метод ProcessScenario и завершить обработку
-        #region
+        #endregion
     }
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)

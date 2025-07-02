@@ -7,7 +7,13 @@
 
         public Task<ScenarioContext?> GetContext(long userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            ct.ThrowIfCancellationRequested();
+
+            return Task.FromResult(
+                _scenarioContext.TryGetValue(userId, out var context)
+                    ? context
+                    : null
+            );
         }
 
         public Task ResetContext(long userId, CancellationToken ct)

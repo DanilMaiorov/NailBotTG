@@ -18,7 +18,8 @@ namespace NailBot
 
         public async static Task Main(string[] args)
         {
-            string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
+            //string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
+            string token = "7512417913:AAHnoeWdDKNOyTuF0DMHpPVdO95imk0xMgw";
 
             if (string.IsNullOrEmpty(token))
             {
