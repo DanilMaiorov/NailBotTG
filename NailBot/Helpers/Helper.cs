@@ -29,8 +29,9 @@ namespace NailBot.Helpers
         public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
             new[]
             {
-                new KeyboardButton("ФВЫВАВЫА"),
+                new KeyboardButton("/showalltasks"),
                 new KeyboardButton("/showtasks"),
+                new KeyboardButton("/addtask"),
                 new KeyboardButton("/report")
             })
         {
@@ -58,14 +59,9 @@ namespace NailBot.Helpers
             string cutInput = "";
             Guid taskGuid = Guid.Empty;
 
-            if (input.StartsWith("/addtask") || input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
+            if (input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
             {
-                if (input.StartsWith("/addtask "))
-                {
-                    cutInput = input.Substring(9);
-                    input = "/addtask";
-                }
-                else if (input.StartsWith("/find "))
+                if (input.StartsWith("/find "))
                 {
                     cutInput = input.Substring(6);
                     input = "/find";

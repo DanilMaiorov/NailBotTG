@@ -6,6 +6,8 @@ using NailBot.TelegramBot.Scenarios;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NailBot.TelegramBot;
 
@@ -94,17 +96,15 @@ internal class UpdateHandler : IUpdateHandler
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message);
 
-            //В метод HandleUpdateAsync добавить получение ScenarioContext через IScenarioContextRepository перед обработкой команд.
-            //ЕСЛИ ScenarioContext найден, ТО вызвать метод ProcessScenario и завершить обработку
             //вызов сценария
             var scenarioContext = await _scenarioContextRepository.GetContext(update.Message.From.Id, ct);
 
             if (scenarioContext != null)
             {
                 await ProcessScenario(scenarioContext, update, ct);
+
+                return;
             }
-
-
 
             switch (command)
             {
@@ -126,8 +126,11 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Addtask:
-                    var newTask = await _toDoService.Add(currentUser, inputText, ct);
-                    await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    var newContext = new ScenarioContext(ScenarioType.AddTask);
+
+                    await ProcessScenario(newContext, update, ct);
+
+                    //await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Showtasks:
@@ -264,7 +267,6 @@ internal class UpdateHandler : IUpdateHandler
         #endregion
 
         #region МЕТОДЫ СЦЕНАРИЯ
-        //Добавить метод IScenario GetScenario(ScenarioType scenario), который возвращает соответствующий сценарий.Если сценарий не найден, то выбрасывать исключение.
         /// <summary>
         /// Возвращает экземпляр сценария по указанному типу.
         /// </summary>
@@ -273,16 +275,8 @@ internal class UpdateHandler : IUpdateHandler
         /// <exception cref="NotSupportedException">Выбрасывается при передаче неподдерживаемого значения ScenarioType</exception>
         IScenario GetScenario(ScenarioType scenario)
         {
-            //if (scenario == ScenarioType.AddTask)
-            //    return new BasicScenario();
-
-            //if (scenario == ScenarioType.Advanced)
-            //    return new AdvancedScenario();
-
-            //if (scenario == ScenarioType.Custom)
-            //    return new CustomScenario();
-
-            throw new NotSupportedException($"Сценарий типа {scenario} не поддерживается");
+            var scen = _scenarios.FirstOrDefault(s => s.CanHandle(scenario));
+            return scen ?? throw new NotSupportedException($"Сценарий {scenario} не поддерживается");
         }
 
         async Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
@@ -296,9 +290,6 @@ internal class UpdateHandler : IUpdateHandler
             else
                 await _scenarioContextRepository.SetContext(update.Message.From.Id, context, ct);
         }
-
-        //В метод HandleUpdateAsync добавить получение ScenarioContext через IScenarioContextRepository перед обработкой команд.
-        //ЕСЛИ ScenarioContext найден, ТО вызвать метод ProcessScenario и завершить обработку
         #endregion
     }
 
@@ -306,15 +297,10 @@ internal class UpdateHandler : IUpdateHandler
     {
         ct.ThrowIfCancellationRequested();
 
-
         Console.WriteLine($"Обработанное исключение: {exception.Message}");
 
         return Task.CompletedTask;
     }
-
-
-
-
 
     public void HandleStart(string message)
     {

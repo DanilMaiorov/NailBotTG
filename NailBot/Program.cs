@@ -61,7 +61,10 @@ namespace NailBot
 
             //логика сценариев
             IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
-            var scenarios = new List<IScenario> {};
+            var scenarios = new List<IScenario> 
+            {
+                new AddTaskScenario(_userService, _toDoService)
+            };
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, cts.Token);
 

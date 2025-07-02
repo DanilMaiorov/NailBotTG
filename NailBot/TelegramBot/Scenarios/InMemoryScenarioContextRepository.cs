@@ -1,4 +1,6 @@
-﻿namespace NailBot.TelegramBot.Scenarios
+﻿using Polly;
+
+namespace NailBot.TelegramBot.Scenarios
 {
     public class InMemoryScenarioContextRepository : IScenarioContextRepository
     {
@@ -18,12 +20,14 @@
 
         public Task ResetContext(long userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            _scenarioContext.Remove(userId);
+            return Task.CompletedTask;
         }
 
         public Task SetContext(long userId, ScenarioContext context, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            _scenarioContext[userId] = context;
+            return Task.CompletedTask;
         }
     }
 }
