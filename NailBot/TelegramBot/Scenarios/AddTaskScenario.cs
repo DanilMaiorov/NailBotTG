@@ -29,11 +29,9 @@ namespace NailBot.TelegramBot.Scenarios
             switch (context.CurrentStep)
             {
                 case null:
-                    
-
                     context.Data[currentUser.TelegramUserName] = currentUser;
 
-                    bot.SendMessage(update.Message.Chat, "Введите название задачи:", cancellationToken: ct);
+                    await bot.SendMessage(update.Message.Chat, "Введите название задачи:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
                     context.CurrentStep = "Name";
                     return await Task.FromResult(ScenarioResult.Transition);
 
@@ -41,7 +39,7 @@ namespace NailBot.TelegramBot.Scenarios
 
                     if (context.Data.TryGetValue(currentUser.TelegramUserName, out object user))
                     {
-                        _toDoService.Add((ToDoUser)user, update.Message.Text, ct);
+                        await _toDoService.Add((ToDoUser)user, update.Message.Text, ct);
 
                         await bot.SendMessage(update.Message.Chat, $"Задача \"{update.Message.Text}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                         return await Task.FromResult(ScenarioResult.Completed);

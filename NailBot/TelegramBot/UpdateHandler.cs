@@ -8,6 +8,8 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Telegram.Bot.Types.ReplyMarkups;
+using System.Threading.Channels;
+using NailBot.Core.Exceptions;
 
 namespace NailBot.TelegramBot;
 
@@ -96,13 +98,15 @@ internal class UpdateHandler : IUpdateHandler
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message);
 
-            //вызов сценария
+            //Работа с командой cancel и сценариями
+            if (command == Commands.Cancel)
+                await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            
             var scenarioContext = await _scenarioContextRepository.GetContext(update.Message.From.Id, ct);
 
             if (scenarioContext != null)
             {
                 await ProcessScenario(scenarioContext, update, ct);
-
                 return;
             }
 
@@ -127,10 +131,11 @@ internal class UpdateHandler : IUpdateHandler
 
                 case Commands.Addtask:
                     var newContext = new ScenarioContext(ScenarioType.AddTask);
-
                     await ProcessScenario(newContext, update, ct);
+                    break;
 
-                    //await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                case Commands.Cancel:
+                    await botClient.SendMessage(currentChat, "Добавление задачи отменено. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Showtasks:
@@ -142,7 +147,6 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Removetask:
-                    //вызов метода удаления задачи
                     await _toDoService.Delete(taskGuid, ct);
                     await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
@@ -193,10 +197,12 @@ internal class UpdateHandler : IUpdateHandler
         //    if (update.Message.Id == 1)
         //        await HandleUpdateAsync(botClient, update, ct);
         //}
-        //catch (DuplicateTaskException ex)
-        //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-        //}
+        catch (DuplicateTaskException ex)
+        {
+            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+            return;
+        }
         //catch (EmptyTaskListException ex)
         //{
         //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
@@ -247,7 +253,8 @@ internal class UpdateHandler : IUpdateHandler
                 await botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/addtask\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
+                $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном введении, задача будет добавлена\n" +
+                $"Введя команду \"/cancel\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
                 $"Введя команду \"/showtasks\" ты сможешь увидеть список активных задач в списке\n" +
                 $"Введя команду \"/showalltasks\" ты сможешь увидеть список всех задач в списке\n" +
                 $"Введя команду \"/removetask\" *номер задачи*\" ты сможешь удалить задачу из списка задач\n" +
@@ -275,13 +282,13 @@ internal class UpdateHandler : IUpdateHandler
         /// <exception cref="NotSupportedException">Выбрасывается при передаче неподдерживаемого значения ScenarioType</exception>
         IScenario GetScenario(ScenarioType scenario)
         {
-            var scen = _scenarios.FirstOrDefault(s => s.CanHandle(scenario));
-            return scen ?? throw new NotSupportedException($"Сценарий {scenario} не поддерживается");
+            var currentScenario = _scenarios.FirstOrDefault(s => s.CanHandle(scenario));
+            return currentScenario ?? throw new NotSupportedException($"Сценарий {scenario} не поддерживается");
         }
 
         async Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
         {
-            var scenario = GetScenario(ScenarioType.AddTask);
+            var scenario = GetScenario(context.CurrentScenario);
 
             var scenarioResult = await scenario.HandleMessageAsync(botClient, context, update, ct);
 

@@ -38,6 +38,19 @@ namespace NailBot.Helpers
             ResizeKeyboard = true,
             OneTimeKeyboard = false
         };
+        //кнопка для /cancel
+        public static readonly ReplyKeyboardMarkup keyboardCancel = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/cancel")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = true
+        };
+
+
+
         //рендер списка задач
         public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
         {
