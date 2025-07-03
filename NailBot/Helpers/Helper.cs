@@ -7,6 +7,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
 using NailBot.Core.Enums;
+using System.Globalization;
 
 namespace NailBot.Helpers
 {
@@ -145,5 +146,31 @@ namespace NailBot.Helpers
                 ? result
                 : default;
         }
+
+        /// <summary>
+        /// Пытается преобразовать строку с датой в формате dd.MM.yyyy в объект DateTime.
+        /// </summary>
+        /// <param name="userInput">Строка с датой для парсинга</param>
+        /// <param name="result">Результат преобразования (при успешном парсинге)</param>
+        /// <returns>
+        /// true - если парсинг выполнен успешно; 
+        /// false - если строка имеет неверный формат или не является допустимой датой
+        /// </returns>
+        /// <remarks>
+        /// Использует строгий парсинг с форматом, заданным в Constants.deadlineFormat
+        /// и независимый от региональных настроек (InvariantCulture)
+        /// </remarks>
+        public static bool TryParseUserDate(string userInput, out DateTime result)
+        {
+            return DateTime.TryParseExact(
+                userInput,
+                Constants.deadlineFormat,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out result
+            );
+        }
+
+
     }
 }

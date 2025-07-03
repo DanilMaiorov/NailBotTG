@@ -2,14 +2,8 @@
 using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bots.Http;
 
 namespace NailBot.TelegramBot.Scenarios
 {
@@ -18,6 +12,13 @@ namespace NailBot.TelegramBot.Scenarios
         private readonly IUserService _userService;
         private readonly IToDoService _toDoService;
 
+        private string _taskName;
+        public AddTaskScenario(IUserService userService, IToDoService toDoService)
+        {
+            _userService = userService;
+            _toDoService = toDoService;
+        }
+
         public bool CanHandle(ScenarioType scenario)
         {
             return scenario == ScenarioType.AddTask;
@@ -25,35 +26,72 @@ namespace NailBot.TelegramBot.Scenarios
 
         public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct)
         {
-            var currentUser = await _userService.GetUser(update.Message.From.Id, ct);
+            var message = update.Message;
+            var currentUser = await _userService.GetUser(message.From.Id, ct);
+            var currentChat = message.Chat;
+            var currentUserInput = message.Text?.Trim();
+
             switch (context.CurrentStep)
             {
                 case null:
-                    context.Data[currentUser.TelegramUserName] = currentUser;
-
-                    await bot.SendMessage(update.Message.Chat, "Введите название задачи:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
-                    context.CurrentStep = "Name";
-                    return await Task.FromResult(ScenarioResult.Transition);
+                    return await HandleInitialStep(bot, context, currentUser, currentChat, ct);
 
                 case "Name":
+                    return await HandleNameStep(bot, context, currentUser, currentChat, currentUserInput, ct);
 
-                    if (context.Data.TryGetValue(currentUser.TelegramUserName, out object user))
-                    {
-                        await _toDoService.Add((ToDoUser)user, update.Message.Text, ct);
+                case "Deadline":
+                    return await HandleDeadlineStep(bot, context, currentUser, currentChat, currentUserInput, ct);
 
-                        await bot.SendMessage(update.Message.Chat, $"Задача \"{update.Message.Text}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                        return await Task.FromResult(ScenarioResult.Completed);
-                    }
+                default:
+                    await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
-            }
-
-            throw new NotImplementedException();
+             }
+            return ScenarioResult.Completed;
         }
 
-        public AddTaskScenario(IUserService userService, IToDoService toDoService)
+
+        private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            _userService = userService;
-            _toDoService = toDoService;
+            context.Data[user.TelegramUserName] = user;
+
+            await bot.SendMessage(chat, "Введите название задачи:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+
+            context.CurrentStep = "Name";
+            return ScenarioResult.Transition;
+        }
+
+        private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        {
+            var tasks = await _toDoService.GetAllByUserId(user.UserId, ct);
+
+            Helper.CheckDuplicate(userInput, tasks);
+
+            _taskName = userInput;
+
+            await bot.SendMessage(chat, "Введите дедлайн задачи в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+
+            context.CurrentStep = "Deadline";
+            return ScenarioResult.Transition;
+        }
+
+        private async Task<ScenarioResult> HandleDeadlineStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        {
+            if (!Helper.TryParseUserDate(userInput, out DateTime deadline))
+            {
+                await bot.SendMessage(chat, "Неверный формат даты. Попробуйте ещё раз в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+                return ScenarioResult.Transition;
+            }
+
+            if (!context.Data.TryGetValue(user.TelegramUserName, out var userObj))
+                throw new InvalidOperationException("Пользователь не найден в контексте");
+            
+
+            await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, ct);
+
+            await bot.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+
+            _taskName = string.Empty;
+            return ScenarioResult.Completed;
         }
     }
 }

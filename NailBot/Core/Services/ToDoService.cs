@@ -34,7 +34,7 @@ namespace NailBot.Core.Services
         }
 
         // реализация метода интерфейса Add
-        public async Task<ToDoItem> Add(ToDoUser user, string name, CancellationToken ct)
+        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, CancellationToken ct)
         {
             var tasks = await GetAllByUserId(user.UserId, ct);
 
@@ -43,17 +43,16 @@ namespace NailBot.Core.Services
                 throw new TaskCountLimitException(maxTaskAmount);
             }
 
-            string newTask = Validate.ValidateString(name, maxTaskLength);
-
-            Helper.CheckDuplicate(newTask, tasks);
+            string taskName = Validate.ValidateString(name, maxTaskLength);
 
             var newToDoItem = new ToDoItem
             {
-                Name = newTask,
+                Name = taskName,
                 Id = Guid.NewGuid(),
                 CreatedAt = DateTime.Now,
                 User = user,
                 StateChangedAt = DateTime.Now,
+                Deadline = deadline,
             };
 
             await _toDoRepository.Add(newToDoItem, ct);

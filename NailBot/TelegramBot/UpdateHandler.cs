@@ -114,9 +114,8 @@ internal class UpdateHandler : IUpdateHandler
             {
                 case Commands.Start:
                     if (currentUser == null)
-                    {
                         currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username, ct);
-                    }
+                    
                     await botClient.SendMessage(currentChat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
@@ -135,7 +134,7 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Cancel:
-                    await botClient.SendMessage(currentChat, "Добавление задачи отменено. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await botClient.SendMessage(currentChat, "Текущий сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Showtasks:
@@ -183,19 +182,15 @@ internal class UpdateHandler : IUpdateHandler
         //    if (update.Message.Id == 1)
         //        await HandleUpdateAsync(botClient, update, ct);
         //}
-        //catch (TaskCountLimitException ex)
-        //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-
-        //    if (update.Message.Id == 1)
-        //        await HandleUpdateAsync(botClient, update, ct);
-        //}
+        catch (TaskCountLimitException ex)
+        {
+            await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            await botClient.SendMessage(currentChat, "Текущий сценарий завершен. Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+        }
         //catch (TaskLengthLimitException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-
-        //    if (update.Message.Id == 1)
-        //        await HandleUpdateAsync(botClient, update, ct);
+        //    await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+        //    await botClient.SendMessage(currentChat, "Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         //}
         catch (DuplicateTaskException ex)
         {
@@ -203,10 +198,11 @@ internal class UpdateHandler : IUpdateHandler
             await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
             return;
         }
-        //catch (EmptyTaskListException ex)
-        //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-        //}
+        catch (EmptyTaskListException ex)
+        {
+            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+        }
         #endregion
 
         catch (Exception)
@@ -253,8 +249,8 @@ internal class UpdateHandler : IUpdateHandler
                 await botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном введении, задача будет добавлена\n" +
-                $"Введя команду \"/cancel\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
+                $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном вводе, задача будет добавлена\n" +
+                $"Введя команду \"/cancel\" ты сможешь отменить отменить добавление новой задачи \n" +
                 $"Введя команду \"/showtasks\" ты сможешь увидеть список активных задач в списке\n" +
                 $"Введя команду \"/showalltasks\" ты сможешь увидеть список всех задач в списке\n" +
                 $"Введя команду \"/removetask\" *номер задачи*\" ты сможешь удалить задачу из списка задач\n" +
@@ -299,6 +295,12 @@ internal class UpdateHandler : IUpdateHandler
         }
         #endregion
     }
+
+//Добавление Deadline в ToDoItem
+//Добавить свойство DateTime Deadline в ToDoItem
+//Добавить аргумент DateTime deadline в IToDoService.Add
+//Добавить заполнение Deadline в AddTaskScenario через отдельный шаг. Формат текста dd.MM.yyyy.
+//Если пользователь введет дату в неверном формате, сценарий не должен прерваться и нужно еще раз запросить дату.
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
     {
