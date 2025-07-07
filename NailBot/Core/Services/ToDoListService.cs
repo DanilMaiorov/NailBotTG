@@ -9,9 +9,24 @@ namespace NailBot.Core.Services
 {
     public class ToDoListService : IToDoListService
     {
-        public Task<ToDoList> Add(ToDoUser user, string name, CancellationToken ct)
+        private readonly IToDoListRepository _toDoListRepository;
+
+        public ToDoListService(IToDoListRepository toDoListRepository)
         {
-            throw new NotImplementedException();
+            _toDoListRepository = toDoListRepository;
+        }
+
+        public async Task<ToDoList> Add(ToDoUser user, string name, CancellationToken ct)
+        {
+            // Размер имени списка не может быть больше 10 символов
+            if (string.IsNullOrWhiteSpace(name) || name.Length > 10)
+                throw new ArgumentException("Название списка не может быть пустым и не должно превышать 10 символов.");
+
+            //Название списка должно быть уникально в рамках одного ToDoUser
+
+            var toDoList = await _toDoListRepository.GetByUserId(user.UserId, ct);
+            //ПРОДОЛЖИТЬ ТУТ РЕАЛИЗОВАЛ МЕТОД GetByUserId
+
         }
 
         public Task Delete(Guid id, CancellationToken ct)
@@ -30,8 +45,8 @@ namespace NailBot.Core.Services
         }
 
 
-        //Размер имени списка не может быть больше 10 символов
 
-        //Название списка должно быть уникально в рамках одного ToDoUser
+
+
     }
 }
