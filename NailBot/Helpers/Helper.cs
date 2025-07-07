@@ -30,8 +30,7 @@ namespace NailBot.Helpers
         public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
             new[]
             {
-                new KeyboardButton("/showalltasks"),
-                new KeyboardButton("/showtasks"),
+                new KeyboardButton("/show"),
                 new KeyboardButton("/addtask"),
                 new KeyboardButton("/report")
             })
@@ -49,6 +48,28 @@ namespace NailBot.Helpers
             ResizeKeyboard = true,
             OneTimeKeyboard = true
         };
+
+
+
+        //метод клавиатуры после нажатия /show
+        public static InlineKeyboardMarkup GetSelectListKeyboard()
+        {
+            var keyboardButtons = new List<List<InlineKeyboardButton>>();
+
+            keyboardButtons.Add(new List<InlineKeyboardButton>
+            {
+                InlineKeyboardButton.WithCallbackData(text: "📌 Без списка", callbackData: "select_list_none")
+            });
+
+            // Вторая строка: "Добавить" и "Удалить"
+            keyboardButtons.Add(new List<InlineKeyboardButton>
+            {
+                InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "add_list"),
+                InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "delete_list")
+            });
+
+            return new InlineKeyboardMarkup(keyboardButtons);
+        }
 
 
 

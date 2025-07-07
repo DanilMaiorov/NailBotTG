@@ -32,6 +32,11 @@ internal class UpdateHandler : IUpdateHandler
     private readonly IEnumerable<IScenario> _scenarios;
     private readonly IScenarioContextRepository _scenarioContextRepository;
 
+    //IToDoListService 
+    private readonly IToDoListService _toDoListService;
+
+
+
     public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, IEnumerable<IScenario> scenarios, IScenarioContextRepository contextRepository, CancellationToken ct)
     {
         _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
@@ -137,12 +142,9 @@ internal class UpdateHandler : IUpdateHandler
                     await botClient.SendMessage(currentChat, "Текущий сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
-                case Commands.Showtasks:
-                    await ShowTasks(currentUser.UserId);
-                    break;
-
-                case Commands.Showalltasks:
-                    await ShowTasks(currentUser.UserId, true);
+                case Commands.Show:
+                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboard(), cancellationToken: ct);
+                    //await ShowTasks(currentUser.UserId);
                     break;
 
                 case Commands.Removetask:
@@ -204,7 +206,7 @@ internal class UpdateHandler : IUpdateHandler
             await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
         }
         #endregion
-
+        
         catch (Exception)
         {
             //await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", cancellationToken: ct);

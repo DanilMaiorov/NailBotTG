@@ -84,5 +84,6 @@ namespace NailBot.Infrastructure.DataAccess
 
             return userList;
         }    
+    
     }
 }

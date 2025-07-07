@@ -84,9 +84,13 @@ namespace NailBot.TelegramBot.Scenarios
 
             if (!context.Data.TryGetValue(user.TelegramUserName, out var userObj))
                 throw new InvalidOperationException("Пользователь не найден в контексте");
-            
 
-            await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, ct);
+
+
+
+            //await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, ct);
+            //ТУТ ПОКА НЕ ПОНИМАЮ КАК ДОЛЖНО РАБОТАТ
+            await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, null, ct);
 
             await bot.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 

@@ -34,7 +34,7 @@ namespace NailBot.Core.Services
         }
 
         // реализация метода интерфейса Add
-        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, CancellationToken ct)
+        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, ToDoList? list, CancellationToken ct)
         {
             var tasks = await GetAllByUserId(user.UserId, ct);
 
@@ -120,6 +120,26 @@ namespace NailBot.Core.Services
             return item == null
                 ? throw new NullTaskException("Задача не существует или равна null")
                 : result.FirstOrDefault(x => x.Id == id);
+        }
+
+
+
+        async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        {
+            await Task.Delay(1);
+
+            throw new NotImplementedException();
+            //await Task.Delay(1);
+
+            //var list = new List<ToDoItem> { };
+
+            //return list.AsReadOnly();
+        }
+
+
+        Task<IReadOnlyList<ToDoItem>> IToDoService.GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        {
+            throw new NotImplementedException();
         }
     }
 }

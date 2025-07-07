@@ -10,5 +10,8 @@
         public ToDoItemState State { get; set; }
         public DateTime? StateChangedAt { get; set; }
         public DateTime Deadline { get; set; }
+        
+        //ДЗ 11
+        public ToDoList? List { get; set; }
     }
 }

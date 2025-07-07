@@ -1,11 +1,12 @@
 ﻿using Polly;
+using System.Collections.Concurrent;
 
 namespace NailBot.TelegramBot.Scenarios
 {
     public class InMemoryScenarioContextRepository : IScenarioContextRepository
     {
         //словарь в качестве хранилища
-        public Dictionary<long, ScenarioContext> _scenarioContext = [];
+        public ConcurrentDictionary<long, ScenarioContext> _scenarioContext = [];
 
         public Task<ScenarioContext?> GetContext(long userId, CancellationToken ct)
         {
@@ -20,7 +21,13 @@ namespace NailBot.TelegramBot.Scenarios
 
         public Task ResetContext(long userId, CancellationToken ct)
         {
-            _scenarioContext.Remove(userId);
+            ScenarioContext? removedContext;
+
+            if (_scenarioContext.TryRemove(userId, out removedContext))
+                Console.WriteLine($"Контекст пользователя {userId} успешно удален.");
+            else
+                Console.WriteLine($"Контекст для пользователя {userId} не найден или уже был удален.");
+            
             return Task.CompletedTask;
         }
 
