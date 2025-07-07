@@ -4,15 +4,43 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NailBot.Infrastructure.DataAccess
 {
     public class FileToDoListRepository : IToDoListRepository
     {
-        public Task Add(ToDoList list, CancellationToken ct)
+        //имя папки с ToDoList
+        private readonly string _toDoListFolderName;
+        //путь до текущей директории
+        private readonly string _currentDirectory;
+
+        //объявлю semaphore
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
+        public FileToDoListRepository(string toDoListFolderName)
         {
-            throw new NotImplementedException();
+            _toDoListFolderName = toDoListFolderName;
+            _currentDirectory = GetCurrentPath();
+        }
+
+
+        public async Task Add(ToDoList list, CancellationToken ct)
+        {
+            await _semaphore.WaitAsync();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(list);
+                var currentDirectory = Path.Combine(_currentDirectory, _toDoListFolderName, list.User.UserId.ToString());
+                var fullPath = Path.Combine(currentDirectory, $"{list.Name}.json");
+                await File.WriteAllTextAsync(fullPath, json, ct);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public Task Delete(Guid id, CancellationToken ct)
@@ -30,23 +58,54 @@ namespace NailBot.Infrastructure.DataAccess
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<ToDoList>> GetByUserId(Guid userId, CancellationToken ct)
+        public async Task<IReadOnlyList<ToDoList>> GetByUserId(Guid userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var toDoList = new List<ToDoList>();
+
+            await _semaphore.WaitAsync();
+
+            try
+            {
+                var currentUserDirectory = Path.Combine(_currentDirectory, userId.ToString());
+
+                if (!Directory.Exists(currentUserDirectory))
+                    return toDoList.AsReadOnly(); // Возвращаем пустой список
+                
+
+                var files = Directory.EnumerateFiles(currentUserDirectory, "*.json");
+
+                foreach (var file in files)
+                {
+                    string jsonContent = await File.ReadAllTextAsync(file, ct);
+                    var toDoListFromFiles = JsonSerializer.Deserialize<ToDoList>(jsonContent);
+
+                    toDoList.Add(toDoListFromFiles);
+                }
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+
+            return toDoList.AsReadOnly();
+        }
+
+        //вспомогательные методы
+        private string GetCurrentPath()
+        {
+            var directory = Directory.GetCurrentDirectory();
+
+            var currentPath = Path.Combine(directory, _toDoListFolderName);
+
+            if (!Directory.Exists(currentPath))
+                Directory.CreateDirectory(currentPath);
+
+            return currentPath;
         }
     }
 }
 
-//public async Task Add(ToDoUser user, CancellationToken ct)
-//{
-//    var json = JsonSerializer.Serialize(user);
 
-//    var currentDirectory = Path.Combine(_currentDirectory, _userFolderName);
-
-//    var fullPath = Path.Combine(currentDirectory, $"{user.UserId}.json");
-
-//    await File.WriteAllTextAsync(fullPath, json, ct);
-//}
 //public async Task<ToDoUser?> GetUser(Guid userId, CancellationToken ct)
 //{
 //    var user = Path.Combine(_currentDirectory, userId.ToString());
@@ -63,39 +122,4 @@ namespace NailBot.Infrastructure.DataAccess
 //    return userList.Find(x => x.TelegramUserId == telegramUserId);
 //}
 
-////вспомогательные методы
-//private string GetCurrentPath()
-//{
-//    var directory = Directory.GetCurrentDirectory();
 
-//    var currentPath = Path.Combine(directory, _userFolderName);
-
-//    if (!Directory.Exists(currentPath))
-//        Directory.CreateDirectory(currentPath);
-
-//    return currentPath;
-//}
-////метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
-//private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
-//{
-//    var userList = new List<ToDoUser>();
-
-//    if (Directory.Exists(_currentDirectory))
-//    {
-//        var files = Directory.EnumerateFiles(_currentDirectory, "*.json");
-
-//        foreach (var file in files)
-//        {
-//            string jsonContent = await File.ReadAllTextAsync(file, ct);
-//            var userFromFiles = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
-
-//            userList.Add(userFromFiles);
-//        }
-//    }
-//    else
-//    {
-//        throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
-//    }
-
-//    return userList;
-//}

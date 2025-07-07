@@ -114,6 +114,14 @@ namespace NailBot.Helpers
                     input = "unregistered user command";
                 }
             }
+
+            if (input == "add_list")
+            {
+                
+            }
+
+
+
             return (input, cutInput, taskGuid);
         }
 

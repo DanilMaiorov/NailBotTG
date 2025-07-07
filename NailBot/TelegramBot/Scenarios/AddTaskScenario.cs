@@ -89,7 +89,7 @@ namespace NailBot.TelegramBot.Scenarios
 
 
             //await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, ct);
-            //ТУТ ПОКА НЕ ПОНИМАЮ КАК ДОЛЖНО РАБОТАТ
+            //ТУТ ПОКА НЕ ПОНИМАЮ КАК ДОЛЖНО РАБОТАТЬ
             await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, null, ct);
 
             await bot.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);

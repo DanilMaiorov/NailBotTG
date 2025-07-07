@@ -17,6 +17,10 @@ namespace NailBot.Infrastructure.DataAccess
         //путь до текущей директории
         private readonly string _currentDirectory;
 
+
+        // Создаем семафор: разрешаем только ОДНОМУ потоку доступ одновременно (1, 1)
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
         public FileUserRepository(string userFolderName)
         {
             _userFolderName = userFolderName;
@@ -24,13 +28,22 @@ namespace NailBot.Infrastructure.DataAccess
         }
         public async Task Add(ToDoUser user, CancellationToken ct)
         {
-            var json = JsonSerializer.Serialize(user);
+            await _semaphore.WaitAsync(ct); // Захватываем семафор
 
-            var currentDirectory = Path.Combine(_currentDirectory, _userFolderName);
+            try
+            {
+                var json = JsonSerializer.Serialize(user);
 
-            var fullPath = Path.Combine(currentDirectory, $"{user.UserId}.json");
+                var currentDirectory = Path.Combine(_currentDirectory, _userFolderName);
 
-            await File.WriteAllTextAsync(fullPath, json, ct);
+                var fullPath = Path.Combine(currentDirectory, $"{user.UserId}.json");
+
+                await File.WriteAllTextAsync(fullPath, json, ct);
+            }
+            finally
+            {
+                _semaphore.Release(); // Освобождаем семафор, даже если произошла ошибка
+            }
         }
         public async Task<ToDoUser?> GetUser(Guid userId, CancellationToken ct)
         {
@@ -61,25 +74,35 @@ namespace NailBot.Infrastructure.DataAccess
             return currentPath;
         }
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
+
         private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
         {
             var userList = new List<ToDoUser>();
 
-            if (Directory.Exists(_currentDirectory))
+            await _semaphore.WaitAsync(ct); // Захватываем семафор для чтения файлов
+            try
             {
-                var files = Directory.EnumerateFiles(_currentDirectory, "*.json");
-
-                foreach (var file in files)
+                if (Directory.Exists(_currentDirectory))
                 {
-                    string jsonContent = await File.ReadAllTextAsync(file, ct);
-                    var userFromFiles = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
+                    var files = Directory.EnumerateFiles(_currentDirectory, "*.json");
 
-                    userList.Add(userFromFiles);
+                    foreach (var file in files)
+                    {
+                        string jsonContent = await File.ReadAllTextAsync(file, ct);
+                        var userFromFile = JsonSerializer.Deserialize<ToDoUser>(jsonContent);
+
+                        if (userFromFile != null)
+                            userList.Add(userFromFile);
+                    }
+                }
+                else
+                {
+                    throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
                 }
             }
-            else
+            finally
             {
-                throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
+                _semaphore.Release(); // Освобождаем семафор
             }
 
             return userList;

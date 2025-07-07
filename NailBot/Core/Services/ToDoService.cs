@@ -53,6 +53,9 @@ namespace NailBot.Core.Services
                 User = user,
                 StateChangedAt = DateTime.Now,
                 Deadline = deadline,
+
+                //присваиваю свойству значение без предварительной обработки
+                List = list,
             };
 
             await _toDoRepository.Add(newToDoItem, ct);
