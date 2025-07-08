@@ -1,4 +1,5 @@
 ﻿using NailBot.Core.Entities;
+using NailBot.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,10 +24,20 @@ namespace NailBot.Core.Services
                 throw new ArgumentException("Название списка не может быть пустым и не должно превышать 10 символов.");
 
             //Название списка должно быть уникально в рамках одного ToDoUser
+            var isExist = await _toDoListRepository.ExistsByName(user.UserId, name, ct);
 
-            var toDoList = await _toDoListRepository.GetByUserId(user.UserId, ct);
-            //ПРОДОЛЖИТЬ ТУТ РЕАЛИЗОВАЛ МЕТОД GetByUserId
+            if (isExist)
+                throw new DuplicateListException(name);
+                
+            var newList = new ToDoList
+            {
+                Name = name,
+                User = user,
+            };
 
+            await _toDoListRepository.Add(newList, ct);
+
+            return newList;
         }
 
         public Task Delete(Guid id, CancellationToken ct)
@@ -39,9 +50,9 @@ namespace NailBot.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<ToDoList>> GetUserLists(Guid userId, CancellationToken ct)
+        public async Task<IReadOnlyList<ToDoList>> GetUserLists(Guid userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            return await _toDoListRepository.GetByUserId(userId, ct);
         }
 
 

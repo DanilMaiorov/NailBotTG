@@ -8,6 +8,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
 using NailBot.Core.Enums;
 using System.Globalization;
+using NailBot.TelegramBot.Dto;
 
 namespace NailBot.Helpers
 {
@@ -52,23 +53,32 @@ namespace NailBot.Helpers
 
 
         //метод клавиатуры после нажатия /show
-        public static InlineKeyboardMarkup GetSelectListKeyboard()
+        public static InlineKeyboardMarkup GetSelectListKeyboard(IReadOnlyList<ToDoList> lists)
         {
-            var keyboardButtons = new List<List<InlineKeyboardButton>>();
-
-            keyboardButtons.Add(new List<InlineKeyboardButton>
+            var keyboard = new InlineKeyboardMarkup(new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "📌 Без списка", callbackData: "select_list_none")
+                //первый ряд
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "📌 Без списка",
+                        callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = null }.ToString()
+                    ),
+                },
+                // кнопки списков
+                lists.Select(list => InlineKeyboardButton.WithCallbackData(
+                    text: list.Name,
+                    callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = list.Id }.ToString())).ToArray(),
+        
+                //последний ряд кнопок
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "addlist"),
+                    InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "deletelist")
+                }
             });
 
-            // Вторая строка: "Добавить" и "Удалить"
-            keyboardButtons.Add(new List<InlineKeyboardButton>
-            {
-                InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "add_list"),
-                InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "delete_list")
-            });
-
-            return new InlineKeyboardMarkup(keyboardButtons);
+            return keyboard;
         }
 
 

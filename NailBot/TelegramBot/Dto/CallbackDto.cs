@@ -12,24 +12,15 @@ namespace NailBot.TelegramBot.Dto
 
         public static CallbackDto FromString(string input)
         {
-            //ТУТ НАДО ДОПИСАТЬ ПРОВЕРКУНА СОДЕРЖАНИЕ СТРОКИ
-            CallbackDto callbackDto;
-            if (!input.Contains("|"))
-                callbackDto = new CallbackDto { Action = input };
-            else
+            var parts = input.Split('|', 2);
+            return new CallbackDto
             {
-                callbackDto = new CallbackDto { Action = input };
-            }
-            return callbackDto;
+                Action = parts[0]
+            };
         }
-        //На вход принимает строку вида "{action}|{prop1}|{prop2}...".
-        //Нужно создать CallbackDto с Action = action.
-        //Нужно учесть что в строке может не быть |, тогда всю строку сохраняем в Action.
-
-
 
         public override string ToString() {
-            return $"{Action} действие";
+            return Action;
         }
     }
 }

@@ -10,7 +10,7 @@
         public ToDoList()
         {
             Id = Guid.NewGuid();
-            CreatedAt = DateTime.UtcNow; // Рекомендуется использовать UtcNow для консистентности
+            CreatedAt = DateTime.Now;
         }
     }
 }

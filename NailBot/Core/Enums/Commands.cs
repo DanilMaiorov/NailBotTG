@@ -6,6 +6,7 @@
         Help,
         Info,
         Addtask,
+        Addlist,
         Cancel,
         Show,
         Removetask,

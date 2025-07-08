@@ -12,10 +12,14 @@ namespace NailBot.TelegramBot.Dto
 
         public static new ToDoListCallbackDto FromString(string input)
         {
-            return new ToDoListCallbackDto { Action = "action", ToDoListId = Guid.NewGuid() };
+            var parts = input.Split('|');
+            return new ToDoListCallbackDto
+            {
+                Action = parts[0],
+                ToDoListId = parts.Length > 1 && Guid.TryParse(parts[1], out var id) ? id : null
+            };
         }
-        //На вход принимает строку ввида "{action}|{toDoListId}|{prop2}...".
-        //Нужно создать ToDoListCallbackDto с Action = action и ToDoListId = toDoListId.
+
         public override string ToString()
         {
             return $"{base.ToString()}|{ToDoListId}";

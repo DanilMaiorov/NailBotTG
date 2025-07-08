@@ -54,6 +54,8 @@ namespace NailBot.Core.Services
                 StateChangedAt = DateTime.Now,
                 Deadline = deadline,
 
+
+
                 //присваиваю свойству значение без предварительной обработки
                 List = list,
             };

@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using NailBot.TelegramBot.Scenarios;
+using System.Globalization;
 
 namespace NailBot
 {
@@ -15,6 +16,8 @@ namespace NailBot
         private const string toDoItemfolderName = "ToDoItemFolder";
         //имя папки для User
         private const string userfolderName = "UserFolder";
+        //имя папки для списков
+        private const string toDoListfolderName = "ListFolder";
 
         public async static Task Main(string[] args)
         {
@@ -45,7 +48,6 @@ namespace NailBot
             int maxTaskAmount = 20;
             int maxTaskLength = 25;
 
-
             //создам класс FileToDoRepository
             var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
             
@@ -59,14 +61,21 @@ namespace NailBot
             IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
 
+
+            //логика списка задач
+            var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName);
+            IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
+
+
             //логика сценариев
             IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
-            var scenarios = new List<IScenario> 
+            var scenarios = new List<IScenario>
             {
-                new AddTaskScenario(_userService, _toDoService)
+                new AddTaskScenario(_userService, _toDoService),
+                new AddListScenario(_userService, _toDoListService)
             };
 
-            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, cts.Token);
+            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, _toDoListService, cts.Token);
 
             if (_updateHandler is UpdateHandler castHandler)
             {

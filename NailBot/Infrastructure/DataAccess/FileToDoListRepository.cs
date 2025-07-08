@@ -1,6 +1,7 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Services;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,6 @@ namespace NailBot.Infrastructure.DataAccess
             _currentDirectory = GetCurrentPath();
         }
 
-
         public async Task Add(ToDoList list, CancellationToken ct)
         {
             await _semaphore.WaitAsync();
@@ -33,7 +33,12 @@ namespace NailBot.Infrastructure.DataAccess
             try
             {
                 var json = JsonSerializer.Serialize(list);
-                var currentDirectory = Path.Combine(_currentDirectory, _toDoListFolderName, list.User.UserId.ToString());
+                var currentDirectory = Path.Combine(_currentDirectory, list.User.UserId.ToString());
+
+                if (!Directory.Exists(currentDirectory))
+                    Directory.CreateDirectory(currentDirectory);
+
+
                 var fullPath = Path.Combine(currentDirectory, $"{list.Name}.json");
                 await File.WriteAllTextAsync(fullPath, json, ct);
             }
@@ -48,9 +53,16 @@ namespace NailBot.Infrastructure.DataAccess
             throw new NotImplementedException();
         }
 
-        public Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
+        public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+
+            var list = await GetByUserId(userId, ct);
+
+            return list?.Any(x => 
+                string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)) 
+                ?? false;
         }
 
         public Task<ToDoList?> Get(Guid id, CancellationToken ct)
@@ -71,7 +83,6 @@ namespace NailBot.Infrastructure.DataAccess
                 if (!Directory.Exists(currentUserDirectory))
                     return toDoList.AsReadOnly(); // Возвращаем пустой список
                 
-
                 var files = Directory.EnumerateFiles(currentUserDirectory, "*.json");
 
                 foreach (var file in files)
