@@ -12,18 +12,19 @@ namespace NailBot.Infrastructure.DataAccess
 {
     public class FileToDoListRepository : IToDoListRepository
     {
-        //имя папки с ToDoList
-        private readonly string _toDoListFolderName;
+
+        //имя папки с ToDoItem
+        private readonly string _toDoItemFolderName;
         //путь до текущей директории
         private readonly string _currentDirectory;
 
         //объявлю semaphore
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-        public FileToDoListRepository(string toDoListFolderName)
+        public FileToDoListRepository(string toDoItemFolderName)
         {
-            _toDoListFolderName = toDoListFolderName;
-            _currentDirectory = GetCurrentPath();
+            _toDoItemFolderName = toDoItemFolderName;
+            _currentDirectory = Directory.GetCurrentDirectory();
         }
 
         public async Task Add(ToDoList list, CancellationToken ct)
@@ -32,20 +33,41 @@ namespace NailBot.Infrastructure.DataAccess
 
             try
             {
+                var toDoItemFolderDirectoryPath = Path.Combine(_currentDirectory, _toDoItemFolderName);
+
+                var currentUserDirectoryPath = GetUserFolderPath(list.User.UserId, toDoItemFolderDirectoryPath, ct);
+
                 var json = JsonSerializer.Serialize(list);
-                var currentDirectory = Path.Combine(_currentDirectory, list.User.UserId.ToString());
+                var currentDirectory = Path.Combine(currentUserDirectoryPath, list.Id.ToString());
 
                 if (!Directory.Exists(currentDirectory))
                     Directory.CreateDirectory(currentDirectory);
 
 
-                var fullPath = Path.Combine(currentDirectory, $"{list.Name}.json");
+
+                var toDoListsFolderDirectoryPath = Path.Combine(_currentDirectory, "ToDoLists", list.User.UserId.ToString());
+
+                if (!Directory.Exists(toDoListsFolderDirectoryPath))
+                    Directory.CreateDirectory(toDoListsFolderDirectoryPath);
+
+                var fullPath = Path.Combine(toDoListsFolderDirectoryPath, $"{list.Name}.json");
+
                 await File.WriteAllTextAsync(fullPath, json, ct);
             }
             finally
             {
                 _semaphore.Release();
             }
+        }
+
+        private string GetUserFolderPath(Guid userId, string toDoFolder, CancellationToken ct)
+        {
+            string currentUserDirectoryPath = Path.Combine(toDoFolder, userId.ToString());
+
+            if (!Directory.Exists(currentUserDirectoryPath))
+                Directory.CreateDirectory(currentUserDirectoryPath);
+
+            return currentUserDirectoryPath;
         }
 
         public Task Delete(Guid id, CancellationToken ct)
@@ -78,12 +100,12 @@ namespace NailBot.Infrastructure.DataAccess
 
             try
             {
-                var currentUserDirectory = Path.Combine(_currentDirectory, userId.ToString());
+                var currentUserListsDirectory = Path.Combine(_currentDirectory, "ToDoLists", userId.ToString());
 
-                if (!Directory.Exists(currentUserDirectory))
+                if (!Directory.Exists(currentUserListsDirectory))
                     return toDoList.AsReadOnly(); // Возвращаем пустой список
                 
-                var files = Directory.EnumerateFiles(currentUserDirectory, "*.json");
+                var files = Directory.EnumerateFiles(currentUserListsDirectory, "*.json");
 
                 foreach (var file in files)
                 {
@@ -102,17 +124,6 @@ namespace NailBot.Infrastructure.DataAccess
         }
 
         //вспомогательные методы
-        private string GetCurrentPath()
-        {
-            var directory = Directory.GetCurrentDirectory();
-
-            var currentPath = Path.Combine(directory, _toDoListFolderName);
-
-            if (!Directory.Exists(currentPath))
-                Directory.CreateDirectory(currentPath);
-
-            return currentPath;
-        }
     }
 }
 

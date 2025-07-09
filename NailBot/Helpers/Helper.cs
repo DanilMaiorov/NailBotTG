@@ -55,33 +55,40 @@ namespace NailBot.Helpers
         //метод клавиатуры после нажатия /show
         public static InlineKeyboardMarkup GetSelectListKeyboard(IReadOnlyList<ToDoList> lists)
         {
-            var keyboard = new InlineKeyboardMarkup(new[]
+            //первый ряд
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            keyboardRows.Add(new[]
             {
-                //первый ряд
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(
-                        text: "📌 Без списка",
-                        callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = null }.ToString()
-                    ),
-                },
-                // кнопки списков
-                lists.Select(list => InlineKeyboardButton.WithCallbackData(
-                    text: list.Name,
-                    callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = list.Id }.ToString())).ToArray(),
-        
-                //последний ряд кнопок
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "addlist"),
-                    InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "deletelist")
-                }
+                InlineKeyboardButton.WithCallbackData(
+                    text: "📌 Без списка",
+                    callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = null }.ToString()
+                )
             });
 
-            return keyboard;
+            // кнопки списков
+            foreach (var list in lists)
+            {
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: list.Name,
+                        callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = list.Id }.ToString()
+                    )
+                });
+            }
+
+            //последний ряд кнопок
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "addlist"),
+                InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "deletelist")
+            });
+
+            return new InlineKeyboardMarkup(keyboardRows);
         }
 
-
+         
 
         //рендер списка задач
         public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)

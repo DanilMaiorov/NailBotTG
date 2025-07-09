@@ -17,7 +17,7 @@ namespace NailBot
         //имя папки для User
         private const string userfolderName = "UserFolder";
         //имя папки для списков
-        private const string toDoListfolderName = "ListFolder";
+        //private const string toDoListfolderName = "ListFolder";
 
         public async static Task Main(string[] args)
         {
@@ -63,7 +63,7 @@ namespace NailBot
 
 
             //логика списка задач
-            var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName);
+            var fileToDoListRepository = new FileToDoListRepository(toDoItemfolderName);
             IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
 
 

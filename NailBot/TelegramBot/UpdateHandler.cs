@@ -138,7 +138,6 @@ internal class UpdateHandler : IUpdateHandler
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message.Text);
 
-
             //Работа с командой cancel и сценариями
             if (command == Commands.Cancel)
                 await _scenarioContextRepository.ResetContext(telegramUserId, ct);
@@ -336,8 +335,6 @@ internal class UpdateHandler : IUpdateHandler
         }
         #endregion
 
-
-
     }
     private async Task OnCallbackQuery(ITelegramBotClient botClient, Update update, CallbackQuery callbackQuery, CancellationToken ct)
     {
@@ -364,10 +361,9 @@ internal class UpdateHandler : IUpdateHandler
                 }
             }
 
-
-            
-
             var callbackDto = CallbackDto.FromString(input);
+
+            var toDoListCallbackDto = ToDoListCallbackDto.FromString(input);
 
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             //OnHandleUpdateStarted?.Invoke(message.Text);
@@ -396,8 +392,11 @@ internal class UpdateHandler : IUpdateHandler
 
             switch (callbackDto.Action)
             {
-
                 case "show":
+                    if (toDoListCallbackDto != null)
+                    {
+                        
+                    }
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
                     await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboard(lists), cancellationToken: ct);
                     //await ShowTasks(currentUser.UserId);
@@ -408,9 +407,6 @@ internal class UpdateHandler : IUpdateHandler
                     var newContext = new ScenarioContext(ScenarioType.AddList);
                     await ProcessScenario(newContext, update, ct);
                     break;
-
-
-
 
 
 

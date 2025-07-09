@@ -42,6 +42,9 @@ namespace NailBot.TelegramBot.Scenarios
                 case "Deadline":
                     return await HandleDeadlineStep(bot, context, currentUser, currentChat, currentUserInput, ct);
 
+                case "Addlist":
+                    return await HandleDeadlineStep(bot, context, currentUser, currentChat, currentUserInput, ct);
+
                 default:
                     await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
@@ -75,6 +78,28 @@ namespace NailBot.TelegramBot.Scenarios
         }
 
         private async Task<ScenarioResult> HandleDeadlineStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        {
+            if (!Helper.TryParseUserDate(userInput, out DateTime deadline))
+            {
+                await bot.SendMessage(chat, "Неверный формат даты. Попробуйте ещё раз в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+                return ScenarioResult.Transition;
+            }
+
+            if (!context.Data.TryGetValue(user.TelegramUserName, out var userObj))
+                throw new InvalidOperationException("Пользователь не найден в контексте");
+
+            //await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, ct);
+            //ТУТ ПОКА НЕ ПОНИМАЮ КАК ДОЛЖНО РАБОТАТЬ
+            await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, null, ct);
+
+            await bot.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+
+            _taskName = string.Empty;
+            return ScenarioResult.Completed;
+        }
+
+
+        private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
             if (!Helper.TryParseUserDate(userInput, out DateTime deadline))
             {
