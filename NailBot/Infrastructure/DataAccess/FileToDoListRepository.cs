@@ -20,14 +20,25 @@ namespace NailBot.Infrastructure.DataAccess
         //путь до текущей директории
         private readonly string _currentDirectory;
 
+        private readonly string _indexPath;
+
+        private readonly string _indexFileName = "FileIndexLists.json";
+
         //объявлю semaphore
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
+
+        public Task Initialization { get; }
 
         public FileToDoListRepository(string toDoListFolderName, string toDoItemFolderName)
         {
             _toDoListFolderName = toDoListFolderName;
             _toDoItemFolderName = toDoItemFolderName;
             _currentDirectory = Directory.GetCurrentDirectory();
+
+            _indexPath = Path.Combine(_currentDirectory, _toDoListFolderName, _indexFileName);
+
+            Initialization = EnsureIndexExists();           
         }
 
         public async Task Add(ToDoList list, CancellationToken ct)
@@ -48,10 +59,24 @@ namespace NailBot.Infrastructure.DataAccess
                 var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, _toDoListFolderName, list.User.UserId.ToString());
 
                 //получение пути до json файла списка 
-                var fullPath = Path.Combine(currentUserToDoListsFolderDirectoryPath, $"{list.Name}.json");
+                var fullPath = Path.Combine(currentUserToDoListsFolderDirectoryPath, $"{list.Id}.json");
 
                 //создание json файла списка 
                 await File.WriteAllTextAsync(fullPath, json, ct);
+
+                //работа с файл индексом
+                try
+                {
+                    var index = await LoadIndex();
+                    index[list.Id] = list.User.UserId;
+                    await SaveIndex(index);
+                }
+                catch (Exception ex)
+                {
+                    // логирую ошибку и перестраиваю индекс
+                    Console.WriteLine($"Ошибка обновления индекса: {ex.Message}");
+                    RebuildIndex();
+                }
             }
             finally
             {
@@ -77,8 +102,20 @@ namespace NailBot.Infrastructure.DataAccess
                 ?? false;
         }
 
-        public Task<ToDoList?> Get(Guid id, CancellationToken ct)
+        public async Task<ToDoList?> Get(Guid id, CancellationToken ct)
         {
+            var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, _toDoListFolderName, id.ToString());
+
+            await _semaphore.WaitAsync(ct);
+            try
+            {
+
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+
             throw new NotImplementedException();
         }
 
@@ -90,7 +127,7 @@ namespace NailBot.Infrastructure.DataAccess
 
             try
             {
-                var currentUserListsDirectory = Helper.GetDirectoryPath(_currentDirectory, _toDoListFolderName, userId.ToString());
+                var currentUserListsDirectory = Helper.GetDirectoryPath(_currentDirectory, userId.ToString());
 
                 if (!Directory.Exists(currentUserListsDirectory))
                     return toDoList.AsReadOnly(); // верну пустой список
@@ -112,6 +149,122 @@ namespace NailBot.Infrastructure.DataAccess
 
             return toDoList.AsReadOnly();
         }
+
+
+        private string GetCurrentPath(string toDoListFolderName)
+        {
+            var directory = Directory.GetCurrentDirectory();
+
+            var currentPath = Path.Combine(directory, toDoListFolderName);
+
+            if (!Directory.Exists(currentPath))
+                Directory.CreateDirectory(currentPath);
+
+            return currentPath;
+        }
+
+        //методы работы с файл индексом
+        private async Task EnsureIndexExists()
+        {
+            await _semaphore.WaitAsync();
+            try
+            {
+                if (!File.Exists(_indexPath))
+                    await RebuildIndex();
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        //метод для наполнения индекса 
+        private async Task RebuildIndex()
+        {
+            //создам словарь для хранения пары задача-пользак
+            var index = new Dictionary<Guid, Guid>();
+
+            //переберу все директории и файлы в них и занесу в словарь
+            foreach (var userDir in Directory.EnumerateDirectories(_currentDirectory))
+            {
+                var userId = Path.GetFileName(userDir);
+
+                if (Guid.TryParse(userId, out var userGuid))
+                {
+                    foreach (var filePath in Directory.EnumerateFiles(userDir))
+                    {
+                        var fileName = Path.GetFileNameWithoutExtension(filePath);
+
+                        if (Guid.TryParse(fileName, out var todoId))
+                        {
+                            if (File.Exists(filePath))
+                                index[todoId] = userGuid;
+                        }
+                    }
+                }
+            }
+            await SaveIndex(index);
+        }
+
+        private async Task SaveIndex(Dictionary<Guid, Guid> index)
+        {
+            string tempPath = null;
+            try
+            {
+                var directory = Path.GetDirectoryName(_indexPath);
+
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
+                // создам временный файл индекс
+                tempPath = Path.Combine(directory, $"{Guid.NewGuid()}.tmp");
+
+                var json = JsonSerializer.Serialize(index, JsonSettings.SerializerOptions());
+
+                await File.WriteAllTextAsync(tempPath, json);
+
+                if (!File.Exists(tempPath))
+                    throw new IOException($"Не удалось создать временный файл: {tempPath}");
+
+
+                // атомарная запись через временный файл
+                if (File.Exists(_indexPath))
+                    // заменяю существующий файл
+                    File.Replace(tempPath, _indexPath, null);
+                else
+                    // если файл не существует - переименовываю временный файл
+                    File.Move(tempPath, _indexPath);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка сохранения индекса: {ex.Message}");
+            }
+        
+        }
+
+        private async Task<Dictionary<Guid, Guid>> LoadIndex()
+        {
+            //проверка и перестроение индекса если он исчез по время работы
+            if (!File.Exists(_indexPath))
+                RebuildIndex();
+
+            try
+            {
+                var json = await File.ReadAllTextAsync(_indexPath);
+                return JsonSerializer.Deserialize<Dictionary<Guid, Guid>>(json)
+                    ?? new Dictionary<Guid, Guid>();
+            }
+            catch (Exception ex) when (ex is JsonException or IOException)
+            {
+                // если файл поврежден или недоступен - перестраиваю
+                RebuildIndex();
+                var json = await File.ReadAllTextAsync(_indexPath);
+                return JsonSerializer.Deserialize<Dictionary<Guid, Guid>>(json)
+                    ?? new Dictionary<Guid, Guid>();
+            }
+        }
+
     }
 }
 

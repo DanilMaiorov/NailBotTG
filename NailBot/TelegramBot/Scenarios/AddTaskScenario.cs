@@ -145,7 +145,7 @@ namespace NailBot.TelegramBot.Scenarios
 
             //var list = lists.Where(x => userInput == x.Name).ToList()[0];
 
-            _toDoService.GetByUserIdAndList()..
+            //_toDoService.GetByUserIdAndList();
 
             //if (!Helper.TryParseUserDate(userInput, out DateTime deadline))
             //{
