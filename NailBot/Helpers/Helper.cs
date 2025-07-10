@@ -53,7 +53,7 @@ namespace NailBot.Helpers
 
 
         //метод клавиатуры после нажатия /show
-        public static InlineKeyboardMarkup GetSelectListKeyboard(IReadOnlyList<ToDoList> lists)
+        public static InlineKeyboardMarkup GetSelectListKeyboardWithAdd(IReadOnlyList<ToDoList> lists)
         {
             //первый ряд
             var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
@@ -88,7 +88,34 @@ namespace NailBot.Helpers
             return new InlineKeyboardMarkup(keyboardRows);
         }
 
-         
+        //метод клавиатуры выбора списка куда добавлять задачу
+        public static InlineKeyboardMarkup GetSelectListKeyboard(IReadOnlyList<ToDoList> lists)
+        {
+            //первый ряд
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "📌 Без списка",
+                    callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = null }.ToString()
+                )
+            });
+
+            // кнопки списков
+            foreach (var list in lists)
+            {
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: list.Name,
+                        callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = list.Id }.ToString()
+                    )
+                });
+            }
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
 
         //рендер списка задач
         public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
@@ -215,6 +242,28 @@ namespace NailBot.Helpers
                 DateTimeStyles.None,
                 out result
             );
+        }
+
+
+
+
+        public static string GetDirectoryPath(params string[] args)
+        {
+            string path = args.Aggregate(Path.Combine);
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            return path;
+        }
+
+
+        public static void CheckOrCreateDirectory(params string[] args)
+        {
+            string path = args.Aggregate(Path.Combine);
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
         }
 
 

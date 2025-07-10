@@ -58,7 +58,6 @@ namespace NailBot.Infrastructure.DataAccess
             }
         }
 
-
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct)
         {
             var toDoList = await GetToDoList(userId, ct);

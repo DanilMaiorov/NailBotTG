@@ -181,7 +181,7 @@ internal class UpdateHandler : IUpdateHandler
                 case Commands.Show:
 
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboard(lists), cancellationToken: ct);
+                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardWithAdd(lists), cancellationToken: ct);
                     //await ShowTasks(currentUser.UserId);
                     break;
 
@@ -371,24 +371,24 @@ internal class UpdateHandler : IUpdateHandler
             //(string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input, currentUserTaskList);
 
             //получение значений команд типа Enum
-            //Commands command = Helper.GetEnumValue<Commands>(input);
-            //ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
+            Commands command = Helper.GetEnumValue<Commands>(input);
+            ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             //OnHandleUpdateCompleted?.Invoke(message.Text);
 
 
             //Работа с командой cancel и сценариями
-            //if (command == Commands.Cancel)
-            //    await _scenarioContextRepository.ResetContext(telegramUserId, ct);
+            if (command == Commands.Cancel)
+                await _scenarioContextRepository.ResetContext(telegramUserId, ct);
 
-            //var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
+            var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
 
-            //if (scenarioContext != null)
-            //{
-            //    await ProcessScenario(scenarioContext, update, ct);
-            //    return;
-            //}
+            if (scenarioContext != null)
+            {
+                await ProcessScenario(scenarioContext, update, ct);
+                return;
+            }
 
             switch (callbackDto.Action)
             {
@@ -398,7 +398,7 @@ internal class UpdateHandler : IUpdateHandler
                         
                     }
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboard(lists), cancellationToken: ct);
+                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardWithAdd(lists), cancellationToken: ct);
                     //await ShowTasks(currentUser.UserId);
                     break;
 
