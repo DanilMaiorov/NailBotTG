@@ -1,5 +1,6 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
+using NailBot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,9 @@ namespace NailBot.Infrastructure.DataAccess
         //путь до текущей директории
         private readonly string _currentDirectory;
 
+        //путь до текущей директории
+        private readonly string _toDoUserDirectory;
+
 
         // Создаем семафор: разрешаем только ОДНОМУ потоку доступ одновременно (1, 1)
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
@@ -24,7 +28,9 @@ namespace NailBot.Infrastructure.DataAccess
         public FileUserRepository(string userFolderName)
         {
             _userFolderName = userFolderName;
-            _currentDirectory = GetCurrentPath();
+            _currentDirectory = Directory.GetCurrentDirectory();
+
+            _toDoUserDirectory = Helper.GetDirectoryPath(_currentDirectory, _userFolderName);
         }
         public async Task Add(ToDoUser user, CancellationToken ct)
         {
@@ -34,9 +40,7 @@ namespace NailBot.Infrastructure.DataAccess
             {
                 var json = JsonSerializer.Serialize(user);
 
-                var currentDirectory = Path.Combine(_currentDirectory, _userFolderName);
-
-                var fullPath = Path.Combine(currentDirectory, $"{user.UserId}.json");
+                var fullPath = Path.Combine(_toDoUserDirectory, $"{user.UserId}.json");
 
                 await File.WriteAllTextAsync(fullPath, json, ct);
             }
@@ -62,17 +66,6 @@ namespace NailBot.Infrastructure.DataAccess
         }
     
         //вспомогательные методы
-        private string GetCurrentPath()
-        {
-            var directory = Directory.GetCurrentDirectory();
-
-            var currentPath = Path.Combine(directory, _userFolderName);
-
-            if (!Directory.Exists(currentPath))
-                Directory.CreateDirectory(currentPath);
-            
-            return currentPath;
-        }
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
 
         private async Task<List<ToDoUser>> GetUserList(CancellationToken ct)
@@ -82,9 +75,9 @@ namespace NailBot.Infrastructure.DataAccess
             await _semaphore.WaitAsync(ct); // Захватываем семафор для чтения файлов
             try
             {
-                if (Directory.Exists(_currentDirectory))
+                if (Directory.Exists(_toDoUserDirectory))
                 {
-                    var files = Directory.EnumerateFiles(_currentDirectory, "*.json");
+                    var files = Directory.EnumerateFiles(_toDoUserDirectory, "*.json");
 
                     foreach (var file in files)
                     {
@@ -97,7 +90,7 @@ namespace NailBot.Infrastructure.DataAccess
                 }
                 else
                 {
-                    throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
+                    throw new DirectoryNotFoundException($"Директория не найдена: {_toDoUserDirectory}");
                 }
             }
             finally

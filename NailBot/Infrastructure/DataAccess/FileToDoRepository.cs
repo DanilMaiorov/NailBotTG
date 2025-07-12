@@ -1,5 +1,6 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
+using NailBot.Helpers;
 using NailBot.TelegramBot;
 using System.Diagnostics.Metrics;
 using System.Text.Json;
@@ -60,7 +61,7 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct)
         {
-            var toDoList = await GetToDoList(userId, ct);
+            var toDoList = await GetToDoItems(userId, ct);
 
             return toDoList
                 .Where(x => x.User.UserId == userId)
@@ -70,7 +71,7 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken ct)
         {
-            var toDoList = await GetToDoList(userId, ct);
+            var toDoList = await GetToDoItems(userId, ct);
 
             if (userId == Guid.Empty)
                 return toDoList.AsReadOnly();
@@ -135,7 +136,7 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken ct)
         {
-            var toDoList = await GetToDoList(userId, ct);
+            var toDoList = await GetToDoItems(userId, ct);
 
             return toDoList
                 .Where(x => x.User.UserId == userId)
@@ -145,7 +146,7 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
         {
-            var toDoList = await GetToDoList(userId, ct);
+            var toDoList = await GetToDoItems(userId, ct);
 
             if (string.IsNullOrWhiteSpace(name))
                 return false;
@@ -176,6 +177,34 @@ namespace NailBot.Infrastructure.DataAccess
             }
         }
 
+
+
+
+
+        //добавлю временно без согласования с преподавателем
+        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        {
+            var toDoItems = new List<ToDoItem>();
+
+            var currentUserToDoItemsDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, userId.ToString());
+
+            if (listId != null)
+            {
+                var currentUserListToDoItemsDirectoryPath = Helper.GetDirectoryPath(currentUserToDoItemsDirectoryPath, listId.ToString());
+                toDoItems = await GetToDoItemsFromFolder(currentUserListToDoItemsDirectoryPath, ct);
+            } 
+            else
+            {
+                toDoItems = await GetToDoItemsFromFolder(currentUserToDoItemsDirectoryPath, ct);
+            }
+
+            return toDoItems.AsReadOnly();
+        }
+
+
+
+
+
         private string GetCurrentPath()
         {
             var directory = Directory.GetCurrentDirectory();
@@ -189,9 +218,9 @@ namespace NailBot.Infrastructure.DataAccess
         }
 
         //метод для возврата List в методы где возвращается IReadOnlyList<ToDoItem>
-        private async Task<List<ToDoItem>> GetToDoList(Guid userId, CancellationToken ct)
+        private async Task<List<ToDoItem>> GetToDoItems(Guid userId, CancellationToken ct)
         {
-            var toDoList = new List<ToDoItem>();
+            var toDoItems = new List<ToDoItem>();
 
             if (Directory.Exists(_currentDirectory))
             {
@@ -208,20 +237,49 @@ namespace NailBot.Infrastructure.DataAccess
                         var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
 
                         if (toDoItemFromFiles != null)
-                            toDoList.Add(toDoItemFromFiles);
+                            toDoItems.Add(toDoItemFromFiles);
                     }
                 }
                 else
                 {
-                    return toDoList;
+                    return toDoItems;
                 }
             }
             else
             {
                 throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
             }
-            return toDoList;
+            return toDoItems;
         }
+
+
+        private async Task<List<ToDoItem>> GetToDoItemsFromFolder(string folderPath, CancellationToken ct)
+        {
+            var toDoItems = new List<ToDoItem>();
+
+            if (Directory.Exists(folderPath))
+            {
+                var files = Directory.EnumerateFiles(folderPath, "*.json");
+
+                foreach (var file in files)
+                {
+                    var jsonContent = await File.ReadAllTextAsync(file, ct);
+
+                    var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
+
+                    if (toDoItemFromFiles != null)
+                        toDoItems.Add(toDoItemFromFiles);
+                }
+            }
+            else
+            {
+                throw new DirectoryNotFoundException($"Директория не найдена: {_currentDirectory}");
+            }
+            return toDoItems;
+        }
+
+
+
 
         //метод получения директории тудушек текущего юзера
         private string GetUserFolderPath(Guid userId, CancellationToken ct)
@@ -233,6 +291,7 @@ namespace NailBot.Infrastructure.DataAccess
 
             return currentUserDirectoryPath;
         }
+
         private void EnsureIndexExists()
         {
             lock (_indexLock)
@@ -336,7 +395,5 @@ namespace NailBot.Infrastructure.DataAccess
                 }
             }
         }
-
-
     }
 }

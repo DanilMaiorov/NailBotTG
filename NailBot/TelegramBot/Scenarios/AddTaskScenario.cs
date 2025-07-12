@@ -2,6 +2,7 @@
 using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
+using System.ComponentModel.DataAnnotations;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bots;
@@ -16,7 +17,6 @@ namespace NailBot.TelegramBot.Scenarios
 
         private readonly IToDoListService _toDoListService;
 
-        private string _taskName;
         public AddTaskScenario(IUserService userService, IToDoService toDoService, IToDoListService toDoListService)
         {
             _userService = userService;
@@ -94,20 +94,16 @@ namespace NailBot.TelegramBot.Scenarios
 
             Helper.CheckDuplicate(userInput, tasks);
 
-            //_taskName = userInput;
-
             context.Data[user.TelegramUserName] = new ToDoItem()
             {
                 Name = userInput,
             };
-
 
             await botClient.SendMessage(chat, "Введите дедлайн задачи в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
 
             context.CurrentStep = "Deadline";
             return ScenarioResult.Transition;
         }
-
 
         private async Task<ScenarioResult> HandleDeadlineStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
@@ -124,29 +120,17 @@ namespace NailBot.TelegramBot.Scenarios
 
             obj.Deadline = deadline;
 
-            //await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, null, ct);
-
-
-
             context.CurrentStep = "List";
 
             var lists = await _toDoListService.GetUserLists(user.UserId, ct);
 
-            await botClient.SendMessage(chat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboard(lists), cancellationToken: ct);
+            await botClient.SendMessage(chat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardForAdd(lists), cancellationToken: ct);
 
             return ScenarioResult.Transition;
         }
 
-
         private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            //_toDoService.GetByUserIdAndList();
-            var lists = await _toDoListService.GetUserLists(user.UserId, ct);
-
-            //var list = lists.Where(x => userInput == x.Name).ToList()[0];
-
-            //_toDoService.GetByUserIdAndList();
-
             //if (!Helper.TryParseUserDate(userInput, out DateTime deadline))
             //{
             //    //Helper.GetSelectListKeyboard();
@@ -154,21 +138,22 @@ namespace NailBot.TelegramBot.Scenarios
             //}
 
             if (!context.Data.TryGetValue(user.TelegramUserName, out var toDoItemObj))
-                throw new InvalidOperationException("Пользователь не найден в контексте");
+                throw new InvalidOperationException("Тудушка не найдена в контексте");
 
             var obj = (ToDoItem)toDoItemObj;
 
+            await _toDoService.Add(user, obj.Name, obj.Deadline, obj.List, ct);
 
-            await _toDoService.Add(user, obj.Name, obj.Deadline, new ToDoList(), ct);
             //ТУТ ПОКА НЕ ПОНИМАЮ КАК ДОЛЖНО РАБОТАТЬ
             //await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, null, ct);
 
             //await botClient.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
-            //_taskName = string.Empty;
 
-
-            await botClient.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            if (obj.List != null)
+                await botClient.SendMessage(chat, $"Задача \"{obj.Name}\" добавлена в список \"{obj.List.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            else
+                await botClient.SendMessage(chat, $"Задача \"{obj.Name}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
             return ScenarioResult.Completed;
         }

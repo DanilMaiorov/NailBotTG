@@ -13,6 +13,7 @@ using NailBot.Core.Exceptions;
 using Telegram.Bots.Http;
 using Telegram.Bots;
 using NailBot.TelegramBot.Dto;
+using System.Reflection;
 
 namespace NailBot.TelegramBot;
 
@@ -181,8 +182,7 @@ internal class UpdateHandler : IUpdateHandler
                 case Commands.Show:
 
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardWithAdd(lists), cancellationToken: ct);
-                    //await ShowTasks(currentUser.UserId);
+                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardForShow(lists), cancellationToken: ct);
                     break;
 
                 case Commands.Removetask:
@@ -365,6 +365,7 @@ internal class UpdateHandler : IUpdateHandler
 
             var toDoListCallbackDto = ToDoListCallbackDto.FromString(input);
 
+
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             //OnHandleUpdateStarted?.Invoke(message.Text);
 
@@ -377,39 +378,57 @@ internal class UpdateHandler : IUpdateHandler
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             //OnHandleUpdateCompleted?.Invoke(message.Text);
 
-
             //Работа с командой cancel и сценариями
             if (command == Commands.Cancel)
                 await _scenarioContextRepository.ResetContext(telegramUserId, ct);
 
             var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
 
+            var listGuid = toDoListCallbackDto.ToDoListId;
+
+            ToDoList? list = null;
+
             if (scenarioContext != null)
             {
+                if (scenarioContext.Data.TryGetValue(currentChat.Username, out object? item))
+                {
+                    if (item is ToDoItem toDoItem)
+                    {
+                        if (listGuid.HasValue)
+                        {
+                            toDoItem.List = await _toDoListService.Get(listGuid.Value, ct);
+                        }
+                    }
+                }
+
                 await ProcessScenario(scenarioContext, update, ct);
                 return;
             }
 
-            switch (callbackDto.Action)
+
+
+            
+
+            switch (toDoListCallbackDto.Action)
+
+            //получаю show и id 
+
+            //если id есть - то ищу по папкам
+
+            //если id нет - то беру тудушки из корневой
+
             {
                 case "show":
-                    if (toDoListCallbackDto != null)
-                    {
-                        
-                    }
-                    var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardWithAdd(lists), cancellationToken: ct);
-                    //await ShowTasks(currentUser.UserId);
-                    break;
+                    var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, toDoListCallbackDto.ToDoListId, ct);
 
+                    await ShowTasksFromFolder(toDoItems);
+
+                    break;
 
                 case "addlist":
                     var newContext = new ScenarioContext(ScenarioType.AddList);
                     await ProcessScenario(newContext, update, ct);
                     break;
-
-
-
 
 
                 default:
@@ -455,6 +474,26 @@ internal class UpdateHandler : IUpdateHandler
             throw;
         }
         #region МЕТОДЫ КОМАНД
+
+        async Task ShowTasksFromFolder(IReadOnlyList<ToDoItem> tasksList, bool isActive = false)
+        {
+            if (tasksList.Count == 0)
+            {
+                string emptyMessage = isActive ? "Список задач пуст\n" : "Aктивных задач нет";
+                await botClient.SendMessage(currentChat, emptyMessage, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                return;
+            }
+
+            //выберу текст меседжа через тернарный оператор
+            string message = isActive ? "Список всех задач:" : "Список активных задач:";
+
+            await botClient.SendMessage(currentChat, message, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+
+            await Helper.TasksListRender(tasksList, botClient, currentChat, ct);
+        }
+
+
+
         async Task ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
         {
             //присвою список через оператор null объединения 

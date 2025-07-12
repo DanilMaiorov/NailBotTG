@@ -19,6 +19,8 @@ namespace NailBot.Infrastructure.DataAccess
         private readonly string _toDoItemFolderName;
         //путь до текущей директории
         private readonly string _currentDirectory;
+        //путь до директории с ToDoList
+        private readonly string _toDoListDirectory;
 
         private readonly string _indexPath;
 
@@ -35,6 +37,8 @@ namespace NailBot.Infrastructure.DataAccess
             _toDoListFolderName = toDoListFolderName;
             _toDoItemFolderName = toDoItemFolderName;
             _currentDirectory = Directory.GetCurrentDirectory();
+
+            _toDoListDirectory = Helper.GetDirectoryPath(_currentDirectory, _toDoListFolderName);
 
             _indexPath = Path.Combine(_currentDirectory, _toDoListFolderName, _indexFileName);
 
@@ -56,7 +60,7 @@ namespace NailBot.Infrastructure.DataAccess
                 Helper.CheckOrCreateDirectory(currentUserToDoItemDirectoryPath, list.Id.ToString());
 
                 //получение пути до папки с листами пользака
-                var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, _toDoListFolderName, list.User.UserId.ToString());
+                var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_toDoListDirectory, list.User.UserId.ToString());
 
                 //получение пути до json файла списка 
                 var fullPath = Path.Combine(currentUserToDoListsFolderDirectoryPath, $"{list.Id}.json");
@@ -104,19 +108,31 @@ namespace NailBot.Infrastructure.DataAccess
 
         public async Task<ToDoList?> Get(Guid id, CancellationToken ct)
         {
-            var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, _toDoListFolderName, id.ToString());
-
             await _semaphore.WaitAsync(ct);
             try
             {
+                var index = await LoadIndex();
 
+                if (index.TryGetValue(id, out Guid userId))
+                {
+                    var userListsFolderPath = Path.Combine(_toDoListDirectory, userId.ToString());
+
+                    if (Directory.Exists(userListsFolderPath))
+                    {
+                        var toDoListPath = Path.Combine(userListsFolderPath, id.ToString() + ".json");
+
+                        var json = await File.ReadAllTextAsync(toDoListPath, ct);
+
+                        return JsonSerializer.Deserialize<ToDoList>(json);
+                    }
+                }
             }
             finally
             {
                 _semaphore.Release();
             }
 
-            throw new NotImplementedException();
+            return null;
         }
 
         public async Task<IReadOnlyList<ToDoList>> GetByUserId(Guid userId, CancellationToken ct)
@@ -127,7 +143,7 @@ namespace NailBot.Infrastructure.DataAccess
 
             try
             {
-                var currentUserListsDirectory = Helper.GetDirectoryPath(_currentDirectory, userId.ToString());
+                var currentUserListsDirectory = Helper.GetDirectoryPath(_toDoListDirectory, userId.ToString());
 
                 if (!Directory.Exists(currentUserListsDirectory))
                     return toDoList.AsReadOnly(); // верну пустой список

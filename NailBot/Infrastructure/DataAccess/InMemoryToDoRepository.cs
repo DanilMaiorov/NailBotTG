@@ -114,5 +114,10 @@ namespace NailBot.Infrastructure.DataAccess
                 throw new KeyNotFoundException($"Задча с номером {item.Id} не найдена");
             }
         }
+
+        public Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

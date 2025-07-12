@@ -129,22 +129,18 @@ namespace NailBot.Core.Services
 
 
 
-        async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
         {
-            await Task.Delay(1);
+            
+            //var items = _toDoRepository.GetAllByUserId(userId, ct);
+            return await _toDoRepository.GetByUserIdAndList(userId, listId, ct);
 
-            throw new NotImplementedException();
+
             //await Task.Delay(1);
 
             //var list = new List<ToDoItem> { };
 
             //return list.AsReadOnly();
-        }
-
-
-        Task<IReadOnlyList<ToDoItem>> IToDoService.GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
-        {
-            throw new NotImplementedException();
         }
     }
 }

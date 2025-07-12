@@ -58,7 +58,7 @@ namespace NailBot.Helpers
             await botClient.SendMessage(chat, builder.ToString(), cancellationToken: ct);
 
             //рендерю менюшку
-            await botClient.SetMyCommands(commands, cancellationToken: ct);
+            //await botClient.SetMyCommands(commands, cancellationToken: ct);
         }
 
         //метод замены ввода номера команды

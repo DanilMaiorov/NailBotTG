@@ -45,9 +45,10 @@ namespace NailBot.Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<ToDoList?> Get(Guid id, CancellationToken ct)
+        public async Task<ToDoList?> Get(Guid id, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            return await _toDoListRepository?.Get(id, ct);   
+
         }
 
         public async Task<IReadOnlyList<ToDoList>> GetUserLists(Guid userId, CancellationToken ct)
