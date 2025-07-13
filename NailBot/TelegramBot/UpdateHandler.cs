@@ -6,14 +6,8 @@ using NailBot.TelegramBot.Scenarios;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Telegram.Bot.Types.ReplyMarkups;
-using System.Threading.Channels;
 using NailBot.Core.Exceptions;
-using Telegram.Bots.Http;
-using Telegram.Bots;
 using NailBot.TelegramBot.Dto;
-using System.Reflection;
 
 namespace NailBot.TelegramBot;
 
@@ -91,7 +85,6 @@ internal class UpdateHandler : IUpdateHandler
         }
     }
 
-
     private async Task OnMessage(ITelegramBotClient botClient, Update update, Message message, CancellationToken ct)
     {
         Chat currentChat = update.Message.Chat;
@@ -152,7 +145,6 @@ internal class UpdateHandler : IUpdateHandler
                 return;
             }
 
-
             switch (command)
             {
                 case Commands.Start:
@@ -180,7 +172,6 @@ internal class UpdateHandler : IUpdateHandler
                     await botClient.SendMessage(currentChat, "Текущий сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
                 case Commands.Show:
-
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
                     await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardForShow(lists), cancellationToken: ct);
                     break;
@@ -247,7 +238,7 @@ internal class UpdateHandler : IUpdateHandler
 
         catch (Exception)
         {
-            //await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", cancellationToken: ct);
+            await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", cancellationToken: ct);
             throw;
         }
         #region МЕТОДЫ КОМАНД
@@ -364,10 +355,7 @@ internal class UpdateHandler : IUpdateHandler
                 }
             }
 
-            var callbackDto = CallbackDto.FromString(input);
-
-            var toDoListCallbackDto = ToDoListCallbackDto.FromString(input);
-
+            var callbackDto = ToDoListCallbackDto.FromString(input);
 
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             //OnHandleUpdateStarted?.Invoke(message.Text);
@@ -387,8 +375,6 @@ internal class UpdateHandler : IUpdateHandler
 
             var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
 
-            var listGuid = toDoListCallbackDto.ToDoListId;
-
             ToDoList? list = null;
 
             if (scenarioContext != null)
@@ -397,27 +383,21 @@ internal class UpdateHandler : IUpdateHandler
                 {
                     if (item is ToDoItem toDoItem)
                     {
-                        if (listGuid.HasValue)
+                        if (callbackDto.ToDoListId.HasValue)
                         {
-                            toDoItem.List = await _toDoListService.Get(listGuid.Value, ct);
+                            toDoItem.List = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
                         }
                     }
                 }
-
                 await ProcessScenario(scenarioContext, update, ct);
-
                 return;
-            }
+            }         
 
-                        
-
-            switch (toDoListCallbackDto.Action)
+            switch (callbackDto.Action)
             {
                 case "show":
-                    var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, toDoListCallbackDto.ToDoListId, ct);
-
+                    var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackDto.ToDoListId, ct);
                     await ShowTasksFromFolder(toDoItems);
-
                     break;
 
                 case "addlist":
@@ -425,6 +405,10 @@ internal class UpdateHandler : IUpdateHandler
                     await ProcessScenario(newContext, update, ct);
                     break;
 
+                case "deletelist":
+                    var newContext1 = new ScenarioContext(ScenarioType.DeleteList);
+                    await ProcessScenario(newContext1, update, ct);
+                    break;
 
                 default:
                     await botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
@@ -486,65 +470,6 @@ internal class UpdateHandler : IUpdateHandler
 
             await Helper.TasksListRender(tasksList, botClient, currentChat, ct);
         }
-
-
-
-        async Task ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
-        {
-            //присвою список через оператор null объединения 
-            var tasksList = tasks ?? (isActive
-                ? await _toDoService.GetAllByUserId(userId, ct)
-                : await _toDoService.GetActiveByUserId(userId, ct));
-
-            if (tasksList.Count == 0)
-            {
-                string emptyMessage = isActive ? "Список задач пуст\n" : "Aктивных задач нет";
-                await botClient.SendMessage(currentChat, emptyMessage, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                return;
-            }
-
-            //выберу текст меседжа через тернарный оператор
-            string message = tasks != null ? "Список найденных задач:"
-                : (isActive ? "Список всех задач:" : "Список активных задач:");
-
-            await botClient.SendMessage(currentChat, message, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-
-            await Helper.TasksListRender(tasksList, botClient, currentChat, ct);
-        }
-
-        async Task ShowHelp(ToDoUser user)
-        {
-            if (user == null)
-            {
-                await botClient.SendMessage(currentChat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
-                $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-            }
-            else
-            {
-                await botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
-                $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном вводе, задача будет добавлена\n" +
-                $"Введя команду \"/cancel\" ты сможешь отменить отменить добавление новой задачи \n" +
-                $"Введя команду \"/showtasks\" ты сможешь увидеть список активных задач в списке\n" +
-                $"Введя команду \"/showalltasks\" ты сможешь увидеть список всех задач в списке\n" +
-                $"Введя команду \"/removetask\" *номер задачи*\" ты сможешь удалить задачу из списка задач\n" +
-                $"Введя команду \"/completetask\" *номер задачи*\" ты сможешь отметить задачу из списка как завершенную\n" +
-                $"Введя команду \"/find\" *название задачи*\" ты сможешь увидеть список всех задач начинающихся с названия задачи\n" +
-                $"Введя команду \"/report\" ты получишь отчёт по задачам\n" +
-                $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-            }
-        }
-
-        async Task ShowInfo()
-        {
-            DateTime releaseDate = new DateTime(2025, 02, 08);
-            await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-        }
         #endregion
 
         #region МЕТОДЫ СЦЕНАРИЯ
@@ -572,8 +497,6 @@ internal class UpdateHandler : IUpdateHandler
                 await _scenarioContextRepository.SetContext(telegramUserId, context, ct);
         }
         #endregion
-
-
     }
 
     private async Task OnUnknown(Update update)

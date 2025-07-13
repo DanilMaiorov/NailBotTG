@@ -51,8 +51,6 @@ namespace NailBot.Helpers
             OneTimeKeyboard = true
         };
 
-
-
         //метод клавиатуры после нажатия /show
         public static InlineKeyboardMarkup GetSelectListKeyboardForShow(IReadOnlyList<ToDoList> lists)
         {
@@ -135,7 +133,7 @@ namespace NailBot.Helpers
                 }
             }
         }
-
+        //добавлю перегрузку TasksListRender
         public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, bool isActive, CancellationToken ct)
         {
             int taskCounter = 0;
@@ -175,18 +173,9 @@ namespace NailBot.Helpers
                     taskGuid = inputData.taskGuid;
                 }
                 else
-                {
                     input = "unregistered user command";
-                }
-            }
-
-            if (input == "add_list")
-            {
                 
             }
-
-
-
             return (input, cutInput, taskGuid);
         }
 
@@ -194,9 +183,7 @@ namespace NailBot.Helpers
         public static void CheckDuplicate(string newTask, IReadOnlyList<ToDoItem> toDoItems)
         {
             if (toDoItems.Any(item => item.Name == newTask))
-            {
                 throw new DuplicateTaskException(newTask);
-            }
         }
 
         //метод присваивания значений длин
@@ -265,9 +252,11 @@ namespace NailBot.Helpers
             );
         }
 
-
-
-
+        /// <summary>
+        /// Собирает путь до директории из переданных папок. При отутствии директории - создает директорию
+        /// </summary>
+        /// <param name="args">Названия папок до директории для построения пути</param>
+        /// <returns>Путь к директории</returns>
         public static string GetDirectoryPath(params string[] args)
         {
             string path = args.Aggregate(Path.Combine);
@@ -278,7 +267,10 @@ namespace NailBot.Helpers
             return path;
         }
 
-
+        /// <summary>
+        /// Собирает путь до директории из переданных папок. При отустствии директории - создает директорию
+        /// </summary>
+        /// <param name="args">Названия папок до директории для построения пути</param>
         public static void CheckOrCreateDirectory(params string[] args)
         {
             string path = args.Aggregate(Path.Combine);
@@ -287,8 +279,12 @@ namespace NailBot.Helpers
                 Directory.CreateDirectory(path);
         }
 
-
-
+        /// <summary>
+        /// Сохраняет JSON-файл по указанному пути
+        /// </summary>
+        /// <param name="item">Задача пользователя</param>
+        /// <param name="ct">Токен отмены</param>
+        /// <param name="args">Названия папок до директории для построения пути</param>
         public static async void CreateToDoItemJsonFile(ToDoItem item, CancellationToken ct, params string[] args)
         {
             var fileDirectory = GetDirectoryPath(args);
