@@ -12,7 +12,6 @@ namespace NailBot.Helpers
         public static JsonSerializerOptions SerializerOptions()
         {
             return new JsonSerializerOptions { WriteIndented = true };
-        }
-        
+        }        
     }
 }

@@ -21,7 +21,9 @@ namespace NailBot.Core.Services
         {
             // Размер имени списка не может быть больше 10 символов
             if (string.IsNullOrWhiteSpace(name) || name.Length > 10)
+            {
                 throw new ArgumentException("Название списка не может быть пустым и не должно превышать 10 символов.");
+            }
 
             //Название списка должно быть уникально в рамках одного ToDoUser
             var isExist = await _toDoListRepository.ExistsByName(user.UserId, name, ct);
@@ -48,17 +50,11 @@ namespace NailBot.Core.Services
         public async Task<ToDoList?> Get(Guid id, CancellationToken ct)
         {
             return await _toDoListRepository?.Get(id, ct);   
-
         }
 
         public async Task<IReadOnlyList<ToDoList>> GetUserLists(Guid userId, CancellationToken ct)
         {
             return await _toDoListRepository.GetByUserId(userId, ct);
         }
-
-
-
-
-
     }
 }

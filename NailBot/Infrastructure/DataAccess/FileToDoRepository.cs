@@ -33,14 +33,11 @@ namespace NailBot.Infrastructure.DataAccess
         }
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
-            var currentUserDirectoryPath = GetUserFolderPath(item.User.UserId, ct);
-
-            var json = JsonSerializer.Serialize(item);
-
-            var filePath = Path.Combine(currentUserDirectoryPath, $"{item.Id}.json");
-
-            await File.WriteAllTextAsync(filePath, json, ct);
-
+            if (item.List != null)
+                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, item.User.UserId.ToString(), item.List.Id.ToString());
+            else
+                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, item.User.UserId.ToString());
+            
             //залочу поток и обновляю индекс
             lock (_indexLock)
             {
@@ -92,6 +89,9 @@ namespace NailBot.Infrastructure.DataAccess
 
                 var filePath = Path.Combine(currentUserDirectoryPath, id + ".json");
 
+                if (deleteItem.List != null)
+                    filePath = Path.Combine(currentUserDirectoryPath, deleteItem.List.Id.ToString(), id + ".json");
+                     
                 if (File.Exists(filePath))
                 {
                     //удаляю задачу
@@ -118,9 +118,32 @@ namespace NailBot.Infrastructure.DataAccess
                 {
                     var toDoItemPath = Path.Combine(userFolderPath, id.ToString() + ".json");
 
-                    var json = await File.ReadAllTextAsync(toDoItemPath, ct);
+                    if (File.Exists(toDoItemPath))
+                    {
+                        var json = await File.ReadAllTextAsync(toDoItemPath, ct);
 
-                    return JsonSerializer.Deserialize<ToDoItem>(json);
+                        return JsonSerializer.Deserialize<ToDoItem>(json);
+                    }
+                }
+
+                var directories = new Queue<string>();
+                directories.Enqueue(userFolderPath);
+
+                while (directories.Count > 0)
+                {
+                    var currentDir = directories.Dequeue();
+
+                    // проверяю файлы в текущей директории
+                    var filePath = Path.Combine(currentDir, $"{id}.json");
+                    if (File.Exists(filePath))
+                    {
+                        var json = await File.ReadAllTextAsync(filePath, ct);
+                        return JsonSerializer.Deserialize<ToDoItem>(json);
+                    }
+
+                    // добавляю поддиректории в очередь для проверки
+                    foreach (var subDir in Directory.GetDirectories(currentDir))
+                        directories.Enqueue(subDir);
                 }
             }
 
@@ -160,9 +183,12 @@ namespace NailBot.Infrastructure.DataAccess
         {
             if (item != null)
             {
-                var currentUserDirectoryPath = Path.Combine(_currentDirectory, item.User.UserId.ToString());
+                var currentUserListDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, item.User.UserId.ToString());
+                if (item.List != null)
+                    currentUserListDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, item.User.UserId.ToString(), item.List.Id.ToString());
 
-                var filePath = Path.Combine(currentUserDirectoryPath, item.Id + ".json");
+
+                var filePath = Path.Combine(currentUserListDirectoryPath, item.Id + ".json");
 
                 if (File.Exists(filePath))
                 {
@@ -177,11 +203,6 @@ namespace NailBot.Infrastructure.DataAccess
             }
         }
 
-
-
-
-
-        //добавлю временно без согласования с преподавателем
         public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
         {
             var toDoItems = new List<ToDoItem>();
@@ -228,16 +249,28 @@ namespace NailBot.Infrastructure.DataAccess
 
                 if (Directory.Exists(currentUserDirectory))
                 {
-                    var files = Directory.EnumerateFiles(currentUserDirectory, "*.json");
+                    // Очередь для обхода директорий (BFS - обход в ширину)
+                    var directoriesToSearch = new Queue<string>();
+                    directoriesToSearch.Enqueue(currentUserDirectory);
 
-                    foreach (var file in files)
+                    while (directoriesToSearch.Count > 0)
                     {
-                        var jsonContent = await File.ReadAllTextAsync(file, ct);
+                        var currentDirectory = directoriesToSearch.Dequeue();
 
-                        var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
+                        // обрабатываю все json-файлы в текущей директории
+                        foreach (var filePath in Directory.EnumerateFiles(currentDirectory, "*.json"))
+                        {
+                            var json = await File.ReadAllTextAsync(filePath, ct);
+                            var item = JsonSerializer.Deserialize<ToDoItem>(json);
+                            if (item != null)
+                                toDoItems.Add(item);
+                        }
 
-                        if (toDoItemFromFiles != null)
-                            toDoItems.Add(toDoItemFromFiles);
+                        // Добавляем все поддиректории в очередь для поиска
+                        foreach (var subDir in Directory.GetDirectories(currentDirectory))
+                        {
+                            directoriesToSearch.Enqueue(subDir);
+                        }
                     }
                 }
                 else
@@ -307,21 +340,37 @@ namespace NailBot.Infrastructure.DataAccess
             //создам словарь для хранения пары задача-пользак
             var index = new Dictionary<Guid, Guid>();
 
-            //переберу все директории и файлы в них и занесу в словарь
-            foreach (var userDir in Directory.EnumerateDirectories(_currentDirectory))
+            // создам очередь для обхода директорий (BFS)
+            var directoriesQueue = new Queue<string>();
+            // начинаю с корневой директории
+            directoriesQueue.Enqueue(_currentDirectory);
+
+            while (directoriesQueue.Count > 0)
             {
-                var userId = Path.GetFileName(userDir);
+                var currentDir = directoriesQueue.Dequeue();
 
-                if (Guid.TryParse(userId, out var userGuid))
+                //переберу все директории и файлы в них и занесу в словарь
+                foreach (var userDir in Directory.EnumerateDirectories(currentDir))
                 {
-                    foreach (var filePath in Directory.EnumerateFiles(userDir))
-                    {
-                        var fileName = Path.GetFileNameWithoutExtension(filePath);
+                    var userIdFolder = Path.GetFileName(userDir);
 
-                        if (Guid.TryParse(fileName, out var todoId))
+                    if (Guid.TryParse(userIdFolder, out var userGuid))
+                    {
+                        // Добавляем все подпапки пользователя в очередь для поиска
+                        foreach (var userSubDir in Directory.EnumerateDirectories(userDir))
                         {
-                            if (File.Exists(filePath))
-                                index[todoId] = userGuid;
+                            directoriesQueue.Enqueue(userSubDir);
+                        }
+
+                        foreach (var filePath in Directory.EnumerateFiles(userDir, "*.json", SearchOption.AllDirectories))
+                        {
+                            var fileName = Path.GetFileNameWithoutExtension(filePath);
+
+                            if (Guid.TryParse(fileName, out var todoId))
+                            {
+                                if (File.Exists(filePath))
+                                    index[todoId] = userGuid;
+                            }
                         }
                     }
                 }

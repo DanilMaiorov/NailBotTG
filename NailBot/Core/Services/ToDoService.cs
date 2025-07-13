@@ -53,10 +53,6 @@ namespace NailBot.Core.Services
                 User = user,
                 StateChangedAt = DateTime.Now,
                 Deadline = deadline,
-
-
-
-                //присваиваю свойству значение без предварительной обработки
                 List = list,
             };
 
@@ -70,8 +66,8 @@ namespace NailBot.Core.Services
         {
             var action = "удалять";
 
-            await GetTask(id, action, ct);
-            
+            var deleteTask = await GetTask(id, action, ct);
+
             await _toDoRepository.Delete(id, ct);
         }
 
@@ -131,16 +127,7 @@ namespace NailBot.Core.Services
 
         public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
         {
-            
-            //var items = _toDoRepository.GetAllByUserId(userId, ct);
             return await _toDoRepository.GetByUserIdAndList(userId, listId, ct);
-
-
-            //await Task.Delay(1);
-
-            //var list = new List<ToDoItem> { };
-
-            //return list.AsReadOnly();
         }
     }
 }

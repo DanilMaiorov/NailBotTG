@@ -271,7 +271,10 @@ internal class UpdateHandler : IUpdateHandler
 
             await botClient.SendMessage(currentChat, message, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
-            await Helper.TasksListRender(tasksList, botClient, currentChat, ct);
+            if (isActive)
+                await Helper.TasksListRender(tasksList, botClient, currentChat, isActive, ct);
+            else
+                await Helper.TasksListRender(tasksList, botClient, currentChat, ct);            
         }
 
         async Task ShowHelp(ToDoUser user)
@@ -402,21 +405,13 @@ internal class UpdateHandler : IUpdateHandler
                 }
 
                 await ProcessScenario(scenarioContext, update, ct);
+
                 return;
             }
 
-
-
-            
+                        
 
             switch (toDoListCallbackDto.Action)
-
-            //получаю show и id 
-
-            //если id есть - то ищу по папкам
-
-            //если id нет - то беру тудушки из корневой
-
             {
                 case "show":
                     var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, toDoListCallbackDto.ToDoListId, ct);

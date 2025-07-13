@@ -131,11 +131,6 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            //if (!Helper.TryParseUserDate(userInput, out DateTime deadline))
-            //{
-            //    //Helper.GetSelectListKeyboard();
-            //    return ScenarioResult.Transition;
-            //}
 
             if (!context.Data.TryGetValue(user.TelegramUserName, out var toDoItemObj))
                 throw new InvalidOperationException("Тудушка не найдена в контексте");
@@ -143,12 +138,6 @@ namespace NailBot.TelegramBot.Scenarios
             var obj = (ToDoItem)toDoItemObj;
 
             await _toDoService.Add(user, obj.Name, obj.Deadline, obj.List, ct);
-
-            //ТУТ ПОКА НЕ ПОНИМАЮ КАК ДОЛЖНО РАБОТАТЬ
-            //await _toDoService.Add((ToDoUser)userObj, _taskName, deadline, null, ct);
-
-            //await botClient.SendMessage(chat, $"Задача \"{_taskName}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-
 
             if (obj.List != null)
                 await botClient.SendMessage(chat, $"Задача \"{obj.Name}\" добавлена в список \"{obj.List.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);

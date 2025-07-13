@@ -127,9 +127,29 @@ namespace NailBot.Helpers
 
             foreach (ToDoItem task in tasks)
             {
-                taskCounter++;
-                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
-                await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                if (task.State == ToDoItemState.Active)
+                {
+                    taskCounter++;
+                    await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+                    await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                }
+            }
+        }
+
+        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, bool isActive, CancellationToken ct)
+        {
+            int taskCounter = 0;
+
+            var builder = new StringBuilder();
+
+            foreach (ToDoItem task in tasks)
+            {
+                if (isActive)
+                {
+                    taskCounter++;
+                    await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+                    await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                }
             }
         }
 
@@ -269,85 +289,16 @@ namespace NailBot.Helpers
 
 
 
-        /// <summary>
-        /// Изменяет поле (свойство) вложенного объекта, полученного из словаря.
-        /// </summary>
-        /// <param name="dictionary">Словарь, содержащий объекты</param>
-        /// <param name="key">Ключ для доступа к объекту в словаре</param>
-        /// <param name="nestedFieldName">Имя поля (свойства) внутри вложенного объекта.</param>
-        /// <param name="newValue">Новое значение для поля вложенного объекта.</param>
-        public static void ModifyNestedObjectField<TKey, TValue>(
-            Dictionary<TKey, TValue> dictionary,
-            TKey key,
-            string nestedFieldName,
-            object newValue)
+        public static async void CreateToDoItemJsonFile(ToDoItem item, CancellationToken ct, params string[] args)
         {
-            // 1. Проверка существования ключа и объекта
-            if (!dictionary.TryGetValue(key, out TValue? mainObject) || mainObject == null)
-            {
-                Console.WriteLine($"Ошибка: Ключ '{key}' не найден или объект равен null.");
-                return;
-            }
+            var fileDirectory = GetDirectoryPath(args);
 
-            Type nestedObjectType = mainObject.GetType();
-            PropertyInfo? property = nestedObjectType.GetProperty(nestedFieldName);
+            var json = JsonSerializer.Serialize(item);
 
-            // 2. Проверка существования свойства и возможности записи
-            if (property == null || !property.CanWrite)
-            {
-                Console.WriteLine($"Ошибка: Свойство '{nestedFieldName}' не найдено или недоступно для записи в типе '{nestedObjectType.Name}'.");
-                return;
-            }
+            var filePath = Path.Combine(fileDirectory, $"{item.Id}.json");
 
-            Type propertyType = property.PropertyType;
-            Type? underlyingPropertyType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
-
-            // 3. Проверка совместимости типов newValue
-            if (newValue == null)
-            {
-                // Нельзя присвоить null значимому типу, который не является Nullable<T>
-                if (propertyType.IsValueType && Nullable.GetUnderlyingType(propertyType) == null)
-                {
-                    Console.WriteLine($"Ошибка: Нельзя присвоить null свойству '{nestedFieldName}' типа '{propertyType.Name}' (не Nullable).");
-                    return;
-                }
-            }
-            else // newValue не null, проверяем его фактический тип
-            {
-                Type newValuesActualType = newValue.GetType();
-
-                // Проверяем, может ли фактический тип newValue быть присвоен базовому типу свойства
-                if (!underlyingPropertyType.IsAssignableFrom(newValuesActualType))
-                {
-                    Console.WriteLine($"Ошибка: Тип значения '{newValuesActualType.Name}' несовместим со свойством '{nestedFieldName}' (ожидается '{propertyType.Name}').");
-                    return;
-                }
-
-                // Дополнительная попытка преобразования, если необходимо (например, для int из long)
-                try
-                {
-                    if (underlyingPropertyType != newValuesActualType)
-                    {
-                        newValue = Convert.ChangeType(newValue, underlyingPropertyType);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Ошибка преобразования значения для '{nestedFieldName}': {ex.Message}");
-                    return;
-                }
-            }
-
-            // 4. Установка значения
-            try
-            {
-                property.SetValue(mainObject, newValue);
-                Console.WriteLine($"Успешно изменено поле '{nestedFieldName}'. Новое значение: {newValue}.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Непредвиденная ошибка при установке значения для '{nestedFieldName}': {ex.Message}");
-            }
+            await File.WriteAllTextAsync(filePath, json, ct);
         }
+
     }
 }
