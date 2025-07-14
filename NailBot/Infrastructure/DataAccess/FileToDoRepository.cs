@@ -33,10 +33,17 @@ namespace NailBot.Infrastructure.DataAccess
         }
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
+            var userId = item.User.UserId.ToString();
+
             if (item.List != null)
-                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, item.User.UserId.ToString(), item.List.Id.ToString());
+            {
+                var listId = item.List.Id.ToString();
+                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, userId, listId);
+            }
             else
-                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, item.User.UserId.ToString());
+            {
+                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, userId);
+            }
             
             //залочу поток и обновляю индекс
             lock (_indexLock)
@@ -82,15 +89,21 @@ namespace NailBot.Infrastructure.DataAccess
         public async Task Delete(Guid id, CancellationToken ct)
         {
             var deleteItem = await Get(id, ct);
-
+            var userId = deleteItem.User.UserId.ToString();
+            
             if (deleteItem != null)
             {
-                var currentUserDirectoryPath = Path.Combine(_currentDirectory, deleteItem.User.UserId.ToString());
+                var currentUserDirectoryPath = Path.Combine(_currentDirectory, userId);
 
                 var filePath = Path.Combine(currentUserDirectoryPath, id + ".json");
 
+                //если list не null, то переопределяю путь
                 if (deleteItem.List != null)
-                    filePath = Path.Combine(currentUserDirectoryPath, deleteItem.List.Id.ToString(), id + ".json");
+                {
+                    var listId = deleteItem.List.Id.ToString();
+                    filePath = Path.Combine(currentUserDirectoryPath, listId, id + ".json");
+                }
+                    
                      
                 if (File.Exists(filePath))
                 {

@@ -10,6 +10,7 @@ using NailBot.Core.Enums;
 using System.Globalization;
 using NailBot.TelegramBot.Dto;
 using System.Reflection;
+using NailBot.TelegramBot.Scenarios;
 
 namespace NailBot.Helpers
 {
@@ -66,16 +67,7 @@ namespace NailBot.Helpers
             });
 
             // кнопки списков
-            foreach (var list in lists)
-            {
-                keyboardRows.Add(new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(
-                        text: list.Name,
-                        callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = list.Id }.ToString()
-                    )
-                });
-            }
+            ListInlineButtonGenerate(lists, keyboardRows, "show");
 
             //последний ряд кнопок
             keyboardRows.Add(new[]
@@ -83,6 +75,17 @@ namespace NailBot.Helpers
                 InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "addlist"),
                 InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "deletelist")
             });
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры после нажатия /show
+        public static InlineKeyboardMarkup GetSelectListKeyboardForDelete(IReadOnlyList<ToDoList> lists)
+        {
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            // кнопки списков
+            ListInlineButtonGenerate(lists, keyboardRows, "deletelist");
 
             return new InlineKeyboardMarkup(keyboardRows);
         }
@@ -102,16 +105,23 @@ namespace NailBot.Helpers
             });
 
             // кнопки списков
-            foreach (var list in lists)
+            ListInlineButtonGenerate(lists, keyboardRows, "add");
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры подтверждения удаления списка
+        public static InlineKeyboardMarkup GetApproveDeleteListKeyboard()
+        {
+            //первый ряд
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            //последний ряд кнопок
+            keyboardRows.Add(new[]
             {
-                keyboardRows.Add(new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(
-                        text: list.Name,
-                        callbackData: new ToDoListCallbackDto { Action = "add", ToDoListId = list.Id }.ToString()
-                    )
-                });
-            }
+                InlineKeyboardButton.WithCallbackData(text: "✅ Да", callbackData: "yes"),
+                InlineKeyboardButton.WithCallbackData(text: "❌ Нет", callbackData: "no")
+            });
 
             return new InlineKeyboardMarkup(keyboardRows);
         }
@@ -294,6 +304,51 @@ namespace NailBot.Helpers
             var filePath = Path.Combine(fileDirectory, $"{item.Id}.json");
 
             await File.WriteAllTextAsync(filePath, json, ct);
+        }
+
+        /// <summary>
+        /// Парсит строку формата "префикс|GUID", разделённую символом '|', и возвращает GUID из второй части.
+        /// Возвращает null, если строка пустая, не содержит разделителя или GUID невалиден.
+        /// </summary>
+        /// <param name="input">Входная строка для парсинга</param>
+        /// <param name="commandPrefix">Ожидаемый префикс перед разделителем</param>
+        /// <returns>GUID из строки или null</returns>
+        public static Guid? ParseGuidFromCommand(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return null;
+
+            string[] parts = input.Split('|');
+
+            if (parts.Length > 1 && Guid.TryParse(parts[1], out Guid result))
+                return result;
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Фабричный метод для создания контекста сценария
+        /// </summary>
+        /// <param name="type">Тип создаваемого сценария</param>
+        /// <returns>Новый экземпляр ScenarioContext</returns>
+        public static ScenarioContext CreateScenarioContext(ScenarioType type)
+        {
+            return new ScenarioContext(type);
+        }
+
+        //написать метод генерации списка
+        private static void ListInlineButtonGenerate(IReadOnlyList<ToDoList> lists, List<IEnumerable<InlineKeyboardButton>> keyboardRows, string action)
+        {
+            foreach (var list in lists)
+            {
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: list.Name,
+                        callbackData: new ToDoListCallbackDto { Action = action, ToDoListId = list.Id }.ToString()
+                    )
+                });
+            }
         }
 
     }

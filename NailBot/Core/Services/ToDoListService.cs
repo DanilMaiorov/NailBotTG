@@ -42,9 +42,9 @@ namespace NailBot.Core.Services
             return newList;
         }
 
-        public Task Delete(Guid id, CancellationToken ct)
+        public async Task Delete(Guid id, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            await _toDoListRepository.Delete(id, ct);
         }
 
         public async Task<ToDoList?> Get(Guid id, CancellationToken ct)

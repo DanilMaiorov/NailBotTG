@@ -2,6 +2,7 @@
 using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
+using NailBot.TelegramBot.Dto;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -12,11 +13,16 @@ namespace NailBot.TelegramBot.Scenarios
         private readonly IUserService _userService;
         private readonly IToDoService _toDoService;
         private readonly IToDoListService _toDoListService;
-        public DeleteListScenario(IUserService userService, IToDoService toDoService, IToDoListService toDoListService) 
+
+        //добавлю ещё имя папки с тудушками в конструктор
+        private readonly string _toDoItemFolderName;
+        public DeleteListScenario(IUserService userService, IToDoService toDoService, IToDoListService toDoListService, string toDoItemFolderName) 
         {
             _userService = userService;
             _toDoService = toDoService;
             _toDoListService = toDoListService;
+
+            _toDoItemFolderName = toDoItemFolderName;
         }
 
         public bool CanHandle(ScenarioType scenario)
@@ -47,7 +53,6 @@ namespace NailBot.TelegramBot.Scenarios
             }
             else
             {
-                //await OnUnknown(update);
                 return ScenarioResult.Completed;
             }
 
@@ -56,11 +61,11 @@ namespace NailBot.TelegramBot.Scenarios
                 case null:
                     return await HandleInitialStep(bot, context, currentUser, currentChat, ct);
 
-                case "Name":
-                    return await HandleNameStep(bot, context, currentUser, currentChat, currentUserInput, ct);
+                case "Approve":
+                    return await HandleApproveStep(bot, context, currentUser, currentChat, currentUserInput, ct);
 
-                //case "Deadline":
-                //    return await HandleDeadlineStep(bot, context, currentUser, currentChat, currentUserInput, ct);
+                case "Delete":
+                    return await HandleDeleteStep(bot, context, currentUser, currentChat, currentUserInput, ct);
 
                 default:
                     await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
@@ -76,37 +81,70 @@ namespace NailBot.TelegramBot.Scenarios
             context.Data[user.TelegramUserName] = user;
 
             var lists = await _toDoListService.GetUserLists(user.UserId, ct);
-            await bot.SendMessage(chat, "Выберете список для удаления:", replyMarkup: Helper.GetSelectListKeyboardForShow(lists));
 
-            context.CurrentStep = "Name";
+            if (lists.Count > 0)
+            {
+                await bot.SendMessage(chat, "Выберете список для удаления:", replyMarkup: Helper.GetSelectListKeyboardForDelete(lists), cancellationToken: ct);
+
+                context.CurrentStep = "Approve";
+                return ScenarioResult.Transition;
+            }
+            await bot.SendMessage(chat, "Нет списков для удаления:", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            return ScenarioResult.Completed;
+        }
+
+        private async Task<ScenarioResult> HandleApproveStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        {
+            var deleteListGuid = Helper.ParseGuidFromCommand(userInput);
+
+            if (deleteListGuid.HasValue)
+            {
+                var deleteList = await _toDoListService.Get(deleteListGuid.Value, ct);
+
+                context.Data[user.TelegramUserName] = deleteList;
+
+                await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteListKeyboard(), cancellationToken: ct);
+
+                context.CurrentStep = "Delete";
+            }
             return ScenarioResult.Transition;
         }
 
-        private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        private async Task<ScenarioResult> HandleDeleteStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            await _toDoListService.Add(user, userInput, ct);
+            if (userInput == "no")
+            {
+                await bot.SendMessage(chat, $"Удаление отменено", cancellationToken: ct);
+            } 
+            else
+            {
+                if (context.Data.TryGetValue(user.TelegramUserName, out var list))
+                {
+                    if (list is not ToDoList toDoList)
+                        throw new ArgumentException("Удаляемый список не является типом списка");
 
-            await bot.SendMessage(chat, $"Список {userInput} добавлен", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    //получу все тудушки которые в выбранном списке
+                    var items = await _toDoService.GetByUserIdAndList(user.UserId, toDoList.Id, ct);
 
+                    //удлю по очереди с перестройкой индекса
+                    if (items.Count > 0)
+                    {
+                        foreach (var item in items)
+                            await _toDoService.Delete(item.Id, ct);
+                    }
+
+                    // удаляю папку списка и директории с разделение тудушек по папкам-спискам после удаления всех тудушек выбранного списка
+                    var toDoItemsDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), _toDoItemFolderName, user.UserId.ToString(), toDoList.Id.ToString());
+                    if (Directory.Exists(toDoItemsDirectoryPath))
+                        Directory.Delete(toDoItemsDirectoryPath);
+
+                    //затем удалю папку в todolist директории
+                    await _toDoListService.Delete(toDoList.Id, ct);
+
+                    await bot.SendMessage(chat, $"Список {toDoList.Name} удален", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                }
+            }
             return ScenarioResult.Completed;
         }
     }
 }
-
-
-//Добавление и удаление списка
-
-//case null
-//Получить ToDoUser и сохранить его в ScenarioContext.Data.
-//Отправить пользователю сообщение "Выберете список для удаления:" с Inline кнопками. callbackData = ToDoListCallbackDto.ToString(). Action = "deletelist"
-//Обновить ScenarioContext.CurrentStep на "Approve"
-//case "Approve"
-//Получить ToDoList и сохранить его в ScenarioContext.Data.
-//Отправить пользователю сообщение "Подтверждаете удаление списка {toDoList.Name} и всех его задач" с Inline кнопками: WithCallbackData("✅Да", "yes"), WithCallbackData("❌Нет", "no")
-//Обновить ScenarioContext.CurrentStep на "Delete"
-//case "Delete"
-//ЕСЛИ update.CallbackQuery.Data равна
-//"yes" ТО удалить все задачи по ToDoUser и ToDoList. Удалить ToDoList.
-//"no" ТО отправить сообщение "Удаление отменено".
-//Вернуть ScenarioResult.Completed.
-//При нажатии на кнопку "❌Удалить" должен запускаться сценарий DeleteListScenario

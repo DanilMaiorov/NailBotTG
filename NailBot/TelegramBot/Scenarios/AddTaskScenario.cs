@@ -52,7 +52,6 @@ namespace NailBot.TelegramBot.Scenarios
             }
             else
             {
-                //await OnUnknown(update);
                 return ScenarioResult.Completed;
             }
 
@@ -77,7 +76,6 @@ namespace NailBot.TelegramBot.Scenarios
             return ScenarioResult.Completed;
         }
 
-
         private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
             context.Data[user.TelegramUserName] = user;
@@ -87,7 +85,6 @@ namespace NailBot.TelegramBot.Scenarios
             context.CurrentStep = "Name";
             return ScenarioResult.Transition;
         }
-
         private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
             var tasks = await _toDoService.GetAllByUserId(user.UserId, ct);

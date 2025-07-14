@@ -39,9 +39,8 @@ namespace NailBot.Core.Services
             var tasks = await GetAllByUserId(user.UserId, ct);
 
             if (tasks.Count >= maxTaskAmount)
-            {
                 throw new TaskCountLimitException(maxTaskAmount);
-            }
+            
 
             string taskName = Validate.ValidateString(name, maxTaskLength);
 
@@ -122,8 +121,6 @@ namespace NailBot.Core.Services
                 ? throw new NullTaskException("Задача не существует или равна null")
                 : result.FirstOrDefault(x => x.Id == id);
         }
-
-
 
         public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
         {

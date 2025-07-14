@@ -57,9 +57,6 @@ namespace NailBot.TelegramBot.Scenarios
                 case "Name":
                     return await HandleNameStep(bot, context, currentUser, currentChat, currentUserInput, ct);
 
-                //case "Deadline":
-                //    return await HandleDeadlineStep(bot, context, currentUser, currentChat, currentUserInput, ct);
-
                 default:
                     await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;

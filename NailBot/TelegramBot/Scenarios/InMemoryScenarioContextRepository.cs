@@ -21,9 +21,7 @@ namespace NailBot.TelegramBot.Scenarios
 
         public Task ResetContext(long userId, CancellationToken ct)
         {
-            ScenarioContext? removedContext;
-
-            if (_scenarioContext.TryRemove(userId, out removedContext))
+            if (_scenarioContext.TryRemove(userId, out var removedContext))
                 Console.WriteLine($"Контекст пользователя {userId} успешно удален.");
             else
                 Console.WriteLine($"Контекст для пользователя {userId} не найден или уже был удален.");

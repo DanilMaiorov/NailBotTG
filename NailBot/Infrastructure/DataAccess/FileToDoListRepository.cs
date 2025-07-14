@@ -48,11 +48,12 @@ namespace NailBot.Infrastructure.DataAccess
         public async Task Add(ToDoList list, CancellationToken ct)
         {
             await _semaphore.WaitAsync(ct);
+            var userId = list.User.UserId.ToString();
 
             try
             {
                 //получение пути до папки с тудушками пользака
-                var currentUserToDoItemDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, _toDoItemFolderName, list.User.UserId.ToString());
+                var currentUserToDoItemDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, _toDoItemFolderName, userId);
 
                 var json = JsonSerializer.Serialize(list);
 
@@ -60,7 +61,7 @@ namespace NailBot.Infrastructure.DataAccess
                 Helper.CheckOrCreateDirectory(currentUserToDoItemDirectoryPath, list.Id.ToString());
 
                 //получение пути до папки с листами пользака
-                var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_toDoListDirectory, list.User.UserId.ToString());
+                var currentUserToDoListsFolderDirectoryPath = Helper.GetDirectoryPath(_toDoListDirectory, userId);
 
                 //получение пути до json файла списка 
                 var fullPath = Path.Combine(currentUserToDoListsFolderDirectoryPath, $"{list.Id}.json");
@@ -89,9 +90,30 @@ namespace NailBot.Infrastructure.DataAccess
         }
 
 
-        public Task Delete(Guid id, CancellationToken ct)
+        public async Task Delete(Guid id, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var deleteItem = await Get(id, ct);
+            var userId = deleteItem.User.UserId.ToString();
+            var listId = deleteItem.Id.ToString();
+
+            if (deleteItem != null)
+            {
+                var currentUserListsDirectoryPath = Path.Combine(_currentDirectory, _toDoListFolderName, userId);
+
+                var filePath = Path.Combine(currentUserListsDirectoryPath, listId + ".json");
+
+                if (File.Exists(filePath))
+                {
+                    //удаляю задачу
+                    File.Delete(filePath);
+                    //обновляю индекс
+                    RebuildIndex();
+                }
+                else
+                {
+                    throw new FileNotFoundException($"Файл не найден: {filePath}");
+                }
+            }
         }
 
         public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
@@ -166,19 +188,6 @@ namespace NailBot.Infrastructure.DataAccess
             return toDoList.AsReadOnly();
         }
 
-
-        private string GetCurrentPath(string toDoListFolderName)
-        {
-            var directory = Directory.GetCurrentDirectory();
-
-            var currentPath = Path.Combine(directory, toDoListFolderName);
-
-            if (!Directory.Exists(currentPath))
-                Directory.CreateDirectory(currentPath);
-
-            return currentPath;
-        }
-
         //методы работы с файл индексом
         private async Task EnsureIndexExists()
         {
@@ -201,7 +210,7 @@ namespace NailBot.Infrastructure.DataAccess
             var index = new Dictionary<Guid, Guid>();
 
             //переберу все директории и файлы в них и занесу в словарь
-            foreach (var userDir in Directory.EnumerateDirectories(_currentDirectory))
+            foreach (var userDir in Directory.EnumerateDirectories(_toDoListDirectory))
             {
                 var userId = Path.GetFileName(userDir);
 
@@ -256,7 +265,6 @@ namespace NailBot.Infrastructure.DataAccess
             {
                 Console.WriteLine($"Ошибка сохранения индекса: {ex.Message}");
             }
-        
         }
 
         private async Task<Dictionary<Guid, Guid>> LoadIndex()

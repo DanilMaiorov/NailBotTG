@@ -54,25 +54,23 @@ namespace NailBot
             //создам класс FileUserRepository
             var fileUserRepository = new FileUserRepository(userfolderName);
 
-
             IUserService _userService = new UserService(fileUserRepository);
             IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
 
             IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
 
-
             //логика списка задач
             var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName, toDoItemfolderName);
             IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
-
 
             //логика сценариев
             IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
             var scenarios = new List<IScenario>
             {
                 new AddTaskScenario(_userService, _toDoService, _toDoListService),
-                new AddListScenario(_userService, _toDoListService)
+                new AddListScenario(_userService, _toDoListService),
+                new DeleteListScenario(_userService, _toDoService, _toDoListService, toDoItemfolderName),
             };
 
             IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, _toDoListService, cts.Token);

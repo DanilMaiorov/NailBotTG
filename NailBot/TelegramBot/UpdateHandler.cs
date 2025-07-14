@@ -136,7 +136,6 @@ internal class UpdateHandler : IUpdateHandler
             if (command == Commands.Cancel)
                 await _scenarioContextRepository.ResetContext(telegramUserId, ct);
 
-
             var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
 
             if (scenarioContext != null)
@@ -169,7 +168,7 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Cancel:
-                    await botClient.SendMessage(currentChat, "Текущий сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await botClient.SendMessage(currentChat, "Сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
                 case Commands.Show:
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
@@ -360,8 +359,6 @@ internal class UpdateHandler : IUpdateHandler
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             //OnHandleUpdateStarted?.Invoke(message.Text);
 
-            //(string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input, currentUserTaskList);
-
             //получение значений команд типа Enum
             Commands command = Helper.GetEnumValue<Commands>(input);
             ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
@@ -375,8 +372,6 @@ internal class UpdateHandler : IUpdateHandler
 
             var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
 
-            ToDoList? list = null;
-
             if (scenarioContext != null)
             {
                 if (scenarioContext.Data.TryGetValue(currentChat.Username, out object? item))
@@ -384,9 +379,7 @@ internal class UpdateHandler : IUpdateHandler
                     if (item is ToDoItem toDoItem)
                     {
                         if (callbackDto.ToDoListId.HasValue)
-                        {
                             toDoItem.List = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
-                        }
                     }
                 }
                 await ProcessScenario(scenarioContext, update, ct);
@@ -401,13 +394,17 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case "addlist":
-                    var newContext = new ScenarioContext(ScenarioType.AddList);
-                    await ProcessScenario(newContext, update, ct);
+                    await ProcessScenario(
+                        Helper.CreateScenarioContext(ScenarioType.AddList), 
+                        update,
+                        ct);
                     break;
 
                 case "deletelist":
-                    var newContext1 = new ScenarioContext(ScenarioType.DeleteList);
-                    await ProcessScenario(newContext1, update, ct);
+                    await ProcessScenario(
+                        Helper.CreateScenarioContext(ScenarioType.DeleteList),
+                        update,
+                        ct);
                     break;
 
                 default:
@@ -485,6 +482,10 @@ internal class UpdateHandler : IUpdateHandler
             return currentScenario ?? throw new NotSupportedException($"Сценарий {scenario} не поддерживается");
         }
 
+        /// <summary>
+        /// Работает со сценарием, устанавливает или сбрасывает контекст. Получает сценарий, получает результат обработки сценария в зависимости от ввода пользователя
+        /// </summary>
+        /// <param name="context">Контекст в зависимотси от типа сценария</param>
         async Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
         {
             var scenario = GetScenario(context.CurrentScenario);
