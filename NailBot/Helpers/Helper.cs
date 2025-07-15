@@ -9,8 +9,8 @@ using System.Text.Json;
 using NailBot.Core.Enums;
 using System.Globalization;
 using NailBot.TelegramBot.Dto;
-using System.Reflection;
 using NailBot.TelegramBot.Scenarios;
+using NailBot.Core.Services;
 
 namespace NailBot.Helpers
 {
@@ -331,12 +331,17 @@ namespace NailBot.Helpers
         /// </summary>
         /// <param name="type">Тип создаваемого сценария</param>
         /// <returns>Новый экземпляр ScenarioContext</returns>
-        public static ScenarioContext CreateScenarioContext(ScenarioType type)
+        public static ScenarioContext CreateScenarioContext(ScenarioType type, long userId)
         {
-            return new ScenarioContext(type);
+            return new ScenarioContext(type, userId);
         }
 
-        //написать метод генерации списка
+        /// <summary>
+        /// Генерирует кнопки со списками задач и добавляет их в список
+        /// </summary>
+        /// <param name="lists">Коллекция списков</param>
+        /// <param name="keyboardRows">Список с кнопками</param>
+        /// <param name="action">Действие</param>
         private static void ListInlineButtonGenerate(IReadOnlyList<ToDoList> lists, List<IEnumerable<InlineKeyboardButton>> keyboardRows, string action)
         {
             foreach (var list in lists)
@@ -351,5 +356,65 @@ namespace NailBot.Helpers
             }
         }
 
+        /// <summary>
+        /// Извлекает ключевые данные из входящего обновления (Update) от Telegram,
+        /// такие как текущий чат, пользовательский ввод и информацию о пользователе.
+        /// </summary>
+        /// <param name="update">Объект Update, содержащий информацию о сообщении или колбэке.</param>
+        /// <param name="context">Контекст сценария, используемый для получения данных пользователя.</param>
+        /// <param name="userService">Сервис для получения информации о пользователе, если он отсутствует в контексте.</param>
+        /// <param name="ct">Токен отмены операции.</param>
+        /// <returns>
+        /// Кортеж, содержащий:
+        /// <list type="bullet">
+        ///     <item><term>Chat?</term><description>Объект чата, откуда пришло сообщение/колбэк (может быть null).</description></item>
+        ///     <item><term>string?</term><description>Текстовый ввод пользователя (может быть null).</description></item>
+        ///     <item><term>ToDoUser?</term><description>Объект пользователя (может быть null, если не найден).</description></item>
+        /// </list>
+        /// Возвращает кортеж из всех null-значений, если обновление не содержит сообщения или колбэка.
+        /// </returns>
+        public static async Task<(Chat?, string?, ToDoUser?)> HandleMessageAsyncGetData(Update update, ScenarioContext context, IUserService userService, CancellationToken ct)
+        {
+            Message? message;
+            string? currentUserInput;
+
+            if (update.Message != null)
+            {
+                message = update.Message;
+                currentUserInput = message.Text?.Trim();
+            }
+            else if (update.CallbackQuery != null)
+            {
+                message = update.CallbackQuery.Message;
+                currentUserInput = update.CallbackQuery.Data.Trim();
+            }
+            else
+            {
+                return default;
+            }
+
+            var currentChat = message.Chat;
+            var currentUser = await GetUserInScenario(context, currentChat.Id, currentChat.Username, userService, ct);
+
+            return (currentChat, currentUserInput, currentUser);
+        }
+
+        /// <summary>
+        /// Пытается получить объект пользователя (ToDoUser) из данных контекста сценария.
+        /// Если пользователь не найден в контексте или имеет неподходящий тип,
+        /// асинхронно получает его из сервиса пользователей.
+        /// </summary>
+        /// <param name="context">Контекст сценария, содержащий данные.</param>
+        /// <param name="id">Идентификатор пользователя для получения из сервиса, если не найден в контексте.</param>
+        /// <param name="username">Имя пользователя для поиска в данных контекста.</param>
+        /// <param name="ct">Токен отмены операции.</param>
+        /// <returns>Найденный объект ToDoUser или null, если пользователь не найден ни в контексте, ни в сервисе.</returns>
+        public static async Task<ToDoUser?> GetUserInScenario(ScenarioContext context, long id, string username, IUserService userService, CancellationToken ct)
+        {
+            if (context?.Data.TryGetValue(username, out var dataObject) == true && dataObject is ToDoUser toDoUser)
+                return toDoUser;
+
+            return await userService.GetUser(id, ct);
+        }
     }
 }

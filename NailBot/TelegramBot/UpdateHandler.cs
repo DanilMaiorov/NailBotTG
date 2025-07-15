@@ -8,6 +8,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using NailBot.Core.Exceptions;
 using NailBot.TelegramBot.Dto;
+using Telegram.Bots.Http;
 
 namespace NailBot.TelegramBot;
 
@@ -19,12 +20,9 @@ internal class UpdateHandler : IUpdateHandler
     private readonly IToDoService _toDoService;
     private readonly IToDoReportService _toDoReportService;
 
-    //добавлю токен
-    private readonly CancellationToken _ct;
-
     //добавлю 2 события
-    public event MessageEventHandler OnHandleUpdateStarted;
-    public event MessageEventHandler OnHandleUpdateCompleted;
+    public event MessageEventHandler? OnHandleUpdateStarted;
+    public event MessageEventHandler? OnHandleUpdateCompleted;
 
     //логика сценариев
     private readonly IEnumerable<IScenario> _scenarios;
@@ -39,48 +37,32 @@ internal class UpdateHandler : IUpdateHandler
         IToDoReportService itoDoReportService, 
         IEnumerable<IScenario> scenarios, 
         IScenarioContextRepository contextRepository,
-        IToDoListService itoDoListService,
-        CancellationToken ct)
+        IToDoListService itoDoListService)
     {
         _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
         _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
 
         _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
 
+        _toDoListService = itoDoListService ?? throw new ArgumentNullException(nameof(itoDoListService));
+
         _scenarios = scenarios;
         _scenarioContextRepository = contextRepository;
-
-        _toDoListService = itoDoListService;
-
-        _ct = ct;
     }
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        Chat currentChat;
-        long telegramUserId;
-        string input;
-        string message = "";
-
         if (update.Message != null)
         {
-            currentChat = update.Message.Chat;
-            telegramUserId = update.Message.From.Id;
-            input = update.Message.Text;
-
             await OnMessage(botClient, update, update.Message, ct);
         }
         else if (update.CallbackQuery != null)
         {
-            currentChat = update.CallbackQuery.Message.Chat;
-            telegramUserId = update.CallbackQuery.From.Id;
-            input = update.CallbackQuery.Data;
-
             await OnCallbackQuery(botClient, update, update.CallbackQuery, ct);
         }
         else
         {
-            await OnUnknown(update);
+            await OnUnknown();
             return;
         }
     }
@@ -99,18 +81,17 @@ internal class UpdateHandler : IUpdateHandler
                 ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
                 : null;
 
-            //if (update.Message.Id == 1)
-            //{
-            //    await botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! \n", cancellationToken: ct);
-            //    return;
-            //}
+            if (update.Message.Id == 1)
+            {
+                await botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! \n", cancellationToken: ct);
+                return;
+            }
 
             if (currentUser == null)
             {
                 if (input != "/start")
                 {
                     await botClient.SendMessage(currentChat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: Helper.keyboardStart, cancellationToken: ct);
-
                     return;
                 }
             }
@@ -127,7 +108,7 @@ internal class UpdateHandler : IUpdateHandler
 
             //получение значений команд типа Enum
             Commands command = Helper.GetEnumValue<Commands>(input);
-            ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
+            //ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message.Text);
@@ -163,8 +144,10 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Addtask:
-                    var newContext = new ScenarioContext(ScenarioType.AddTask);
-                    await ProcessScenario(newContext, update, ct);
+                    await ProcessScenario(
+                        Helper.CreateScenarioContext(ScenarioType.AddTask, telegramUserId),
+                        update,
+                        ct);
                     break;
 
                 case Commands.Cancel:
@@ -339,11 +322,6 @@ internal class UpdateHandler : IUpdateHandler
         {
             var currentUser = await _userService.GetUser(telegramUserId, ct);
 
-            //пока непонятно надо это или нет
-            var currentUserTaskList = currentUser != null
-                ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
-                : null;
-
             if (currentUser == null)
             {
                 if (input != "/start")
@@ -357,14 +335,14 @@ internal class UpdateHandler : IUpdateHandler
             var callbackDto = ToDoListCallbackDto.FromString(input);
 
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
-            //OnHandleUpdateStarted?.Invoke(message.Text);
+            OnHandleUpdateStarted?.Invoke(callbackQuery.Message.Text);
 
             //получение значений команд типа Enum
             Commands command = Helper.GetEnumValue<Commands>(input);
-            ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
+            //ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
-            //OnHandleUpdateCompleted?.Invoke(message.Text);
+            OnHandleUpdateCompleted?.Invoke(callbackQuery.Message.Text);
 
             //Работа с командой cancel и сценариями
             if (command == Commands.Cancel)
@@ -376,6 +354,7 @@ internal class UpdateHandler : IUpdateHandler
             {
                 if (scenarioContext.Data.TryGetValue(currentChat.Username, out object? item))
                 {
+                    //запихну экземпляр объекта списка вместо его id если скастится
                     if (item is ToDoItem toDoItem)
                     {
                         if (callbackDto.ToDoListId.HasValue)
@@ -383,6 +362,7 @@ internal class UpdateHandler : IUpdateHandler
                     }
                 }
                 await ProcessScenario(scenarioContext, update, ct);
+
                 return;
             }         
 
@@ -395,14 +375,14 @@ internal class UpdateHandler : IUpdateHandler
 
                 case "addlist":
                     await ProcessScenario(
-                        Helper.CreateScenarioContext(ScenarioType.AddList), 
+                        Helper.CreateScenarioContext(ScenarioType.AddList, telegramUserId), 
                         update,
                         ct);
                     break;
 
                 case "deletelist":
                     await ProcessScenario(
-                        Helper.CreateScenarioContext(ScenarioType.DeleteList),
+                        Helper.CreateScenarioContext(ScenarioType.DeleteList, telegramUserId),
                         update,
                         ct);
                     break;
@@ -500,14 +480,10 @@ internal class UpdateHandler : IUpdateHandler
         #endregion
     }
 
-    private async Task OnUnknown(Update update)
+    private async Task OnUnknown()
     {
-        Console.WriteLine($"Unknown update type: {update.Type}");
-        await Task.Delay(1);
-        // Возможно, отправить сообщение пользователю о неизвестной команде
+        throw new ArgumentException("Получен неизветсный тип сообщения");
     }
-
-
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
     {

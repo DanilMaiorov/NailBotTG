@@ -73,7 +73,7 @@ namespace NailBot
                 new DeleteListScenario(_userService, _toDoService, _toDoListService, toDoItemfolderName),
             };
 
-            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, _toDoListService, cts.Token);
+            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, _toDoListService);
 
             if (_updateHandler is UpdateHandler castHandler)
             {

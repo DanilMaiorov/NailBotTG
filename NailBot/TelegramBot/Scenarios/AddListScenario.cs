@@ -24,30 +24,11 @@ namespace NailBot.TelegramBot.Scenarios
 
         public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct)
         {
-            Message message;
-            ToDoUser currentUser;
-            Chat currentChat;
-            string currentUserInput;
-
-            if (update.Message != null)
-            {
-                message = update.Message;
-                currentUser = await _userService.GetUser(message.From.Id, ct);
-                currentChat = message.Chat;
-                currentUserInput = message.Text?.Trim();
-            }
-            else if (update.CallbackQuery != null)
-            {
-                message = update.CallbackQuery.Message;
-                currentUser = await _userService.GetUser(update.CallbackQuery.From.Id, ct);
-                currentChat = update.CallbackQuery.Message.Chat;
-                currentUserInput = update.CallbackQuery.Data?.Trim();
-            }
-            else
-            {
-                //await OnUnknown(update);
+            //верну выполненный сценарий если придёт какая-то левая инфа
+            if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
-            }
+
+            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
 
             switch (context.CurrentStep)
             {
@@ -61,7 +42,6 @@ namespace NailBot.TelegramBot.Scenarios
                     await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
             }
-            await Task.Delay(1);
 
             return ScenarioResult.Completed;
         }
@@ -73,6 +53,7 @@ namespace NailBot.TelegramBot.Scenarios
             await bot.SendMessage(chat, "Введите название списка:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
 
             context.CurrentStep = "Name";
+
             return ScenarioResult.Transition;
         }
 

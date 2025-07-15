@@ -32,29 +32,11 @@ namespace NailBot.TelegramBot.Scenarios
 
         public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct)
         {
-            Message message;
-            ToDoUser currentUser;
-            Chat currentChat;
-            string currentUserInput;
-
-            if (update.Message != null)
-            {
-                message = update.Message;
-                currentUser = await _userService.GetUser(message.From.Id, ct);
-                currentChat = message.Chat;
-                currentUserInput = message.Text?.Trim();
-            }
-            else if (update.CallbackQuery != null)
-            {
-                message = update.CallbackQuery.Message;
-                currentUser = await _userService.GetUser(update.CallbackQuery.From.Id, ct);
-                currentChat = update.CallbackQuery.Message.Chat;
-                currentUserInput = update.CallbackQuery.Data?.Trim();
-            }
-            else
-            {
+            //верну выполненный сценарий если придёт какая-то левая инфа
+            if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
-            }
+
+            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
 
             switch (context.CurrentStep)
             {
@@ -71,7 +53,6 @@ namespace NailBot.TelegramBot.Scenarios
                     await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
             }
-            await Task.Delay(1);
 
             return ScenarioResult.Completed;
         }
@@ -87,9 +68,11 @@ namespace NailBot.TelegramBot.Scenarios
                 await bot.SendMessage(chat, "Выберете список для удаления:", replyMarkup: Helper.GetSelectListKeyboardForDelete(lists), cancellationToken: ct);
 
                 context.CurrentStep = "Approve";
+
                 return ScenarioResult.Transition;
             }
-            await bot.SendMessage(chat, "Нет списков для удаления:", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            await bot.SendMessage(chat, "Нет списков для удаления.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+
             return ScenarioResult.Completed;
         }
 
@@ -133,8 +116,9 @@ namespace NailBot.TelegramBot.Scenarios
                             await _toDoService.Delete(item.Id, ct);
                     }
 
-                    // удаляю папку списка и директории с разделение тудушек по папкам-спискам после удаления всех тудушек выбранного списка
+                    // удаляю папку списка и директории с разделение тудушек по папкам-спискам после удаления всех тудушек выбранного списка - ПОХОЖЕ НА КОСТЫЛЬ
                     var toDoItemsDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), _toDoItemFolderName, user.UserId.ToString(), toDoList.Id.ToString());
+
                     if (Directory.Exists(toDoItemsDirectoryPath))
                         Directory.Delete(toDoItemsDirectoryPath);
 

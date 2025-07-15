@@ -31,29 +31,11 @@ namespace NailBot.TelegramBot.Scenarios
 
         public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient botClient, ScenarioContext context, Update update, CancellationToken ct)
         {
-            Message message;
-            ToDoUser currentUser;
-            Chat currentChat;
-            string currentUserInput;
-
-            if (update.Message != null)
-            {
-                message = update.Message;
-                currentUser = await _userService.GetUser(message.From.Id, ct);
-                currentChat = message.Chat;
-                currentUserInput = message.Text?.Trim();
-            }
-            else if (update.CallbackQuery != null)
-            {
-                message = update.CallbackQuery.Message;
-                currentUser = await _userService.GetUser(update.CallbackQuery.From.Id, ct);
-                currentChat = update.CallbackQuery.Message.Chat;
-                currentUserInput = update.CallbackQuery.Data?.Trim();
-            }
-            else
-            {
+            //верну выполненный сценарий если придёт какая-то левая инфа
+            if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
-            }
+
+            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
 
             switch (context.CurrentStep)
             {
@@ -67,7 +49,7 @@ namespace NailBot.TelegramBot.Scenarios
                     return await HandleDeadlineStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
 
                 case "List":
-                    return await HandleChooseListStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
+                    return await HandleChooseListStep(botClient, context, currentUser, currentChat, ct);
 
                 default:
                     await botClient.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
@@ -83,22 +65,19 @@ namespace NailBot.TelegramBot.Scenarios
             await botClient.SendMessage(chat, "Введите название задачи:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
 
             context.CurrentStep = "Name";
+
             return ScenarioResult.Transition;
         }
         private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            var tasks = await _toDoService.GetAllByUserId(user.UserId, ct);
-
-            Helper.CheckDuplicate(userInput, tasks);
-
-            context.Data[user.TelegramUserName] = new ToDoItem()
-            {
-                Name = userInput,
-            };
+            //вызову тут метод сервиса Add и передам в него default и null.
+            //это сделано для проверки на дубликаты и возврат промежуточного объекта
+            context.Data[user.TelegramUserName] = await _toDoService.Add(user, userInput, default, null, ct);
 
             await botClient.SendMessage(chat, "Введите дедлайн задачи в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
 
             context.CurrentStep = "Deadline";
+
             return ScenarioResult.Transition;
         }
 
@@ -126,9 +105,8 @@ namespace NailBot.TelegramBot.Scenarios
             return ScenarioResult.Transition;
         }
 
-        private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-
             if (!context.Data.TryGetValue(user.TelegramUserName, out var toDoItemObj))
                 throw new InvalidOperationException("Тудушка не найдена в контексте");
 

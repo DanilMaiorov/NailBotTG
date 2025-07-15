@@ -36,13 +36,22 @@ namespace NailBot.Core.Services
         // реализация метода интерфейса Add
         public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, ToDoList? list, CancellationToken ct)
         {
-            var tasks = await GetAllByUserId(user.UserId, ct);
-
-            if (tasks.Count >= maxTaskAmount)
-                throw new TaskCountLimitException(maxTaskAmount);
-            
-
             string taskName = Validate.ValidateString(name, maxTaskLength);
+
+            if (deadline == default)
+            {
+                var tasks = await GetAllByUserId(user.UserId, ct);
+
+                if (tasks.Count >= maxTaskAmount)
+                    throw new TaskCountLimitException(maxTaskAmount);
+
+                Helper.CheckDuplicate(taskName, tasks);
+
+                return new ToDoItem()
+                {
+                    Name = taskName,
+                };
+            }
 
             var newToDoItem = new ToDoItem
             {

@@ -103,8 +103,7 @@ namespace NailBot.Infrastructure.DataAccess
                     var listId = deleteItem.List.Id.ToString();
                     filePath = Path.Combine(currentUserDirectoryPath, listId, id + ".json");
                 }
-                    
-                     
+
                 if (File.Exists(filePath))
                 {
                     //удаляю задачу
