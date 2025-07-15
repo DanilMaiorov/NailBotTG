@@ -4,6 +4,7 @@ using NailBot.Infrastructure.DataAccess;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
+using NailBot.TelegramBot.Scenarios;
 
 namespace NailBot
 {
@@ -17,7 +18,8 @@ namespace NailBot
 
         public async static Task Main(string[] args)
         {
-            string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
+            //string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
+            string token = "7512417913:AAHnoeWdDKNOyTuF0DMHpPVdO95imk0xMgw";
 
             if (string.IsNullOrEmpty(token))
             {
@@ -56,7 +58,15 @@ namespace NailBot
 
             IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
-            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, cts.Token);
+
+            //логика сценариев
+            IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
+            var scenarios = new List<IScenario> 
+            {
+                new AddTaskScenario(_userService, _toDoService)
+            };
+
+            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, cts.Token);
 
             if (_updateHandler is UpdateHandler castHandler)
             {

@@ -6,13 +6,14 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
+using NailBot.Core.Enums;
+using System.Globalization;
 
 namespace NailBot.Helpers
 {
 
     public static class Helper
     {
-
         //инициализирую клавиатуры
         //кнопка для /start
         public static readonly ReplyKeyboardMarkup keyboardStart = new ReplyKeyboardMarkup(
@@ -29,14 +30,28 @@ namespace NailBot.Helpers
         public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
             new[]
             {
-                new KeyboardButton("ФВЫВАВЫА"),
+                new KeyboardButton("/showalltasks"),
                 new KeyboardButton("/showtasks"),
+                new KeyboardButton("/addtask"),
                 new KeyboardButton("/report")
             })
         {
             ResizeKeyboard = true,
             OneTimeKeyboard = false
         };
+        //кнопка для /cancel
+        public static readonly ReplyKeyboardMarkup keyboardCancel = new ReplyKeyboardMarkup(
+            new[]
+            {
+                new KeyboardButton("/cancel")
+            })
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = true
+        };
+
+
+
         //рендер списка задач
         public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
         {
@@ -58,14 +73,9 @@ namespace NailBot.Helpers
             string cutInput = "";
             Guid taskGuid = Guid.Empty;
 
-            if (input.StartsWith("/addtask") || input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
+            if (input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
             {
-                if (input.StartsWith("/addtask "))
-                {
-                    cutInput = input.Substring(9);
-                    input = "/addtask";
-                }
-                else if (input.StartsWith("/find "))
+                if (input.StartsWith("/find "))
                 {
                     cutInput = input.Substring(6);
                     input = "/find";
@@ -116,6 +126,51 @@ namespace NailBot.Helpers
             }
             return value;
         }
+
+        /// <summary>
+        /// Преобразует строковое представление в значение указанного перечисления.
+        /// </summary>
+        /// <typeparam name="T">Тип перечисления</typeparam>
+        /// <param name="input">Входная строка для преобразования</param>
+        /// <returns>
+        /// Соответствующее значение перечисления при успешном преобразовании.
+        /// Значение по умолчанию для типа перечисления при неудаче.
+        /// </returns>
+        /// <remarks>
+        /// Сравнение выполняется без учёта регистра. 
+        /// Если входная строка не соответствует ни одному элементу перечисления, возвращается default(T).
+        /// </remarks>
+        public static T GetEnumValue<T>(string input) where T : struct, Enum
+        {
+            return Enum.TryParse<T>(input, true, out var result)
+                ? result
+                : default;
+        }
+
+        /// <summary>
+        /// Пытается преобразовать строку с датой в формате dd.MM.yyyy в объект DateTime.
+        /// </summary>
+        /// <param name="userInput">Строка с датой для парсинга</param>
+        /// <param name="result">Результат преобразования (при успешном парсинге)</param>
+        /// <returns>
+        /// true - если парсинг выполнен успешно; 
+        /// false - если строка имеет неверный формат или не является допустимой датой
+        /// </returns>
+        /// <remarks>
+        /// Использует строгий парсинг с форматом, заданным в Constants.deadlineFormat
+        /// и независимый от региональных настроек (InvariantCulture)
+        /// </remarks>
+        public static bool TryParseUserDate(string userInput, out DateTime result)
+        {
+            return DateTime.TryParseExact(
+                userInput,
+                Constants.deadlineFormat,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out result
+            );
+        }
+
 
     }
 }

@@ -9,5 +9,6 @@
         public DateTime CreatedAt { get; init; }
         public ToDoItemState State { get; set; }
         public DateTime? StateChangedAt { get; set; }
+        public DateTime Deadline { get; set; }
     }
 }

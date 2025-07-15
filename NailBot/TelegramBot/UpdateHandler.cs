@@ -1,26 +1,17 @@
 ﻿using NailBot.Core.Entities;
+using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
+using NailBot.TelegramBot.Scenarios;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Telegram.Bot.Types.ReplyMarkups;
+using System.Threading.Channels;
+using NailBot.Core.Exceptions;
 
 namespace NailBot.TelegramBot;
-public enum Commands
-{
-    Start = 1, 
-    Help, 
-    Info, 
-    Addtask, 
-    Showtasks, 
-    Showalltasks, 
-    Removetask, 
-    Find, 
-    Completetask, 
-    Report, 
-    Exit
-}
 
 internal delegate void MessageEventHandler(string message);
 
@@ -37,12 +28,19 @@ internal class UpdateHandler : IUpdateHandler
     public event MessageEventHandler OnHandleUpdateStarted;
     public event MessageEventHandler OnHandleUpdateCompleted;
 
-    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, CancellationToken ct)
+    //логика сценариев
+    private readonly IEnumerable<IScenario> _scenarios;
+    private readonly IScenarioContextRepository _scenarioContextRepository;
+
+    public UpdateHandler(IUserService iuserService, IToDoService itoDoService, IToDoReportService itoDoReportService, IEnumerable<IScenario> scenarios, IScenarioContextRepository contextRepository, CancellationToken ct)
     {
         _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
         _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
 
         _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
+
+        _scenarios = scenarios;
+        _scenarioContextRepository = contextRepository;
 
         _ct = ct;
     }
@@ -84,8 +82,6 @@ internal class UpdateHandler : IUpdateHandler
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(message);
 
-            Commands command;
-
             input = input.NumberReplacer();
 
             (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input, currentUserTaskList);
@@ -94,24 +90,32 @@ internal class UpdateHandler : IUpdateHandler
 
             if (currentUser == null && input != "start")
                 input = "unregistered user command";
-            
 
-            if (Enum.TryParse<Commands>(input, true, out var result))
-                command = result;
-            
-            else
-                command = default;
-            
+            //получение значений команд типа Enum
+            Commands command = Helper.GetEnumValue<Commands>(input);
+            ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message);
+
+            //Работа с командой cancel и сценариями
+            if (command == Commands.Cancel)
+                await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            
+            var scenarioContext = await _scenarioContextRepository.GetContext(update.Message.From.Id, ct);
+
+            if (scenarioContext != null)
+            {
+                await ProcessScenario(scenarioContext, update, ct);
+                return;
+            }
+
             switch (command)
             {
                 case Commands.Start:
                     if (currentUser == null)
-                    {
                         currentUser = await _userService.RegisterUser(update.Message.From.Id, update.Message.From.Username, ct);
-                    }
+                    
                     await botClient.SendMessage(currentChat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
@@ -125,8 +129,12 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Addtask:
-                    var newTask = await _toDoService.Add(currentUser, inputText, ct);
-                    await botClient.SendMessage(currentChat, $"Задача \"{newTask.Name}\" добавлена в список задач.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    var newContext = new ScenarioContext(ScenarioType.AddTask);
+                    await ProcessScenario(newContext, update, ct);
+                    break;
+
+                case Commands.Cancel:
+                    await botClient.SendMessage(currentChat, "Текущий сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Showtasks:
@@ -138,7 +146,6 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Removetask:
-                    //вызов метода удаления задачи
                     await _toDoService.Delete(taskGuid, ct);
                     await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
@@ -175,28 +182,27 @@ internal class UpdateHandler : IUpdateHandler
         //    if (update.Message.Id == 1)
         //        await HandleUpdateAsync(botClient, update, ct);
         //}
-        //catch (TaskCountLimitException ex)
-        //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-
-        //    if (update.Message.Id == 1)
-        //        await HandleUpdateAsync(botClient, update, ct);
-        //}
+        catch (TaskCountLimitException ex)
+        {
+            await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            await botClient.SendMessage(currentChat, "Текущий сценарий завершен. Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+        }
         //catch (TaskLengthLimitException ex)
         //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-
-        //    if (update.Message.Id == 1)
-        //        await HandleUpdateAsync(botClient, update, ct);
+        //    await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+        //    await botClient.SendMessage(currentChat, "Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         //}
-        //catch (DuplicateTaskException ex)
-        //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-        //}
-        //catch (EmptyTaskListException ex)
-        //{
-        //    await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-        //}
+        catch (DuplicateTaskException ex)
+        {
+            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+            return;
+        }
+        catch (EmptyTaskListException ex)
+        {
+            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+        }
         #endregion
 
         catch (Exception)
@@ -243,7 +249,8 @@ internal class UpdateHandler : IUpdateHandler
                 await botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
                 $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/addtask\" *название задачи*\" ты сможешь добавлять задачи в список задач\n" +
+                $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном вводе, задача будет добавлена\n" +
+                $"Введя команду \"/cancel\" ты сможешь отменить отменить добавление новой задачи \n" +
                 $"Введя команду \"/showtasks\" ты сможешь увидеть список активных задач в списке\n" +
                 $"Введя команду \"/showalltasks\" ты сможешь увидеть список всех задач в списке\n" +
                 $"Введя команду \"/removetask\" *номер задачи*\" ты сможешь удалить задачу из списка задач\n" +
@@ -261,12 +268,43 @@ internal class UpdateHandler : IUpdateHandler
             await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         }
         #endregion
+
+        #region МЕТОДЫ СЦЕНАРИЯ
+        /// <summary>
+        /// Возвращает экземпляр сценария по указанному типу.
+        /// </summary>
+        /// <param name="scenario">Тип сценария из перечисления ScenarioType</param>
+        /// <returns>Реализация интерфейса IScenario для запрошенного сценария</returns>
+        /// <exception cref="NotSupportedException">Выбрасывается при передаче неподдерживаемого значения ScenarioType</exception>
+        IScenario GetScenario(ScenarioType scenario)
+        {
+            var currentScenario = _scenarios.FirstOrDefault(s => s.CanHandle(scenario));
+            return currentScenario ?? throw new NotSupportedException($"Сценарий {scenario} не поддерживается");
+        }
+
+        async Task ProcessScenario(ScenarioContext context, Update update, CancellationToken ct)
+        {
+            var scenario = GetScenario(context.CurrentScenario);
+
+            var scenarioResult = await scenario.HandleMessageAsync(botClient, context, update, ct);
+
+            if (scenarioResult == ScenarioResult.Completed)
+                await _scenarioContextRepository.ResetContext(update.Message.From.Id, ct);
+            else
+                await _scenarioContextRepository.SetContext(update.Message.From.Id, context, ct);
+        }
+        #endregion
     }
+
+//Добавление Deadline в ToDoItem
+//Добавить свойство DateTime Deadline в ToDoItem
+//Добавить аргумент DateTime deadline в IToDoService.Add
+//Добавить заполнение Deadline в AddTaskScenario через отдельный шаг. Формат текста dd.MM.yyyy.
+//Если пользователь введет дату в неверном формате, сценарий не должен прерваться и нужно еще раз запросить дату.
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-
 
         Console.WriteLine($"Обработанное исключение: {exception.Message}");
 

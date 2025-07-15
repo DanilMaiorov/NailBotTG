@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using NailBot.Core.Entities;
+using NailBot.Core.Enums;
 using NailBot.TelegramBot;
 using Telegram.Bot;
 using Telegram.Bot.Types;
