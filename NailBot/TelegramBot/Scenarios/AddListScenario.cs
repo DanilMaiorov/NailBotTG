@@ -48,7 +48,6 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            //context.Data[user.TelegramUserName] = user;
             context.Data["User"] = user;
 
             await bot.SendMessage(chat, "Введите название списка:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);

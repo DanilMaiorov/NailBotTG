@@ -354,7 +354,6 @@ internal class UpdateHandler : IUpdateHandler
             {
                 if (callbackDto.ToDoListId.HasValue)
                     scenarioContext.Data["List"] = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
-                //toDoItem.List = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
 
                 await ProcessScenario(scenarioContext, update, ct);
 
