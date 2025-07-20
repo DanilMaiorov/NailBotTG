@@ -59,7 +59,8 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            context.Data[user.TelegramUserName] = user;
+            //context.Data[user.TelegramUserName] = user;
+            context.Data["User"] = user;
 
             var lists = await _toDoListService.GetUserLists(user.UserId, ct);
 
@@ -84,7 +85,8 @@ namespace NailBot.TelegramBot.Scenarios
             {
                 var deleteList = await _toDoListService.Get(deleteListGuid.Value, ct);
 
-                context.Data[user.TelegramUserName] = deleteList;
+                //context.Data[user.TelegramUserName] = deleteList;
+                context.Data["User"] = deleteList;
 
                 await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteListKeyboard(), cancellationToken: ct);
 
@@ -101,7 +103,7 @@ namespace NailBot.TelegramBot.Scenarios
             } 
             else
             {
-                if (context.Data.TryGetValue(user.TelegramUserName, out var list))
+                if (context.Data.TryGetValue("User", out var list))
                 {
                     if (list is not ToDoList toDoList)
                         throw new ArgumentException("Удаляемый список не является типом списка");

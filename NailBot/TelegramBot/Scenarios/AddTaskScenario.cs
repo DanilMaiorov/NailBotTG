@@ -2,11 +2,8 @@
 using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
-using System.ComponentModel.DataAnnotations;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bots;
-using Telegram.Bots.Http;
 
 namespace NailBot.TelegramBot.Scenarios
 {
@@ -43,7 +40,7 @@ namespace NailBot.TelegramBot.Scenarios
                     return await HandleInitialStep(botClient, context, currentUser, currentChat, ct);
 
                 case "Name":
-                    return await HandleNameStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
+                   return await HandleNameStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
 
                 case "Deadline":
                     return await HandleDeadlineStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
@@ -60,7 +57,8 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            context.Data[user.TelegramUserName] = user;
+            //context.Data[user.TelegramUserName] = user;
+            context.Data["User"] = user;
 
             await botClient.SendMessage(chat, "Введите название задачи:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
 
@@ -70,9 +68,8 @@ namespace NailBot.TelegramBot.Scenarios
         }
         private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            //вызову тут метод сервиса Add и передам в него default и null.
-            //это сделано для проверки на дубликаты и возврат промежуточного объекта
-            context.Data[user.TelegramUserName] = await _toDoService.Add(user, userInput, default, null, ct);
+            //расширил интерфейс методом для проверки на дубликаты ДО ввода дедлайна
+            context.Data["Name"] = await _toDoService.ThrowIfHasDuplicatesOrWhiteSpace(userInput, user.UserId, ct);
 
             await botClient.SendMessage(chat, "Введите дедлайн задачи в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
 
@@ -89,12 +86,7 @@ namespace NailBot.TelegramBot.Scenarios
                 return ScenarioResult.Transition;
             }
 
-            if (!context.Data.TryGetValue(user.TelegramUserName, out var toDoItemObj))
-                throw new InvalidOperationException("Пользователь не найден в контексте");
-
-            var obj = (ToDoItem)toDoItemObj;
-
-            obj.Deadline = deadline;
+            context.Data["Deadline"] = deadline;
 
             context.CurrentStep = "List";
 
@@ -107,17 +99,22 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            if (!context.Data.TryGetValue(user.TelegramUserName, out var toDoItemObj))
-                throw new InvalidOperationException("Тудушка не найдена в контексте");
+            if (!context.Data.TryGetValue("List", out var toDoListObj))
+                throw new InvalidOperationException("Список не найден в контексте");
 
-            var obj = (ToDoItem)toDoItemObj;
+            var toDoList = (ToDoList)toDoListObj;
 
-            await _toDoService.Add(user, obj.Name, obj.Deadline, obj.List, ct);
+            var toDoItem = await _toDoService.Add(
+                (ToDoUser)context.Data["User"],
+                (string)context.Data["Name"],
+                (DateTime)context.Data["Deadline"],
+                toDoList,
+                ct);
 
-            if (obj.List != null)
-                await botClient.SendMessage(chat, $"Задача \"{obj.Name}\" добавлена в список \"{obj.List.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            if (toDoList != null)
+                await botClient.SendMessage(chat, $"Задача \"{toDoList.Name}\" добавлена в список \"{toDoList.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
             else
-                await botClient.SendMessage(chat, $"Задача \"{obj.Name}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"Задача \"{toDoList.Name}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
             return ScenarioResult.Completed;
         }

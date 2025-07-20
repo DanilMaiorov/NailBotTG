@@ -8,7 +8,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using NailBot.Core.Exceptions;
 using NailBot.TelegramBot.Dto;
-using Telegram.Bots.Http;
+
 
 namespace NailBot.TelegramBot;
 
@@ -352,15 +352,10 @@ internal class UpdateHandler : IUpdateHandler
 
             if (scenarioContext != null)
             {
-                if (scenarioContext.Data.TryGetValue(currentChat.Username, out object? item))
-                {
-                    //запихну экземпляр объекта списка вместо его id если скастится
-                    if (item is ToDoItem toDoItem)
-                    {
-                        if (callbackDto.ToDoListId.HasValue)
-                            toDoItem.List = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
-                    }
-                }
+                if (callbackDto.ToDoListId.HasValue)
+                    scenarioContext.Data["List"] = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
+                //toDoItem.List = await _toDoListService.Get(callbackDto.ToDoListId.Value, ct);
+
                 await ProcessScenario(scenarioContext, update, ct);
 
                 return;
