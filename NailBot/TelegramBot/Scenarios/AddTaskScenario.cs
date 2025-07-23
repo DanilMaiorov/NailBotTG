@@ -40,7 +40,7 @@ namespace NailBot.TelegramBot.Scenarios
                     return await HandleInitialStep(botClient, context, currentUser, currentChat, ct);
 
                 case "Name":
-                   return await HandleNameStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
+                    return await HandleNameStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
 
                 case "Deadline":
                     return await HandleDeadlineStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
@@ -67,7 +67,6 @@ namespace NailBot.TelegramBot.Scenarios
         }
         private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            //расширил интерфейс методом для проверки на дубликаты ДО ввода дедлайна
             context.Data["Name"] = await _toDoService.ThrowIfHasDuplicatesOrWhiteSpace(userInput, user.UserId, ct);
 
             await botClient.SendMessage(chat, "Введите дедлайн задачи в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
