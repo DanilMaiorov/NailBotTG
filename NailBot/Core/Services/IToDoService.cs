@@ -13,5 +13,9 @@ namespace NailBot.Core.Services
         Task Delete(Guid id, CancellationToken ct);
         Task<string> ThrowIfHasDuplicatesOrWhiteSpace(string name, Guid id, CancellationToken ct);
         Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct);
+
+        //ДЗ 12
+        Task<ToDoItem?> Get(Guid toDoItemId, CancellationToken ct);
+
     }
 }
