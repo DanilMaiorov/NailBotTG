@@ -9,6 +9,8 @@ using Telegram.Bot.Types;
 using NailBot.Core.Exceptions;
 using NailBot.TelegramBot.Dto;
 using System.Threading.Tasks;
+using Telegram.Bot.Types.ReplyMarkups;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NailBot.TelegramBot;
 
@@ -30,6 +32,9 @@ internal class UpdateHandler : IUpdateHandler
 
     //IToDoListService 
     private readonly IToDoListService _toDoListService;
+
+    //количество кнопок задач на 1 странице
+    int _pageSize = 5;
 
     public UpdateHandler(
         IUserService iuserService, 
@@ -326,7 +331,7 @@ internal class UpdateHandler : IUpdateHandler
 
             var callbackDto = CallbackDto.FromString(input);
 
-            var callbackListDto = ToDoListCallbackDto.FromString(input);
+            var callbackPagedListDto = PagedListCallbackDto.FromString(input);
 
             var callbackItemDto = ToDoItemCallbackDto.FromString(input);
 
@@ -353,25 +358,28 @@ internal class UpdateHandler : IUpdateHandler
 
             if (scenarioContext != null)
             {
-                if (callbackListDto.ToDoListId.HasValue)
-                    scenarioContext.Data["List"] = await _toDoListService.Get(callbackListDto.ToDoListId.Value, ct);
+                if (callbackPagedListDto.ToDoListId.HasValue)
+                    scenarioContext.Data["List"] = await _toDoListService.Get(callbackPagedListDto.ToDoListId.Value, ct);
 
                 await ProcessScenario(scenarioContext, update, ct);
 
                 return;
             }         
 
-
-
-
-
-
-
             switch (callbackDto.Action)
             {
                 case "show":
-                    var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackListDto.ToDoListId, ct);
-                    await ShowTasksFromFolder(toDoItems);
+                    var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackPagedListDto.ToDoListId, ct);
+
+                    var keyValuePairCollection = toDoItems.ToReadOnlyKeyValueList(
+                        item => item.Id.ToString(),
+                        item => item.Name);
+
+                    var itemKeyboardWithPagination = await BuildPagedButtons(keyValuePairCollection, callbackPagedListDto);
+
+                    await botClient.EditMessageText(currentChat, currentMessageId, "Список задач", replyMarkup: itemKeyboardWithPagination, cancellationToken: ct);
+
+                    //await ShowTasksFromFolder(toDoItems);
                     break;
 
                 case "addlist":
@@ -467,30 +475,30 @@ internal class UpdateHandler : IUpdateHandler
         }
         #region МЕТОДЫ КОМАНД
 
-        async Task ShowTasksFromFolder(IReadOnlyList<ToDoItem> tasksList, bool isActive = true)
-        {
-            if (tasksList.Count == 0)
-            {
-                await botClient.EditMessageText(
-                    currentChat,
-                    currentMessageId,
-                    "Aктивных задач нет",
-                    replyMarkup: Helper.GetToDoItemListKeyboard(tasksList, isActive),
-                    cancellationToken: ct);
+        //async Task ShowTasksFromFolder(IReadOnlyList<ToDoItem> tasksList, bool isActive = true)
+        //{
+        //    if (tasksList.Count == 0)
+        //    {
+        //        await botClient.EditMessageText(
+        //            currentChat,
+        //            currentMessageId,
+        //            "Aктивных задач нет",
+        //            replyMarkup: Helper.GetToDoItemListKeyboard(tasksList, isActive),
+        //            cancellationToken: ct);
 
-                return;
-            }
+        //        return;
+        //    }
 
-            //выберу текст меседжа через тернарный оператор
-            string message = isActive ? "Список активных задач:" : "Список выполненных задач:";
+        //    //выберу текст меседжа через тернарный оператор
+        //    string message = isActive ? "Список активных задач:" : "Список выполненных задач:";
 
-            await botClient.EditMessageText(
-                currentChat, 
-                currentMessageId, 
-                message, 
-                replyMarkup: Helper.GetToDoItemListKeyboard(tasksList, isActive), 
-                cancellationToken: ct);
-        }
+        //    await botClient.EditMessageText(
+        //        currentChat, 
+        //        currentMessageId, 
+        //        message, 
+        //        replyMarkup: Helper.GetToDoItemListKeyboard(tasksList, isActive), 
+        //        cancellationToken: ct);
+        //}
         #endregion
 
         #region МЕТОДЫ СЦЕНАРИЯ
@@ -527,6 +535,25 @@ internal class UpdateHandler : IUpdateHandler
     private async Task OnUnknown()
     {
         throw new ArgumentException("Получен неизветсный тип сообщения");
+    }
+
+
+    //IReadOnlyList<KeyValuePair<string, string>> callbackData - общий набор кнопок.Ключ - имя кнопки, Значение - callbackData
+    //PagedListCallbackDto listDto
+    private async Task<InlineKeyboardMarkup> BuildPagedButtons(
+        IReadOnlyList<KeyValuePair<string, string>> callbackData,
+        PagedListCallbackDto listDto)
+    {
+        var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+        //общее количество страниц
+        var totalPages = (int)Math.Ceiling(((double)callbackData.Count / _pageSize));
+
+        var currentPageTasks = callbackData.GetBatchByNumber(_pageSize, listDto.Page);
+
+        Helper.GetToDoItemListKeyboardWithPagination(currentPageTasks, keyboardRows, listDto, totalPages, true);
+
+        return new InlineKeyboardMarkup(keyboardRows);
     }
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
