@@ -371,11 +371,14 @@ internal class UpdateHandler : IUpdateHandler
                 case "show":
                     var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackPagedListDto.ToDoListId, ct);
 
-                    var keyValuePairCollection = toDoItems.ToReadOnlyKeyValueList(
-                        item => item.Id.ToString(),
-                        item => item.Name);
+                    var keyValuePairActiveCollection = toDoItems
+                        .Where(item => item.State == ToDoItemState.Active)
+                        .ToReadOnlyKeyValueList(
+                            item => item.Id.ToString(),
+                            item => item.Name
+                        );
 
-                    var itemKeyboardWithPagination = await BuildPagedButtons(keyValuePairCollection, callbackPagedListDto);
+                    var itemKeyboardWithPagination = await BuildPagedButtons(keyValuePairActiveCollection, callbackPagedListDto);
 
                     await botClient.EditMessageText(currentChat, currentMessageId, "Список задач", replyMarkup: itemKeyboardWithPagination, cancellationToken: ct);
 
@@ -396,6 +399,24 @@ internal class UpdateHandler : IUpdateHandler
                         $"{currentTask.Name}: \n\nСрок выполнения: {currentTask.Deadline}\nВремя создания: {currentTask.CreatedAt}",
                         replyMarkup: Helper.GetToDoItemKeyboard(currentTask), 
                         cancellationToken: ct);
+                    break;
+
+                case "show_completed":
+                    //тут причесать - вынести в отдельный метод
+                    var toDoItems1 = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackPagedListDto.ToDoListId, ct);
+
+                    var keyValuePairCompletedCollection = toDoItems1
+                        .Where(item => item.State == ToDoItemState.Completed)
+                        .ToReadOnlyKeyValueList(
+                            item => item.Id.ToString(),
+                            item => item.Name
+                        );
+
+                    var itemKeyboardWithPagination1 = await BuildPagedButtons(keyValuePairCompletedCollection, callbackPagedListDto);
+
+                    await botClient.EditMessageText(currentChat, currentMessageId, "Список выполненных задач", replyMarkup: itemKeyboardWithPagination1, cancellationToken: ct);
+
+
                     break;
 
                 case "completetask":

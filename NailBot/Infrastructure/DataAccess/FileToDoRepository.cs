@@ -312,7 +312,8 @@ namespace NailBot.Infrastructure.DataAccess
 
                     var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
 
-                    if (toDoItemFromFiles != null && toDoItemFromFiles.State == ToDoItemState.Active)
+                    //if (toDoItemFromFiles != null && toDoItemFromFiles.State == ToDoItemState.Active)
+                    if (toDoItemFromFiles != null)
                         toDoItems.Add(toDoItemFromFiles);
                 }
             }

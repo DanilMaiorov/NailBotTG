@@ -188,7 +188,7 @@ namespace NailBot.Helpers
                 InlineKeyboardButton.WithCallbackData(
                     text: "☑️Посмотреть выполненные",
 
-                    callbackData: new ToDoListCallbackDto { Action = "show_completed", ToDoListId = null }.ToString()
+                    callbackData: new PagedListCallbackDto { Action = "show_completed", ToDoListId = listDto.ToDoListId, Page = listDto.Page }.ToString()
                 )
             });
         }
