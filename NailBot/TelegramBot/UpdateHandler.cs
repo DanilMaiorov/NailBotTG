@@ -160,11 +160,6 @@ internal class UpdateHandler : IUpdateHandler
                     await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardForShow(lists), cancellationToken: ct);
                     break;
 
-                case Commands.Removetask:
-                    await _toDoService.Delete(taskGuid, ct);
-                    await botClient.SendMessage(currentChat, $"Задача {taskGuid} удалена.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                    break;
-
                 case Commands.Find:
                     var findedTasks = await _toDoService.Find(currentUser, inputText, ct);
                     await ShowTasks(currentUser.UserId, true, findedTasks);
@@ -264,10 +259,7 @@ internal class UpdateHandler : IUpdateHandler
                 $"Введя команду \"/help\" ты получишь справку о командах\n" +
                 $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном вводе, задача будет добавлена\n" +
                 $"Введя команду \"/cancel\" ты сможешь отменить отменить добавление новой задачи \n" +
-                $"Введя команду \"/showtasks\" ты сможешь увидеть список активных задач в списке\n" +
-                $"Введя команду \"/showalltasks\" ты сможешь увидеть список всех задач в списке\n" +
-                $"Введя команду \"/removetask\" *номер задачи*\" ты сможешь удалить задачу из списка задач\n" +
-                $"Введя команду \"/completetask\" *номер задачи*\" ты сможешь отметить задачу из списка как завершенную\n" +
+                $"Введя команду \"/show\" ты сможешь увидеть список активных задач в списках\n" +
                 $"Введя команду \"/find\" *название задачи*\" ты сможешь увидеть список всех задач начинающихся с названия задачи\n" +
                 $"Введя команду \"/report\" ты получишь отчёт по задачам\n" +
                 $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +

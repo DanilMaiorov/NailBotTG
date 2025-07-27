@@ -232,24 +232,10 @@ namespace NailBot.Helpers
             string cutInput = "";
             Guid taskGuid = Guid.Empty;
 
-            if (input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
+            if (input.StartsWith("/find "))
             {
-                if (input.StartsWith("/find "))
-                {
-                    cutInput = input.Substring(6);
-                    input = "/find";
-                }
-                else if (input.StartsWith("/removetask ") || input.StartsWith("/completetask "))
-                {
-                    //верну данные кортежем
-                    (string command, Guid taskGuid) inputData = Validate.ValidateTask(input, taskGuid, currentUserTaskList);
-
-                    input = inputData.command;
-                    taskGuid = inputData.taskGuid;
-                }
-                else
-                    input = "unregistered user command";
-                
+                cutInput = input.Substring(6);
+                input = "/find";
             }
             return (input, cutInput, taskGuid);
         }

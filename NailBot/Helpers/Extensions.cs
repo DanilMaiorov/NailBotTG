@@ -28,9 +28,7 @@ namespace NailBot.Helpers
                 { Commands.Info, "Информация о боте" },
                 { Commands.Addtask, "Добавить новую задачу" },
                 { Commands.Show, "Показать активные задачи" },
-                { Commands.Removetask, "Удалить задачу" },
                 { Commands.Find, "Найти задачу" },
-                { Commands.Completetask, "Отметить задачу как выполненную" },
                 { Commands.Report, "Сформировать отчет по задачам" },
                 { Commands.Exit, "Выйти" }
             };
