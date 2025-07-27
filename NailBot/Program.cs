@@ -22,7 +22,7 @@ namespace NailBot
         public async static Task Main(string[] args)
         {
             //string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
-            string token = "7512417913:AAHnoeWdDKNOyTuF0DMHpPVdO95imk0xMgw";
+            string token = "8389262050:AAGxiMOnoOzcgrytZfmSnewL-PXFkv2fp38";
 
             if (string.IsNullOrEmpty(token))
             {
@@ -69,6 +69,7 @@ namespace NailBot
             var scenarios = new List<IScenario>
             {
                 new AddTaskScenario(_userService, _toDoService, _toDoListService),
+                new DeleteTaskScenario(_toDoService),
                 new AddListScenario(_userService, _toDoListService),
                 new DeleteListScenario(_userService, _toDoService, _toDoListService, toDoItemfolderName),
             };

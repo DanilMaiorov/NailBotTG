@@ -28,7 +28,7 @@ namespace NailBot.TelegramBot.Scenarios
             if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
 
-            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
+            (Chat? currentChat, string? currentUserInput, int messageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {

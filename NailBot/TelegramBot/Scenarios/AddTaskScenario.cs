@@ -32,7 +32,7 @@ namespace NailBot.TelegramBot.Scenarios
             if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
 
-            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
+            (Chat? currentChat, string? currentUserInput, int currentMessageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {
@@ -97,22 +97,20 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            if (!context.Data.TryGetValue("List", out var toDoListObj))
-                throw new InvalidOperationException("Список не найден в контексте");
-
-            var toDoList = (ToDoList)toDoListObj;
+            var toDoList = context.Data.TryGetValue("List", out var toDoListObj) ? (ToDoList)toDoListObj : null;
+            var toDoItemName = (string)context.Data["Name"];
 
             var toDoItem = await _toDoService.Add(
                 (ToDoUser)context.Data["User"],
-                (string)context.Data["Name"],
+                toDoItemName,
                 (DateTime)context.Data["Deadline"],
                 toDoList,
                 ct);
 
             if (toDoList != null)
-                await botClient.SendMessage(chat, $"Задача \"{toDoList.Name}\" добавлена в список \"{toDoList.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"Задача \"{toDoItemName}\" добавлена в список \"{toDoList.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
             else
-                await botClient.SendMessage(chat, $"Задача \"{toDoList.Name}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"Задача \"{toDoItemName}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
             return ScenarioResult.Completed;
         }

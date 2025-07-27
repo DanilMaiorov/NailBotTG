@@ -1,6 +1,6 @@
 ﻿namespace NailBot.TelegramBot.Dto
 {
-    internal class ToDoItemCallbackDto : CallbackDto
+    public class ToDoItemCallbackDto : CallbackDto
     {
         public Guid? ToDoItemId { get; set; }
 

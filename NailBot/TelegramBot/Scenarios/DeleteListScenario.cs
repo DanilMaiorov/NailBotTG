@@ -36,7 +36,7 @@ namespace NailBot.TelegramBot.Scenarios
             if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
 
-            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
+            (Chat? currentChat, string? currentUserInput, int currentMessageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {
@@ -88,7 +88,7 @@ namespace NailBot.TelegramBot.Scenarios
                 //context.Data[user.TelegramUserName] = deleteList;
                 context.Data["User"] = deleteList;
 
-                await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteListKeyboard(), cancellationToken: ct);
+                await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteToDoListAndToDoItemKeyboard(), cancellationToken: ct);
 
                 context.CurrentStep = "Delete";
             }

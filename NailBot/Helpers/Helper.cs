@@ -12,6 +12,7 @@ using NailBot.TelegramBot.Dto;
 using NailBot.TelegramBot.Scenarios;
 using NailBot.Core.Services;
 
+
 namespace NailBot.Helpers
 {
 
@@ -93,9 +94,9 @@ namespace NailBot.Helpers
         //метод клавиатуры выбора списка куда добавлять задачу
         public static InlineKeyboardMarkup GetSelectListKeyboardForAdd(IReadOnlyList<ToDoList> lists)
         {
-            //первый ряд
             var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
 
+            //первый ряд
             keyboardRows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(
@@ -110,8 +111,53 @@ namespace NailBot.Helpers
             return new InlineKeyboardMarkup(keyboardRows);
         }
 
+
+        //метод клавиатуры выбора списка куда добавлять задачу
+        public static InlineKeyboardMarkup GetToDoItemListKeyboard(IReadOnlyList<ToDoItem> items, bool isActive)
+        {
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            // кнопки задач
+            ToDoItemInlineButtonGenerate(items, keyboardRows, "showtask", isActive);
+
+            //кнопка "Посмотреть выполненые"
+            keyboardRows.Add(new[]
+{
+                InlineKeyboardButton.WithCallbackData(
+                    text: "☑️Посмотреть выполненные",
+                    callbackData: new ToDoListCallbackDto { Action = "show_completed", ToDoListId = null }.ToString()
+                )
+            });
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры выбора списка куда добавлять задачу
+        public static InlineKeyboardMarkup GetToDoItemKeyboard(ToDoItem? item)
+        {
+
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            //первый ряд
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "✅Выполнить",
+                    callbackData: new ToDoItemCallbackDto { Action = "completetask", ToDoItemId = item.Id }.ToString()
+                ),
+                InlineKeyboardButton.WithCallbackData(
+                    text: "❌Удалить",
+                    callbackData: new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString()
+                )
+            });
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+
+
         //метод клавиатуры подтверждения удаления списка
-        public static InlineKeyboardMarkup GetApproveDeleteListKeyboard()
+        public static InlineKeyboardMarkup GetApproveDeleteToDoListAndToDoItemKeyboard()
         {
             //первый ряд
             var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
@@ -127,13 +173,18 @@ namespace NailBot.Helpers
         }
 
         //рендер списка задач
-        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
+        public async static Task TasksListRender(
+            IReadOnlyList<ToDoItem> tasks, 
+            ITelegramBotClient botClient, 
+            Chat chat, 
+            int messageId,
+            CancellationToken ct)
         {
             int taskCounter = 0;
 
             var builder = new StringBuilder();
 
-            foreach (ToDoItem task in tasks)
+            foreach (var task in tasks)
             {
                 if (task.State == ToDoItemState.Active)
                 {
@@ -142,15 +193,29 @@ namespace NailBot.Helpers
                     await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
                 }
             }
+
+            //await botClient.EditMessageReplyMarkup(chat, messageId, replyMarkup: Helper.ToDoItemInlineButtonGenerate(tasks, ), cancellationToken: _ct);
+
+            //await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+
+            //ToDoItemInlineButtonGenerate
+
         }
+        
         //добавлю перегрузку TasksListRender
-        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, bool isActive, CancellationToken ct)
+        public async static Task TasksListRender(
+            IReadOnlyList<ToDoItem> tasks,
+            ITelegramBotClient botClient, 
+            Chat chat,
+            int messageId,
+            bool isActive, 
+            CancellationToken ct)
         {
             int taskCounter = 0;
 
             var builder = new StringBuilder();
 
-            foreach (ToDoItem task in tasks)
+            foreach (var task in tasks)
             {
                 if (isActive)
                 {
@@ -357,6 +422,35 @@ namespace NailBot.Helpers
         }
 
         /// <summary>
+        /// Генерирует кнопки с задачами и добавляет их в список
+        /// </summary>
+        /// <param name="items">Коллекция задач</param>
+        /// <param name="keyboardRows">Список с кнопками</param>
+        /// <param name="action">Действие</param>
+        private static void ToDoItemInlineButtonGenerate(
+            IReadOnlyList<ToDoItem> items, 
+            List<IEnumerable<InlineKeyboardButton>> keyboardRows, 
+            string action,
+            bool isActive)
+        {
+            foreach (var item in items)
+            {
+                if (item.State == ToDoItemState.Active)
+                {
+                    
+                }
+
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: item.Name,
+                        callbackData: new ToDoItemCallbackDto { Action = action, ToDoItemId = item.Id }.ToString()
+                    )
+                });
+            }
+        }
+
+        /// <summary>
         /// Извлекает ключевые данные из входящего обновления (Update) от Telegram,
         /// такие как текущий чат, пользовательский ввод и информацию о пользователе.
         /// </summary>
@@ -373,19 +467,22 @@ namespace NailBot.Helpers
         /// </list>
         /// Возвращает кортеж из всех null-значений, если обновление не содержит сообщения или колбэка.
         /// </returns>
-        public static async Task<(Chat?, string?, ToDoUser?)> HandleMessageAsyncGetData(Update update, ScenarioContext context, IUserService userService, CancellationToken ct)
+        public static async Task<(Chat?, string?, int, ToDoUser?)> HandleMessageAsyncGetData(Update update, ScenarioContext context, CancellationToken ct, IUserService userService = null)
         {
             Message? message;
             string? currentUserInput;
+            int messageId;
 
             if (update.Message != null)
             {
                 message = update.Message;
+                messageId = update.Message.Id;
                 currentUserInput = message.Text?.Trim();
             }
             else if (update.CallbackQuery != null)
             {
                 message = update.CallbackQuery.Message;
+                messageId = update.CallbackQuery.Message.Id;
                 currentUserInput = update.CallbackQuery.Data.Trim();
             }
             else
@@ -396,7 +493,7 @@ namespace NailBot.Helpers
             var currentChat = message.Chat;
             var currentUser = await GetUserInScenario(context, currentChat.Id, currentChat.Username, userService, ct);
 
-            return (currentChat, currentUserInput, currentUser);
+            return (currentChat, currentUserInput, messageId, currentUser);
         }
 
         /// <summary>
@@ -414,7 +511,10 @@ namespace NailBot.Helpers
             if (context?.Data.TryGetValue(username, out var dataObject) == true && dataObject is ToDoUser toDoUser)
                 return toDoUser;
 
-            return await userService.GetUser(id, ct);
+            if (userService != null)
+                return await userService.GetUser(id, ct);
+
+            return null;
         }
     }
 }
