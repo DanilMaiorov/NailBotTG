@@ -11,6 +11,7 @@ using NailBot.TelegramBot.Dto;
 using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections.Generic;
 
 namespace NailBot.TelegramBot;
 
@@ -223,7 +224,6 @@ internal class UpdateHandler : IUpdateHandler
         #region МЕТОДЫ КОМАНД
         async Task ShowTasks(Guid userId, bool isActive = false, IReadOnlyList<ToDoItem>? tasks = null)
         {
-            //присвою список через оператор null объединения 
             var tasksList = tasks ?? (isActive
                 ? await _toDoService.GetAllByUserId(userId, ct)
                 : await _toDoService.GetActiveByUserId(userId, ct));
@@ -235,7 +235,6 @@ internal class UpdateHandler : IUpdateHandler
                 return;
             }
 
-            //выберу текст меседжа через тернарный оператор
             string message = tasks != null ? "Список найденных задач:"
                 : (isActive ? "Список всех задач:" : "Список активных задач:");
 
@@ -319,14 +318,14 @@ internal class UpdateHandler : IUpdateHandler
         {
             var currentUser = await _userService.GetUser(telegramUserId, ct);
 
-            if (currentUser == null)
+            if (currentUser == null && input != "/start")
             {
-                if (input != "/start")
-                {
-                    await botClient.SendMessage(currentChat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: Helper.keyboardStart, cancellationToken: ct);
-
-                    return;
-                }
+                await botClient.SendMessage(
+                    currentChat, 
+                    "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", 
+                    replyMarkup: Helper.keyboardStart, 
+                    cancellationToken: ct);
+                return;
             }
 
             var callbackDto = CallbackDto.FromString(input);
@@ -335,11 +334,9 @@ internal class UpdateHandler : IUpdateHandler
 
             var callbackItemDto = ToDoItemCallbackDto.FromString(input);
 
-
             if (callbackItemDto.ToDoItemId != null)
                 currentTask = await _toDoService.Get(callbackItemDto.ToDoItemId.Value, ct);
             
-
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(callbackQuery.Message.Text);
 
@@ -362,27 +359,24 @@ internal class UpdateHandler : IUpdateHandler
                     scenarioContext.Data["List"] = await _toDoListService.Get(callbackPagedListDto.ToDoListId.Value, ct);
 
                 await ProcessScenario(scenarioContext, update, ct);
-
                 return;
             }         
 
             switch (callbackDto.Action)
             {
                 case "show":
-                    var toDoItems = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackPagedListDto.ToDoListId, ct);
+                    var activetoDoItems = await GetKeyValuePairTasksCollection(
+                        currentUser.UserId,
+                        callbackPagedListDto.ToDoListId,
+                        ToDoItemState.Active,
+                        ct);
 
-                    var keyValuePairActiveCollection = toDoItems
-                        .Where(item => item.State == ToDoItemState.Active)
-                        .ToReadOnlyKeyValueList(
-                            item => item.Id.ToString(),
-                            item => item.Name
-                        );
-
-                    var itemKeyboardWithPagination = await BuildPagedButtons(keyValuePairActiveCollection, callbackPagedListDto);
-
-                    await botClient.EditMessageText(currentChat, currentMessageId, "Список задач", replyMarkup: itemKeyboardWithPagination, cancellationToken: ct);
-
-                    //await ShowTasksFromFolder(toDoItems);
+                    await botClient.EditMessageText(
+                        currentChat, 
+                        currentMessageId, 
+                        "Список задач", 
+                        replyMarkup: await BuildPagedButtons(activetoDoItems, callbackPagedListDto), 
+                        cancellationToken: ct);
                     break;
 
                 case "addlist":
@@ -393,7 +387,6 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case "showtask":
-
                     await botClient.SendMessage(
                         currentChat,
                         $"{currentTask.Name}: \n\nСрок выполнения: {currentTask.Deadline}\nВремя создания: {currentTask.CreatedAt}",
@@ -402,25 +395,21 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case "show_completed":
-                    //тут причесать - вынести в отдельный метод
-                    var toDoItems1 = await _toDoService.GetByUserIdAndList(currentUser.UserId, callbackPagedListDto.ToDoListId, ct);
+                    var completedtoDoItems = await GetKeyValuePairTasksCollection(
+                        currentUser.UserId, 
+                        callbackPagedListDto.ToDoListId,
+                        ToDoItemState.Completed,
+                        ct);
 
-                    var keyValuePairCompletedCollection = toDoItems1
-                        .Where(item => item.State == ToDoItemState.Completed)
-                        .ToReadOnlyKeyValueList(
-                            item => item.Id.ToString(),
-                            item => item.Name
-                        );
-
-                    var itemKeyboardWithPagination1 = await BuildPagedButtons(keyValuePairCompletedCollection, callbackPagedListDto);
-
-                    await botClient.EditMessageText(currentChat, currentMessageId, "Список выполненных задач", replyMarkup: itemKeyboardWithPagination1, cancellationToken: ct);
-
-
+                    await botClient.EditMessageText(
+                        currentChat, 
+                        currentMessageId, 
+                        "Список выполненных задач", 
+                        replyMarkup: await BuildPagedButtons(completedtoDoItems, callbackPagedListDto), 
+                        cancellationToken: ct);
                     break;
 
                 case "completetask":
-
                     await _toDoService.MarkCompleted(currentTask.Id, ct);
 
                     await botClient.EditMessageText(
@@ -438,7 +427,6 @@ internal class UpdateHandler : IUpdateHandler
                         Helper.CreateScenarioContext(ScenarioType.DeleteTask, telegramUserId),
                         update,
                         ct);
-
                     break;
 
                 case "deletelist":
@@ -454,6 +442,7 @@ internal class UpdateHandler : IUpdateHandler
                         "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", 
                         replyMarkup: Helper.keyboardReg, 
                         cancellationToken: ct);
+
                     await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
             }
@@ -494,33 +483,6 @@ internal class UpdateHandler : IUpdateHandler
             //await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", cancellationToken: ct);
             throw;
         }
-        #region МЕТОДЫ КОМАНД
-
-        //async Task ShowTasksFromFolder(IReadOnlyList<ToDoItem> tasksList, bool isActive = true)
-        //{
-        //    if (tasksList.Count == 0)
-        //    {
-        //        await botClient.EditMessageText(
-        //            currentChat,
-        //            currentMessageId,
-        //            "Aктивных задач нет",
-        //            replyMarkup: Helper.GetToDoItemListKeyboard(tasksList, isActive),
-        //            cancellationToken: ct);
-
-        //        return;
-        //    }
-
-        //    //выберу текст меседжа через тернарный оператор
-        //    string message = isActive ? "Список активных задач:" : "Список выполненных задач:";
-
-        //    await botClient.EditMessageText(
-        //        currentChat, 
-        //        currentMessageId, 
-        //        message, 
-        //        replyMarkup: Helper.GetToDoItemListKeyboard(tasksList, isActive), 
-        //        cancellationToken: ct);
-        //}
-        #endregion
 
         #region МЕТОДЫ СЦЕНАРИЯ
         /// <summary>
@@ -558,16 +520,27 @@ internal class UpdateHandler : IUpdateHandler
         throw new ArgumentException("Получен неизветсный тип сообщения");
     }
 
+    private async Task<IReadOnlyList<KeyValuePair<string, string>>> GetKeyValuePairTasksCollection(
+        Guid userId, 
+        Guid? toDoListId, 
+        ToDoItemState state,
+        CancellationToken ct)
+    {
+        var toDoItems = await _toDoService.GetByUserIdAndList(userId, toDoListId, ct);
 
-    //IReadOnlyList<KeyValuePair<string, string>> callbackData - общий набор кнопок.Ключ - имя кнопки, Значение - callbackData
-    //PagedListCallbackDto listDto
+        return toDoItems
+            .Where(item => item.State == state)
+            .ToReadOnlyKeyValueList(
+                item => item.Id.ToString(),
+                item => item.Name);
+    }
+
     private async Task<InlineKeyboardMarkup> BuildPagedButtons(
         IReadOnlyList<KeyValuePair<string, string>> callbackData,
         PagedListCallbackDto listDto)
     {
         var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
 
-        //общее количество страниц
         var totalPages = (int)Math.Ceiling(((double)callbackData.Count / _pageSize));
 
         var currentPageTasks = callbackData.GetBatchByNumber(_pageSize, listDto.Page);

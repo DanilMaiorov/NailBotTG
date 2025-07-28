@@ -113,29 +113,6 @@ namespace NailBot.Helpers
             return new InlineKeyboardMarkup(keyboardRows);
         }
 
-
-        //метод клавиатуры списка задач БЕЗ ПАГИНАЦИИ
-        public static InlineKeyboardMarkup GetToDoItemListKeyboard(IReadOnlyList<ToDoItem> items, bool isActive)
-        {
-            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
-
-            // кнопки задач
-            ToDoItemInlineButtonGenerate(items, keyboardRows, "showtask", isActive);
-
-            //кнопка "Посмотреть выполненые"
-            keyboardRows.Add(new[]
-{
-                InlineKeyboardButton.WithCallbackData(
-                    text: "☑️Посмотреть выполненные",
-                    callbackData: new ToDoListCallbackDto { Action = "show_completed", ToDoListId = null }.ToString()
-                )
-            });
-
-            return new InlineKeyboardMarkup(keyboardRows);
-        }
-
-
-
         //метод клавиатуры списка задач С ПАГИНАЦИЕЙ
         public static void GetToDoItemListKeyboardWithPagination(
             IEnumerable<KeyValuePair<string, string>> items,
@@ -144,7 +121,6 @@ namespace NailBot.Helpers
             int totalPages,
             bool isActive)
         {
-
             keyboardRows.AddRange(items.Select(item =>
             {
                 Guid.TryParse(item.Key, out var id);
@@ -198,18 +174,30 @@ namespace NailBot.Helpers
         {
             var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
 
-            //первый ряд
-            keyboardRows.Add(new[]
+            if (item.State == ToDoItemState.Active)
             {
-                InlineKeyboardButton.WithCallbackData(
-                    text: "✅Выполнить",
-                    callbackData: new ToDoItemCallbackDto { Action = "completetask", ToDoItemId = item.Id }.ToString()
-                ),
-                InlineKeyboardButton.WithCallbackData(
-                    text: "❌Удалить",
-                    callbackData: new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString()
-                )
-            });
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "✅Выполнить",
+                        callbackData: new ToDoItemCallbackDto { Action = "completetask", ToDoItemId = item.Id }.ToString()
+                    ),
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "❌Удалить",
+                        callbackData: new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString()
+                    )
+                });
+            }
+            else
+            {
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "❌Удалить",
+                        callbackData: new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString()
+                    )
+                });
+            }
 
             return new InlineKeyboardMarkup(keyboardRows);
         }
@@ -442,61 +430,16 @@ namespace NailBot.Helpers
         /// <param name="action">Действие</param>
         private static void ListInlineButtonGenerate(IReadOnlyList<ToDoList> lists, List<IEnumerable<InlineKeyboardButton>> keyboardRows, string action)
         {
-            foreach (var list in lists)
-            {
-                keyboardRows.Add(new[]
+            keyboardRows.AddRange(lists.Select(list => 
+                new[]
                 {
                     InlineKeyboardButton.WithCallbackData(
                         text: list.Name,
                         callbackData: new ToDoListCallbackDto { Action = action, ToDoListId = list.Id }.ToString()
                     )
-                });
-            }
+                }
+            ));
         }
-
-        /// <summary>
-        /// Генерирует кнопки с задачами и добавляет их в список
-        /// </summary>
-        /// <param name="items">Коллекция задач</param>
-        /// <param name="keyboardRows">Список с кнопками</param>
-        /// <param name="action">Действие</param>
-        private static void ToDoItemInlineButtonGenerate(
-            IReadOnlyList<ToDoItem> items, 
-            List<IEnumerable<InlineKeyboardButton>> keyboardRows, 
-            string action,
-            bool isActive)
-        {
-            keyboardRows.AddRange(items.Select(item =>
-            {
-                return new[]
-                {
-                     InlineKeyboardButton.WithCallbackData(
-                        text: item.Name,
-                        callbackData: new ToDoItemCallbackDto { Action = action, ToDoItemId = item.Id }.ToString()
-                     )
-                };
-            }));
-        }
-
-        //private static void ToDoItemInlineButtonGenerateWithPagination(
-        //    IEnumerable<KeyValuePair<string, string>> items,
-        //    List<IEnumerable<InlineKeyboardButton>> keyboardRows,
-        //    string action,
-        //    bool isActive)
-        //{
-
-        //    keyboardRows.AddRange(items.Select(item =>
-        //    {
-        //        Guid.TryParse(item.Key, out var id);
-        //        return new[]
-        //        {
-        //             InlineKeyboardButton.WithCallbackData(
-        //                text: item.Value,
-        //                callbackData: new ToDoItemCallbackDto { Action = action, ToDoItemId = id }.ToString()
-        //             )
-        //        };
-        //    }));
-        //}
 
         /// <summary>
         /// Извлекает ключевые данные из входящего обновления (Update) от Telegram,

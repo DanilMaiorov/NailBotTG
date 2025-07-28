@@ -113,11 +113,8 @@ namespace NailBot.TelegramBot.Scenarios
 
                     //удлю по очереди с перестройкой индекса
                     if (items.Count > 0)
-                    {
-                        foreach (var item in items)
-                            await _toDoService.Delete(item.Id, ct);
-                    }
-
+                        await Task.WhenAll(items.Select(item => _toDoService.Delete(item.Id, ct)));
+                    
                     // удаляю папку списка и директории с разделение тудушек по папкам-спискам после удаления всех тудушек выбранного списка - ПОХОЖЕ НА КОСТЫЛЬ
                     var toDoItemsDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), _toDoItemFolderName, user.UserId.ToString(), toDoList.Id.ToString());
 

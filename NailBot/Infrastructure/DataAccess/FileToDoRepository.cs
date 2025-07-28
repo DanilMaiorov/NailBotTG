@@ -199,7 +199,6 @@ namespace NailBot.Infrastructure.DataAccess
                 if (item.List != null)
                     currentUserListDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, item.User.UserId.ToString(), item.List.Id.ToString());
 
-
                 var filePath = Path.Combine(currentUserListDirectoryPath, item.Id + ".json");
 
                 if (File.Exists(filePath))
@@ -233,10 +232,6 @@ namespace NailBot.Infrastructure.DataAccess
 
             return toDoItems.AsReadOnly();
         }
-
-
-
-
 
         private string GetCurrentPath()
         {
@@ -280,9 +275,7 @@ namespace NailBot.Infrastructure.DataAccess
 
                         // Добавляем все поддиректории в очередь для поиска
                         foreach (var subDir in Directory.GetDirectories(currentDirectory))
-                        {
                             directoriesToSearch.Enqueue(subDir);
-                        }
                     }
                 }
                 else
@@ -312,7 +305,6 @@ namespace NailBot.Infrastructure.DataAccess
 
                     var toDoItemFromFiles = JsonSerializer.Deserialize<ToDoItem>(jsonContent);
 
-                    //if (toDoItemFromFiles != null && toDoItemFromFiles.State == ToDoItemState.Active)
                     if (toDoItemFromFiles != null)
                         toDoItems.Add(toDoItemFromFiles);
                 }
@@ -323,9 +315,6 @@ namespace NailBot.Infrastructure.DataAccess
             }
             return toDoItems;
         }
-
-
-
 
         //метод получения директории тудушек текущего юзера
         private string GetUserFolderPath(Guid userId, CancellationToken ct)
@@ -371,10 +360,8 @@ namespace NailBot.Infrastructure.DataAccess
                     {
                         // Добавляем все подпапки пользователя в очередь для поиска
                         foreach (var userSubDir in Directory.EnumerateDirectories(userDir))
-                        {
                             directoriesQueue.Enqueue(userSubDir);
-                        }
-
+                        
                         foreach (var filePath in Directory.EnumerateFiles(userDir, "*.json", SearchOption.AllDirectories))
                         {
                             var fileName = Path.GetFileNameWithoutExtension(filePath);
@@ -416,7 +403,6 @@ namespace NailBot.Infrastructure.DataAccess
                     if (!File.Exists(tempPath))
                         throw new IOException($"Не удалось создать временный файл: {tempPath}");
 
-
                     // атомарная запись через временный файл
                     if (File.Exists(_indexPath))
                         // заменяю существующий файл
@@ -424,7 +410,6 @@ namespace NailBot.Infrastructure.DataAccess
                     else
                         // если файл не существует - переименовываю временный файл
                         File.Move(tempPath, _indexPath);
-
                 }
                 catch (Exception ex)
                 {

@@ -20,9 +20,6 @@ namespace NailBot.TelegramBot.Dto
             {
                 Action = baseDto.Action,
                 ToDoListId = baseDto.ToDoListId,
-
-                //Page = 0
-
                 Page = parts.Length > 2 && int.TryParse(parts[2], out var page) ? page : 0
             };
         }

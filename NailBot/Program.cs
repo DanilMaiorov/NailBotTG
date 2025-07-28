@@ -59,7 +59,6 @@ namespace NailBot
 
             IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
-
             //логика списка задач
             var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName, toDoItemfolderName);
             IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
