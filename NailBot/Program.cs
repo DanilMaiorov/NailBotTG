@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using NailBot.TelegramBot.Scenarios;
+using System.Globalization;
 
 namespace NailBot
 {
@@ -15,11 +16,13 @@ namespace NailBot
         private const string toDoItemfolderName = "ToDoItemFolder";
         //имя папки для User
         private const string userfolderName = "UserFolder";
+        //имя папки для списков
+        private const string toDoListfolderName = "ToDoListFolder";
 
         public async static Task Main(string[] args)
         {
             //string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
-            string token = "7512417913:AAHnoeWdDKNOyTuF0DMHpPVdO95imk0xMgw";
+            string token = "8389262050:AAGxiMOnoOzcgrytZfmSnewL-PXFkv2fp38";
 
             if (string.IsNullOrEmpty(token))
             {
@@ -45,28 +48,32 @@ namespace NailBot
             int maxTaskAmount = 20;
             int maxTaskLength = 25;
 
-
             //создам класс FileToDoRepository
             var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
             
             //создам класс FileUserRepository
             var fileUserRepository = new FileUserRepository(userfolderName);
 
-
             IUserService _userService = new UserService(fileUserRepository);
             IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
 
             IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
 
+            //логика списка задач
+            var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName, toDoItemfolderName);
+            IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
 
             //логика сценариев
             IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
-            var scenarios = new List<IScenario> 
+            var scenarios = new List<IScenario>
             {
-                new AddTaskScenario(_userService, _toDoService)
+                new AddTaskScenario(_userService, _toDoService, _toDoListService),
+                new DeleteTaskScenario(_toDoService),
+                new AddListScenario(_userService, _toDoListService),
+                new DeleteListScenario(_userService, _toDoService, _toDoListService, toDoItemfolderName),
             };
 
-            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, cts.Token);
+            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, _toDoListService);
 
             if (_updateHandler is UpdateHandler castHandler)
             {

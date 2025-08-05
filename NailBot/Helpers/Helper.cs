@@ -8,6 +8,12 @@ using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
 using NailBot.Core.Enums;
 using System.Globalization;
+using NailBot.TelegramBot.Dto;
+using NailBot.TelegramBot.Scenarios;
+using NailBot.Core.Services;
+using System.Collections.Generic;
+using System;
+
 
 namespace NailBot.Helpers
 {
@@ -30,8 +36,7 @@ namespace NailBot.Helpers
         public static readonly ReplyKeyboardMarkup keyboardReg = new ReplyKeyboardMarkup(
             new[]
             {
-                new KeyboardButton("/showalltasks"),
-                new KeyboardButton("/showtasks"),
+                new KeyboardButton("/show"),
                 new KeyboardButton("/addtask"),
                 new KeyboardButton("/report")
             })
@@ -50,20 +55,209 @@ namespace NailBot.Helpers
             OneTimeKeyboard = true
         };
 
+        //метод клавиатуры после нажатия /show
+        public static InlineKeyboardMarkup GetSelectListKeyboardForShow(IReadOnlyList<ToDoList> lists)
+        {
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
 
+            //первый ряд
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "📌 Без списка",
+                    callbackData: new ToDoListCallbackDto { Action = "show", ToDoListId = null }.ToString()
+                )
+            });
+
+            // кнопки списков
+            ListInlineButtonGenerate(lists, keyboardRows, "show");
+
+            //последний ряд кнопок
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "🆕 Добавить", callbackData: "addlist"),
+                InlineKeyboardButton.WithCallbackData(text: "❌ Удалить", callbackData: "deletelist")
+            });
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры после нажатия /show
+        public static InlineKeyboardMarkup GetSelectListKeyboardForDelete(IReadOnlyList<ToDoList> lists)
+        {
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            // кнопки списков
+            ListInlineButtonGenerate(lists, keyboardRows, "deletelist");
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры выбора списка куда добавлять задачу
+        public static InlineKeyboardMarkup GetSelectListKeyboardForAdd(IReadOnlyList<ToDoList> lists)
+        {
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            //первый ряд
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "📌 Без списка",
+                    callbackData: new ToDoListCallbackDto { Action = "add", ToDoListId = null }.ToString()
+                )
+            });
+
+            // кнопки списков
+            ListInlineButtonGenerate(lists, keyboardRows, "add");
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры списка задач С ПАГИНАЦИЕЙ
+        public static void GetToDoItemListKeyboardWithPagination(
+            IEnumerable<KeyValuePair<string, string>> items,
+            List<IEnumerable<InlineKeyboardButton>> keyboardRows,
+            PagedListCallbackDto listDto,
+            int totalPages,
+            bool isActive)
+        {
+            keyboardRows.AddRange(items.Select(item =>
+            {
+                Guid.TryParse(item.Key, out var id);
+                return new[]
+                {
+                     InlineKeyboardButton.WithCallbackData(
+                        text: item.Value,
+                        callbackData: new ToDoItemCallbackDto { Action = "showtask", ToDoItemId = id }.ToString()
+                     )
+                };
+            }));
+
+            var paginationButtons = new List<InlineKeyboardButton>();
+
+            if (listDto.Page > 0)
+            {
+                paginationButtons.Add(
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "⬅️",
+                        callbackData: new PagedListCallbackDto { Action = listDto.Action, ToDoListId = listDto.ToDoListId, Page = listDto.Page - 1 }.ToString()
+                    )
+                );
+            }
+
+            if (listDto.Page < totalPages - 1)
+            {
+                paginationButtons.Add(
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "➡️",
+                        callbackData: new PagedListCallbackDto { Action = listDto.Action, ToDoListId = listDto.ToDoListId, Page = listDto.Page + 1 }.ToString()
+                    )
+                );
+            }
+
+            if (paginationButtons.Any())
+                keyboardRows.Add(paginationButtons.ToArray());
+
+
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "☑️Посмотреть выполненные",
+
+                    callbackData: new PagedListCallbackDto { Action = "show_completed", ToDoListId = listDto.ToDoListId, Page = listDto.Page }.ToString()
+                )
+            });
+        }
+
+        //метод клавиатуры действий с выбранной задачей
+        public static InlineKeyboardMarkup GetToDoItemKeyboard(ToDoItem? item)
+        {
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            if (item.State == ToDoItemState.Active)
+            {
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "✅Выполнить",
+                        callbackData: new ToDoItemCallbackDto { Action = "completetask", ToDoItemId = item.Id }.ToString()
+                    ),
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "❌Удалить",
+                        callbackData: new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString()
+                    )
+                });
+            }
+            else
+            {
+                keyboardRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: "❌Удалить",
+                        callbackData: new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString()
+                    )
+                });
+            }
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
+
+        //метод клавиатуры подтверждения удаления списка
+        public static InlineKeyboardMarkup GetApproveDeleteToDoListAndToDoItemKeyboard()
+        {
+            //первый ряд
+            var keyboardRows = new List<IEnumerable<InlineKeyboardButton>>();
+
+            //последний ряд кнопок
+            keyboardRows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "✅ Да", callbackData: "yes"),
+                InlineKeyboardButton.WithCallbackData(text: "❌ Нет", callbackData: "no")
+            });
+
+            return new InlineKeyboardMarkup(keyboardRows);
+        }
 
         //рендер списка задач
-        public async static Task TasksListRender(IReadOnlyList<ToDoItem> tasks, ITelegramBotClient botClient, Chat chat, CancellationToken ct)
+        public async static Task TasksListRender(
+            IReadOnlyList<ToDoItem> tasks, 
+            ITelegramBotClient botClient, 
+            Chat chat, 
+            int messageId,
+            CancellationToken ct)
         {
             int taskCounter = 0;
 
-            var builder = new StringBuilder();
-
-            foreach (ToDoItem task in tasks)
+            foreach (var task in tasks)
             {
-                taskCounter++;
-                await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
-                await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                if (task.State == ToDoItemState.Active)
+                {
+                    taskCounter++;
+                    await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+                    await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                }
+            }
+        }
+        
+        //добавлю перегрузку TasksListRender
+        public async static Task TasksListRender(
+            IReadOnlyList<ToDoItem> tasks,
+            ITelegramBotClient botClient, 
+            Chat chat,
+            int messageId,
+            bool isActive, 
+            CancellationToken ct)
+        {
+            int taskCounter = 0;
+
+            foreach (var task in tasks)
+            {
+                if (isActive)
+                {
+                    taskCounter++;
+                    await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
+                    await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
+                }
             }
         }
 
@@ -73,25 +267,10 @@ namespace NailBot.Helpers
             string cutInput = "";
             Guid taskGuid = Guid.Empty;
 
-            if (input.StartsWith("/removetask") || input.StartsWith("/completetask") || input.StartsWith("/find"))
+            if (input.StartsWith("/find "))
             {
-                if (input.StartsWith("/find "))
-                {
-                    cutInput = input.Substring(6);
-                    input = "/find";
-                }
-                else if (input.StartsWith("/removetask ") || input.StartsWith("/completetask "))
-                {
-                    //верну данные кортежем
-                    (string command, Guid taskGuid) inputData = Validate.ValidateTask(input, taskGuid, currentUserTaskList);
-
-                    input = inputData.command;
-                    taskGuid = inputData.taskGuid;
-                }
-                else
-                {
-                    input = "unregistered user command";
-                }
+                cutInput = input.Substring(6);
+                input = "/find";
             }
             return (input, cutInput, taskGuid);
         }
@@ -100,9 +279,7 @@ namespace NailBot.Helpers
         public static void CheckDuplicate(string newTask, IReadOnlyList<ToDoItem> toDoItems)
         {
             if (toDoItems.Any(item => item.Name == newTask))
-            {
                 throw new DuplicateTaskException(newTask);
-            }
         }
 
         //метод присваивания значений длин
@@ -171,6 +348,164 @@ namespace NailBot.Helpers
             );
         }
 
+        /// <summary>
+        /// Собирает путь до директории из переданных папок. При отутствии директории - создает директорию
+        /// </summary>
+        /// <param name="args">Названия папок до директории для построения пути</param>
+        /// <returns>Путь к директории</returns>
+        public static string GetDirectoryPath(params string[] args)
+        {
+            string path = args.Aggregate(Path.Combine);
 
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            return path;
+        }
+
+        /// <summary>
+        /// Собирает путь до директории из переданных папок. При отустствии директории - создает директорию
+        /// </summary>
+        /// <param name="args">Названия папок до директории для построения пути</param>
+        public static void CheckOrCreateDirectory(params string[] args)
+        {
+            string path = args.Aggregate(Path.Combine);
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+        }
+
+        /// <summary>
+        /// Сохраняет JSON-файл по указанному пути
+        /// </summary>
+        /// <param name="item">Задача пользователя</param>
+        /// <param name="ct">Токен отмены</param>
+        /// <param name="args">Названия папок до директории для построения пути</param>
+        public static async void CreateToDoItemJsonFile(ToDoItem item, CancellationToken ct, params string[] args)
+        {
+            var fileDirectory = GetDirectoryPath(args);
+
+            var json = JsonSerializer.Serialize(item);
+
+            var filePath = Path.Combine(fileDirectory, $"{item.Id}.json");
+
+            await File.WriteAllTextAsync(filePath, json, ct);
+        }
+
+        /// <summary>
+        /// Парсит строку формата "префикс|GUID", разделённую символом '|', и возвращает GUID из второй части.
+        /// Возвращает null, если строка пустая, не содержит разделителя или GUID невалиден.
+        /// </summary>
+        /// <param name="input">Входная строка для парсинга</param>
+        /// <param name="commandPrefix">Ожидаемый префикс перед разделителем</param>
+        /// <returns>GUID из строки или null</returns>
+        public static Guid? ParseGuidFromCommand(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return null;
+
+            string[] parts = input.Split('|');
+
+            if (parts.Length > 1 && Guid.TryParse(parts[1], out Guid result))
+                return result;
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Фабричный метод для создания контекста сценария
+        /// </summary>
+        /// <param name="type">Тип создаваемого сценария</param>
+        /// <returns>Новый экземпляр ScenarioContext</returns>
+        public static ScenarioContext CreateScenarioContext(ScenarioType type, long userId)
+        {
+            return new ScenarioContext(type, userId);
+        }
+
+        /// <summary>
+        /// Генерирует кнопки со списками задач и добавляет их в список
+        /// </summary>
+        /// <param name="lists">Коллекция списков</param>
+        /// <param name="keyboardRows">Список с кнопками</param>
+        /// <param name="action">Действие</param>
+        private static void ListInlineButtonGenerate(IReadOnlyList<ToDoList> lists, List<IEnumerable<InlineKeyboardButton>> keyboardRows, string action)
+        {
+            keyboardRows.AddRange(lists.Select(list => 
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: list.Name,
+                        callbackData: new ToDoListCallbackDto { Action = action, ToDoListId = list.Id }.ToString()
+                    )
+                }
+            ));
+        }
+
+        /// <summary>
+        /// Извлекает ключевые данные из входящего обновления (Update) от Telegram,
+        /// такие как текущий чат, пользовательский ввод и информацию о пользователе.
+        /// </summary>
+        /// <param name="update">Объект Update, содержащий информацию о сообщении или колбэке.</param>
+        /// <param name="context">Контекст сценария, используемый для получения данных пользователя.</param>
+        /// <param name="userService">Сервис для получения информации о пользователе, если он отсутствует в контексте.</param>
+        /// <param name="ct">Токен отмены операции.</param>
+        /// <returns>
+        /// Кортеж, содержащий:
+        /// <list type="bullet">
+        ///     <item><term>Chat?</term><description>Объект чата, откуда пришло сообщение/колбэк (может быть null).</description></item>
+        ///     <item><term>string?</term><description>Текстовый ввод пользователя (может быть null).</description></item>
+        ///     <item><term>ToDoUser?</term><description>Объект пользователя (может быть null, если не найден).</description></item>
+        /// </list>
+        /// Возвращает кортеж из всех null-значений, если обновление не содержит сообщения или колбэка.
+        /// </returns>
+        public static async Task<(Chat?, string?, int, ToDoUser?)> HandleMessageAsyncGetData(Update update, ScenarioContext context, CancellationToken ct, IUserService userService = null)
+        {
+            Message? message;
+            string? currentUserInput;
+            int messageId;
+
+            if (update.Message != null)
+            {
+                message = update.Message;
+                messageId = update.Message.Id;
+                currentUserInput = message.Text?.Trim();
+            }
+            else if (update.CallbackQuery != null)
+            {
+                message = update.CallbackQuery.Message;
+                messageId = update.CallbackQuery.Message.Id;
+                currentUserInput = update.CallbackQuery.Data.Trim();
+            }
+            else
+            {
+                return default;
+            }
+
+            var currentChat = message.Chat;
+            var currentUser = await GetUserInScenario(context, currentChat.Id, currentChat.Username, userService, ct);
+
+            return (currentChat, currentUserInput, messageId, currentUser);
+        }
+
+        /// <summary>
+        /// Пытается получить объект пользователя (ToDoUser) из данных контекста сценария.
+        /// Если пользователь не найден в контексте или имеет неподходящий тип,
+        /// асинхронно получает его из сервиса пользователей.
+        /// </summary>
+        /// <param name="context">Контекст сценария, содержащий данные.</param>
+        /// <param name="id">Идентификатор пользователя для получения из сервиса, если не найден в контексте.</param>
+        /// <param name="username">Имя пользователя для поиска в данных контекста.</param>
+        /// <param name="ct">Токен отмены операции.</param>
+        /// <returns>Найденный объект ToDoUser или null, если пользователь не найден ни в контексте, ни в сервисе.</returns>
+        public static async Task<ToDoUser?> GetUserInScenario(ScenarioContext context, long id, string username, IUserService userService, CancellationToken ct)
+        {
+            if (context?.Data.TryGetValue(username, out var dataObject) == true && dataObject is ToDoUser toDoUser)
+                return toDoUser;
+
+            if (userService != null)
+                return await userService.GetUser(id, ct);
+
+            return null;
+        }
     }
 }

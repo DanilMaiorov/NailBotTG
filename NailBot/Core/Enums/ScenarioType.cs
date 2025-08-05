@@ -3,6 +3,12 @@
     public enum ScenarioType
     {
         None = 0,
-        AddTask
+        AddTask,
+        DeleteTask,
+        AddList,
+        DeleteList
     }
 }
+
+
+

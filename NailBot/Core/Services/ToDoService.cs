@@ -34,25 +34,17 @@ namespace NailBot.Core.Services
         }
 
         // реализация метода интерфейса Add
-        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, CancellationToken ct)
+        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, ToDoList? list, CancellationToken ct)
         {
-            var tasks = await GetAllByUserId(user.UserId, ct);
-
-            if (tasks.Count >= maxTaskAmount)
-            {
-                throw new TaskCountLimitException(maxTaskAmount);
-            }
-
-            string taskName = Validate.ValidateString(name, maxTaskLength);
-
             var newToDoItem = new ToDoItem
             {
-                Name = taskName,
+                Name = name,
                 Id = Guid.NewGuid(),
                 CreatedAt = DateTime.Now,
                 User = user,
                 StateChangedAt = DateTime.Now,
                 Deadline = deadline,
+                List = list,
             };
 
             await _toDoRepository.Add(newToDoItem, ct);
@@ -65,8 +57,8 @@ namespace NailBot.Core.Services
         {
             var action = "удалять";
 
-            await GetTask(id, action, ct);
-            
+            var deleteTask = await GetTask(id, action, ct);
+
             await _toDoRepository.Delete(id, ct);
         }
 
@@ -105,8 +97,22 @@ namespace NailBot.Core.Services
                 item.Name.Substring(0, namePrefix.Length) == namePrefix, ct);
         }
 
+
+        //проверка дубликатов
+        public async Task<string> ThrowIfHasDuplicatesOrWhiteSpace(string newTaskName, Guid userId, CancellationToken ct)
+        {
+            string taskName = Validate.ValidateString(newTaskName, maxTaskLength);
+
+            var items = await GetAllByUserId(userId, ct);
+
+            if (items.Any(item => item.Name == taskName))
+                throw new DuplicateTaskException(taskName);
+
+            return taskName;
+        }
+
         //проверка получения задачи
-        async Task<ToDoItem?> GetTask(Guid id, string message, CancellationToken ct)
+        private async Task<ToDoItem?> GetTask(Guid id, string message, CancellationToken ct)
         {
             if (id == Guid.Empty)
             {
@@ -120,6 +126,16 @@ namespace NailBot.Core.Services
             return item == null
                 ? throw new NullTaskException("Задача не существует или равна null")
                 : result.FirstOrDefault(x => x.Id == id);
+        }
+
+        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        {
+            return await _toDoRepository.GetByUserIdAndList(userId, listId, ct);
+        }
+
+        public async Task<ToDoItem?> Get(Guid toDoItemId, CancellationToken ct)
+        {
+            return await _toDoRepository.Get(toDoItemId, ct);
         }
     }
 }
