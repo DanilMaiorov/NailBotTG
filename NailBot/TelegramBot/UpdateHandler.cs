@@ -115,7 +115,6 @@ internal class UpdateHandler : IUpdateHandler
 
             //получение значений команд типа Enum
             Commands command = Helper.GetEnumValue<Commands>(input);
-            //ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message.Text);
@@ -181,7 +180,6 @@ internal class UpdateHandler : IUpdateHandler
                     break;
                 default:
                     await botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                    await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
                     break;
             }
         }
