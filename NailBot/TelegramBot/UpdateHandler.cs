@@ -8,10 +8,7 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using NailBot.Core.Exceptions;
 using NailBot.TelegramBot.Dto;
-using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Collections.Generic;
 
 namespace NailBot.TelegramBot;
 
