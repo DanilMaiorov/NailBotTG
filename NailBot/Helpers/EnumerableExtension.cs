@@ -15,7 +15,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            if (batchSize <= 0)
+            if (batchSize <= 0 && batchNumber < 0)
                 throw new ArgumentOutOfRangeException(nameof(batchSize), "Размер пачки должен быть положительным числом");
 
             return source.Skip(batchNumber * batchSize).Take(batchSize);

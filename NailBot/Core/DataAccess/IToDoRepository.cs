@@ -16,12 +16,7 @@ namespace NailBot.Core.DataAccess
         Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct);
         //Возвращает количество активных задач у пользователя
         Task<int> CountActive(Guid userId, CancellationToken ct);
-
-
-
-
-
-        //добавлю временно без согласования с преподавателем
+        //Возвращает ToDoItem по Id пользователя и Id списка
         Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct);
     }
 }

@@ -332,11 +332,6 @@ internal class UpdateHandler : IUpdateHandler
 
             var callbackPagedListDto = PagedListCallbackDto.FromString(input);
 
-            var callbackItemDto = ToDoItemCallbackDto.FromString(input);
-
-            if (callbackItemDto.ToDoItemId != null)
-                currentTask = await _toDoService.Get(callbackItemDto.ToDoItemId.Value, ct);
-            
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(callbackQuery.Message.Text);
 
@@ -365,6 +360,7 @@ internal class UpdateHandler : IUpdateHandler
             switch (callbackDto.Action)
             {
                 case "show":
+
                     var activetoDoItems = await GetKeyValuePairTasksCollection(
                         currentUser.UserId,
                         callbackPagedListDto.ToDoListId,
@@ -372,10 +368,10 @@ internal class UpdateHandler : IUpdateHandler
                         ct);
 
                     await botClient.EditMessageText(
-                        currentChat, 
-                        currentMessageId, 
-                        "Список задач", 
-                        replyMarkup: await BuildPagedButtons(activetoDoItems, callbackPagedListDto), 
+                        currentChat,
+                        currentMessageId,
+                        "Список задач",
+                        replyMarkup: await BuildPagedButtons(activetoDoItems, callbackPagedListDto),
                         cancellationToken: ct);
                     break;
 
@@ -387,6 +383,8 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case "showtask":
+                    currentTask = await GetToDoItemFromCallbackDto(input, ct);
+
                     await botClient.SendMessage(
                         currentChat,
                         $"{currentTask.Name}: \n\nСрок выполнения: {currentTask.Deadline}\nВремя создания: {currentTask.CreatedAt}",
@@ -396,20 +394,22 @@ internal class UpdateHandler : IUpdateHandler
 
                 case "show_completed":
                     var completedtoDoItems = await GetKeyValuePairTasksCollection(
-                        currentUser.UserId, 
+                        currentUser.UserId,
                         callbackPagedListDto.ToDoListId,
                         ToDoItemState.Completed,
                         ct);
 
                     await botClient.EditMessageText(
-                        currentChat, 
-                        currentMessageId, 
-                        "Список выполненных задач", 
-                        replyMarkup: await BuildPagedButtons(completedtoDoItems, callbackPagedListDto), 
+                        currentChat,
+                        currentMessageId,
+                        "Список выполненных задач",
+                        replyMarkup: await BuildPagedButtons(completedtoDoItems, callbackPagedListDto),
                         cancellationToken: ct);
                     break;
 
                 case "completetask":
+                    currentTask = await GetToDoItemFromCallbackDto(input, ct);
+
                     await _toDoService.MarkCompleted(currentTask.Id, ct);
 
                     await botClient.EditMessageText(
@@ -548,6 +548,15 @@ internal class UpdateHandler : IUpdateHandler
         Helper.GetToDoItemListKeyboardWithPagination(currentPageTasks, keyboardRows, listDto, totalPages, true);
 
         return new InlineKeyboardMarkup(keyboardRows);
+    }
+    private async Task<ToDoItem?> GetToDoItemFromCallbackDto(string input, CancellationToken ct)
+    {
+        var callbackItemDto = ToDoItemCallbackDto.FromString(input);
+
+        if (callbackItemDto.ToDoItemId != null)
+            return await _toDoService.Get(callbackItemDto.ToDoItemId.Value, ct);
+
+        return null;
     }
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken ct)
