@@ -1,8 +1,6 @@
 ﻿using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
 using NailBot.Helpers;
-using NailBot.TelegramBot;
-using System.Diagnostics.Metrics;
 using System.Text.Json;
 
 namespace NailBot.Infrastructure.DataAccess
@@ -31,46 +29,12 @@ namespace NailBot.Infrastructure.DataAccess
 
             EnsureIndexExists();
         }
-        public async Task Add(ToDoItem item, CancellationToken ct)
-        {
-            var userId = item.User.UserId.ToString();
-
-            if (item.List != null)
-            {
-                var listId = item.List.Id.ToString();
-                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, userId, listId);
-            }
-            else
-            {
-                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, userId);
-            }
-            
-            //залочу поток и обновляю индекс
-            lock (_indexLock)
-            {
-                try
-                {
-                    var index = LoadIndex();
-                    index[item.Id] = item.User.UserId;
-                    SaveIndex(index);
-                }
-                catch (Exception ex)
-                {
-                    // логирую ошибку и перестраиваю индекс
-                    Console.WriteLine($"Ошибка обновления индекса: {ex.Message}");
-                    RebuildIndex();
-                }
-            }
-        }
 
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct)
         {
             var toDoList = await GetToDoItems(userId, ct);
 
-            return toDoList
-                .Where(x => x.User.UserId == userId)
-                .ToList()
-                .AsReadOnly();
+            return toDoList.AsReadOnly();
         }
 
         public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken ct)
@@ -81,41 +45,54 @@ namespace NailBot.Infrastructure.DataAccess
                 return toDoList.AsReadOnly();
 
             return toDoList
-                .Where(x => x.User.UserId == userId && x.State == ToDoItemState.Active)
+                .Where(x => x.State == ToDoItemState.Active)
                 .ToList()
                 .AsReadOnly();
         }
-
-        public async Task Delete(Guid id, CancellationToken ct)
+        
+        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
         {
-            var deleteItem = await Get(id, ct);
-            var userId = deleteItem.User.UserId.ToString();
-            
-            if (deleteItem != null)
+            var toDoItems = new List<ToDoItem>();
+
+            var currentUserToDoItemsDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, userId.ToString());
+
+            if (listId != null)
             {
-                var currentUserDirectoryPath = Path.Combine(_currentDirectory, userId);
-
-                var filePath = Path.Combine(currentUserDirectoryPath, id + ".json");
-
-                //если list не null, то переопределяю путь
-                if (deleteItem.List != null)
-                {
-                    var listId = deleteItem.List.Id.ToString();
-                    filePath = Path.Combine(currentUserDirectoryPath, listId, id + ".json");
-                }
-
-                if (File.Exists(filePath))
-                {
-                    //удаляю задачу
-                    File.Delete(filePath);
-                    //обновляю индекс
-                    RebuildIndex();
-                }
-                else
-                {
-                    throw new FileNotFoundException($"Файл не найден: {filePath}");
-                }
+                var currentUserListToDoItemsDirectoryPath = Helper.GetDirectoryPath(currentUserToDoItemsDirectoryPath, listId.ToString());
+                toDoItems = await GetToDoItemsFromFolder(currentUserListToDoItemsDirectoryPath, ct);
             }
+            else
+            {
+                toDoItems = await GetToDoItemsFromFolder(currentUserToDoItemsDirectoryPath, ct);
+            }
+
+            return toDoItems.AsReadOnly();
+        }
+
+        public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
+        {
+            var toDoList = await GetToDoItems(userId, ct);
+
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+
+            return toDoList.Any(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken ct)
+        {
+            var toDoList = await GetToDoItems(userId, ct);
+
+            return toDoList
+                .Where(predicate)
+                .ToList();
+        }
+
+        public async Task<int> CountActive(Guid userId, CancellationToken ct)
+        {
+            var countList = await GetActiveByUserId(userId, ct);
+
+            return countList.Count;
         }
 
         public async Task<ToDoItem?> Get(Guid id, CancellationToken ct)
@@ -126,7 +103,7 @@ namespace NailBot.Infrastructure.DataAccess
             {
                 var userFolderPath = Path.Combine(_currentDirectory, userId.ToString());
 
-                if(Directory.Exists(userFolderPath))
+                if (Directory.Exists(userFolderPath))
                 {
                     var toDoItemPath = Path.Combine(userFolderPath, id.ToString() + ".json");
 
@@ -162,33 +139,68 @@ namespace NailBot.Infrastructure.DataAccess
             return null;
         }
 
-        public async Task<int> CountActive(Guid userId, CancellationToken ct)
+        public async Task Add(ToDoItem item, CancellationToken ct)
         {
-            var countList = await GetActiveByUserId(userId, ct);
+            var userId = item.User.UserId.ToString();
 
-            return countList.Count;
+            if (item.List != null)
+            {
+                var listId = item.List.Id.ToString();
+                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, userId, listId);
+            }
+            else
+            {
+                Helper.CreateToDoItemJsonFile(item, ct, _currentDirectory, userId);
+            }
+
+            //залочу поток и обновляю индекс
+            lock (_indexLock)
+            {
+                try
+                {
+                    var index = LoadIndex();
+                    index[item.Id] = item.User.UserId;
+                    SaveIndex(index);
+                }
+                catch (Exception ex)
+                {
+                    // логирую ошибку и перестраиваю индекс
+                    Console.WriteLine($"Ошибка обновления индекса: {ex.Message}");
+                    RebuildIndex();
+                }
+            }
         }
 
-        public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken ct)
+        public async Task Delete(Guid id, CancellationToken ct)
         {
-            var toDoList = await GetToDoItems(userId, ct);
-
-            return toDoList
-                .Where(x => x.User.UserId == userId)
-                .Where(predicate)
-                .ToList(); 
-        }
-
-        public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
-        {
-            var toDoList = await GetToDoItems(userId, ct);
-
-            if (string.IsNullOrWhiteSpace(name))
-                return false;
+            var deleteItem = await Get(id, ct);
+            var userId = deleteItem.User.UserId.ToString();
             
-            return toDoList
-                .Where(x => x.User.UserId == userId)
-                .Any(x => x.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase)); 
+            if (deleteItem != null)
+            {
+                var currentUserDirectoryPath = Path.Combine(_currentDirectory, userId);
+
+                var filePath = Path.Combine(currentUserDirectoryPath, id + ".json");
+
+                //если list не null, то переопределяю путь
+                if (deleteItem.List != null)
+                {
+                    var listId = deleteItem.List.Id.ToString();
+                    filePath = Path.Combine(currentUserDirectoryPath, listId, id + ".json");
+                }
+
+                if (File.Exists(filePath))
+                {
+                    //удаляю задачу
+                    File.Delete(filePath);
+                    //обновляю индекс
+                    RebuildIndex();
+                }
+                else
+                {
+                    throw new FileNotFoundException($"Файл не найден: {filePath}");
+                }
+            }
         }
 
         public async Task Update(ToDoItem item, CancellationToken ct)
@@ -212,25 +224,6 @@ namespace NailBot.Infrastructure.DataAccess
                     throw new FileNotFoundException($"Файл не найден: {filePath}");
                 }
             }
-        }
-
-        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
-        {
-            var toDoItems = new List<ToDoItem>();
-
-            var currentUserToDoItemsDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, userId.ToString());
-
-            if (listId != null)
-            {
-                var currentUserListToDoItemsDirectoryPath = Helper.GetDirectoryPath(currentUserToDoItemsDirectoryPath, listId.ToString());
-                toDoItems = await GetToDoItemsFromFolder(currentUserListToDoItemsDirectoryPath, ct);
-            } 
-            else
-            {
-                toDoItems = await GetToDoItemsFromFolder(currentUserToDoItemsDirectoryPath, ct);
-            }
-
-            return toDoItems.AsReadOnly();
         }
 
         private string GetCurrentPath()
@@ -289,7 +282,6 @@ namespace NailBot.Infrastructure.DataAccess
             }
             return toDoItems;
         }
-
 
         private async Task<List<ToDoItem>> GetToDoItemsFromFolder(string folderPath, CancellationToken ct)
         {
