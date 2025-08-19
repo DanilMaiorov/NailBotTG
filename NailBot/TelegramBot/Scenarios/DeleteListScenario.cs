@@ -36,7 +36,7 @@ namespace NailBot.TelegramBot.Scenarios
             if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
 
-            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
+            (Chat? currentChat, string? currentUserInput, int currentMessageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {
@@ -88,7 +88,7 @@ namespace NailBot.TelegramBot.Scenarios
                 //context.Data[user.TelegramUserName] = deleteList;
                 context.Data["User"] = deleteList;
 
-                await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteListKeyboard(), cancellationToken: ct);
+                await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteToDoListAndToDoItemKeyboard(), cancellationToken: ct);
 
                 context.CurrentStep = "Delete";
             }
@@ -113,11 +113,8 @@ namespace NailBot.TelegramBot.Scenarios
 
                     //удлю по очереди с перестройкой индекса
                     if (items.Count > 0)
-                    {
-                        foreach (var item in items)
-                            await _toDoService.Delete(item.Id, ct);
-                    }
-
+                        await Task.WhenAll(items.Select(item => _toDoService.Delete(item.Id, ct)));
+                    
                     // удаляю папку списка и директории с разделение тудушек по папкам-спискам после удаления всех тудушек выбранного списка - ПОХОЖЕ НА КОСТЫЛЬ
                     var toDoItemsDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), _toDoItemFolderName, user.UserId.ToString(), toDoList.Id.ToString());
 

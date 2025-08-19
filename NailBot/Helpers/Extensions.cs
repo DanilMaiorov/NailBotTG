@@ -28,9 +28,7 @@ namespace NailBot.Helpers
                 { Commands.Info, "Информация о боте" },
                 { Commands.Addtask, "Добавить новую задачу" },
                 { Commands.Show, "Показать активные задачи" },
-                { Commands.Removetask, "Удалить задачу" },
                 { Commands.Find, "Найти задачу" },
-                { Commands.Completetask, "Отметить задачу как выполненную" },
                 { Commands.Report, "Сформировать отчет по задачам" },
                 { Commands.Exit, "Выйти" }
             };
@@ -58,15 +56,7 @@ namespace NailBot.Helpers
             await botClient.SendMessage(chat, builder.ToString(), cancellationToken: ct);
 
             //рендерю менюшку
-            //await botClient.SetMyCommands(commands, cancellationToken: ct);
-        }
-
-        //метод замены ввода номера команды
-        public static string NumberReplacer(this string str)
-        {
-            Regex regex = new Regex("^[0-9]$");
-
-            return regex.IsMatch(str) ? "uncorrect command" : str;
+            await botClient.SetMyCommands(commands, cancellationToken: ct);
         }
     }
 }

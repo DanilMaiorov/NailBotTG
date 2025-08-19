@@ -132,5 +132,10 @@ namespace NailBot.Core.Services
         {
             return await _toDoRepository.GetByUserIdAndList(userId, listId, ct);
         }
+
+        public async Task<ToDoItem?> Get(Guid toDoItemId, CancellationToken ct)
+        {
+            return await _toDoRepository.Get(toDoItemId, ct);
+        }
     }
 }

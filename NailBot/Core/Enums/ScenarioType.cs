@@ -4,6 +4,7 @@
     {
         None = 0,
         AddTask,
+        DeleteTask,
         AddList,
         DeleteList
     }

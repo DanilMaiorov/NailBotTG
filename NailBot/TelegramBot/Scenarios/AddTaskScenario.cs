@@ -32,7 +32,7 @@ namespace NailBot.TelegramBot.Scenarios
             if (update.Message == null && update.CallbackQuery == null)
                 return ScenarioResult.Completed;
 
-            (Chat? currentChat, string? currentUserInput, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, _userService, ct);
+            (Chat? currentChat, string? currentUserInput, int currentMessageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {
@@ -40,7 +40,7 @@ namespace NailBot.TelegramBot.Scenarios
                     return await HandleInitialStep(botClient, context, currentUser, currentChat, ct);
 
                 case "Name":
-                   return await HandleNameStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
+                    return await HandleNameStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
 
                 case "Deadline":
                     return await HandleDeadlineStep(botClient, context, currentUser, currentChat, currentUserInput, ct);
@@ -57,7 +57,6 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            //context.Data[user.TelegramUserName] = user;
             context.Data["User"] = user;
 
             await botClient.SendMessage(chat, "Введите название задачи:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
@@ -68,7 +67,6 @@ namespace NailBot.TelegramBot.Scenarios
         }
         private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
-            //расширил интерфейс методом для проверки на дубликаты ДО ввода дедлайна
             context.Data["Name"] = await _toDoService.ThrowIfHasDuplicatesOrWhiteSpace(userInput, user.UserId, ct);
 
             await botClient.SendMessage(chat, "Введите дедлайн задачи в формате dd.MM.yyyy:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
@@ -99,22 +97,20 @@ namespace NailBot.TelegramBot.Scenarios
 
         private async Task<ScenarioResult> HandleChooseListStep(ITelegramBotClient botClient, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
-            if (!context.Data.TryGetValue("List", out var toDoListObj))
-                throw new InvalidOperationException("Список не найден в контексте");
-
-            var toDoList = (ToDoList)toDoListObj;
+            var toDoList = context.Data.TryGetValue("List", out var toDoListObj) ? (ToDoList)toDoListObj : null;
+            var toDoItemName = (string)context.Data["Name"];
 
             var toDoItem = await _toDoService.Add(
                 (ToDoUser)context.Data["User"],
-                (string)context.Data["Name"],
+                toDoItemName,
                 (DateTime)context.Data["Deadline"],
                 toDoList,
                 ct);
 
             if (toDoList != null)
-                await botClient.SendMessage(chat, $"Задача \"{toDoList.Name}\" добавлена в список \"{toDoList.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"Задача \"{toDoItemName}\" добавлена в список \"{toDoList.Name}\".\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
             else
-                await botClient.SendMessage(chat, $"Задача \"{toDoList.Name}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(chat, $"Задача \"{toDoItemName}\" добавлена в общий список.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
             return ScenarioResult.Completed;
         }
