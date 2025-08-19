@@ -14,6 +14,17 @@ namespace NailBot.Core.DataAccess
         Task Add(ToDoItem item, CancellationToken ct);
         Task Delete(Guid id, CancellationToken ct);
         Task Update(ToDoItem item, CancellationToken ct);
+
+
+
+        void Write(string str) 
+        {
+            Console.WriteLine(str);
+        }
+        void Debounce(int a) 
+        {
+            
+        }
     }
 }
 
