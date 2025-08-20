@@ -9,6 +9,7 @@ using System.Globalization;
 
 namespace NailBot
 {
+    public enum ToDoItemState { Active, Completed };
     internal class Program//ЧИСТОВИК
     {
         //объявлю имена папок через константы

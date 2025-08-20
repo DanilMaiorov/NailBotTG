@@ -14,7 +14,7 @@ namespace NailBot.Core.Entities
         [Column("UserId"), NotNull]
         public Guid UserId { get; set; }
 
-        [Association(ThisKey = nameof(UserId), OtherKey = nameof(User.UserId))]
+        [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUser.UserId))]
         public ToDoUser User { get; set; }
 
         [Column("CreatedAt"), NotNull]
