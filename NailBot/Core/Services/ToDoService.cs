@@ -69,9 +69,6 @@ namespace NailBot.Core.Services
 
             var completedTask = await GetTask(id, action, ct);
 
-            completedTask.State = ToDoItemState.Completed;
-            completedTask.StateChangedAt = DateTime.Now;
-
             await _toDoRepository.Update(completedTask, ct);
         }
 

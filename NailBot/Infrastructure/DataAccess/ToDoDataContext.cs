@@ -8,8 +8,8 @@ namespace NailBot.Infrastructure.DataAccess
         {
             public ToDoDataContext(string connectionString) : base(ProviderName.PostgreSQL, connectionString) { }
 
-            public ITable<ToDoUser> ToDoUsers => this.GetTable<ToDoUser>();
-            public ITable<ToDoItem> ToDoItems => this.GetTable<ToDoItem>();
-            public ITable<ToDoList> ToDoLists => this.GetTable<ToDoList>();
+            public ITable<ToDoUserModel> ToDoUsers => this.GetTable<ToDoUserModel>();
+            public ITable<ToDoItemModel> ToDoItems => this.GetTable<ToDoItemModel>();
+            public ITable<ToDoListModel> ToDoLists => this.GetTable<ToDoListModel>();
         }
 }

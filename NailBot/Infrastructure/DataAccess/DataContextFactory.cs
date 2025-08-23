@@ -1,4 +1,6 @@
-﻿namespace NailBot.Infrastructure.DataAccess
+﻿using NailBot.Infrastructure.DataAccess;
+
+namespace NailBot.Infrastructure.DataAccess
 {
     public class DataContextFactory : IDataContextFactory<ToDoDataContext>
     {

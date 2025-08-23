@@ -1,80 +1,146 @@
-﻿using LinqToDB.Data;
+﻿using LinqToDB;
 using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
-using System.Data.Common;
+using System.Reflection;
 
 namespace NailBot.Infrastructure.DataAccess
 {
     internal class SqlToDoRepository : IToDoRepository
     {
-        private readonly IDataContextFactory<DataConnection> _factory;
-        public SqlToDoRepository(IDataContextFactory<DataConnection> factory) 
-        { 
+        private readonly IDataContextFactory<ToDoDataContext> _factory;
+        public SqlToDoRepository(IDataContextFactory<ToDoDataContext> factory)
+        {
             _factory = factory;
         }
 
-
-
-
-
-        public Task Add(ToDoItem item, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task Add(ToDoItem item, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+            var model = ModelMapper.MapToModel(item);
+            await dbContext.InsertAsync(model, token: ct);
         }
-
-        public Task<int> CountActive(Guid userId, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<int> CountActive(Guid userId, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            var active = await GetActiveByUserId(userId, ct);
+
+            return active.Count;
         }
-
-        public Task Delete(Guid id, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task Delete(Guid id, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            await dbContext.ToDoItems
+                .Where(i => i.Id == id)
+                .DeleteAsync(ct);
         }
-
-        public Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                return await Task.FromResult(false);
+
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            return await dbContext.ToDoItems
+                .Where(i => i.UserId == userId)
+                .AnyAsync(i => i.Name.ToLower().StartsWith(name.ToLower()), ct);
         }
-
-        public Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        //public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Expression<Func<ToDoItem, bool>> predicate, CancellationToken ct) - Хочется такую сигнатуру для оптимизации
+        public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            var items = dbContext.ToDoItems
+                .Where(i => i.UserId == userId)
+                .Select(ModelMapper.MapFromModel)
+                .ToList()
+                .AsReadOnly();
+
+            await Task.Delay(1);
+
+            return items.Where(predicate).ToList();
         }
-
-        public Task<ToDoItem?> Get(Guid id, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<ToDoItem?> Get(Guid id, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            var model = await dbContext.ToDoItems
+                .Where(i => i.Id == id)
+                .LoadWith(i => i.User)
+                .LoadWith(i => i.List)
+                .FirstOrDefaultAsync(ct);
+
+            return ModelMapper.MapFromModel(model);
         }
-
-        public Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            await Task.Delay(1);
+
+            return dbContext.ToDoItems
+                .Where(i => i.UserId == userId)
+                .Where(i => i.State == ToDoItemState.Active)
+                .Select(ModelMapper.MapFromModel)
+                .ToList()
+                .AsReadOnly();
         }
-
-        public Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            await Task.Delay(1);
+
+            return dbContext.ToDoItems
+                .Where(i => i.UserId == userId)
+                .LoadWith(i => i.User)
+                .Select(ModelMapper.MapFromModel)
+                .ToList()
+                .AsReadOnly();
         }
-
-        public Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            var query = dbContext.ToDoItems
+                .Where(i => i.UserId == userId);
+
+            if (listId.HasValue)
+                query = query.Where(i => i.ToDoListId == listId.Value);
+            else
+                query = query.Where(i => i.ToDoListId == null);
+
+            await Task.Delay(1);
+
+            return query
+                .LoadWith(i => i.User)
+                .LoadWith(i => i.List)
+                .Select(ModelMapper.MapFromModel)
+                .ToList()
+                .AsReadOnly();
         }
-
-        public Task Update(ToDoItem item, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task Update(ToDoItem item, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            throw new NotImplementedException();
+
+            var model = ModelMapper.MapToModel(item);
+
+            await dbContext.ToDoItems
+                .Where(i => i.Id == model.Id)
+                .Set(i => i.State, model.State)
+                .Set(i => i.StateChangedAt, model.StateChangedAt)
+                .UpdateAsync(ct);
         }
     }
 }
