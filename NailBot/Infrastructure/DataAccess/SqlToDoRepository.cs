@@ -1,7 +1,6 @@
 ﻿using LinqToDB;
 using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
-using System.Reflection;
 
 namespace NailBot.Infrastructure.DataAccess
 {
@@ -17,17 +16,16 @@ namespace NailBot.Infrastructure.DataAccess
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
-            var model = ModelMapper.MapToModel(item);
-            await dbContext.InsertAsync(model, token: ct);
+            await dbContext.InsertAsync(ModelMapper.MapToModel(item), token: ct);
         }
         //РЕАЛИЗОВАНО
         public async Task<int> CountActive(Guid userId, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
 
-            var active = await GetActiveByUserId(userId, ct);
-
-            return active.Count;
+            return await dbContext.ToDoItems
+                .Where(i => i.UserId == userId && i.State == ToDoItemState.Active)
+                .CountAsync(ct);
         }
         //РЕАЛИЗОВАНО
         public async Task Delete(Guid id, CancellationToken ct)
@@ -56,15 +54,13 @@ namespace NailBot.Infrastructure.DataAccess
         {
             using var dbContext = _factory.CreateDataContext();
 
-            var items = dbContext.ToDoItems
+            var models = await dbContext.ToDoItems
                 .Where(i => i.UserId == userId)
-                .Select(ModelMapper.MapFromModel)
-                .ToList()
-                .AsReadOnly();
+                .ToListAsync(ct);
 
-            await Task.Delay(1);
+            var entities = models.Select(ModelMapper.MapFromModel).ToList();     
 
-            return items.Where(predicate).ToList();
+            return entities.Where(predicate).ToList().AsReadOnly();
         }
         //РЕАЛИЗОВАНО
         public async Task<ToDoItem?> Get(Guid id, CancellationToken ct)
@@ -84,11 +80,12 @@ namespace NailBot.Infrastructure.DataAccess
         {
             using var dbContext = _factory.CreateDataContext();
 
-            await Task.Delay(1);
+            var models = await dbContext.ToDoItems
+                .Where(i => i.UserId == userId && i.State == ToDoItemState.Active)
+                .LoadWith(i => i.User)
+                .ToListAsync(ct);
 
-            return dbContext.ToDoItems
-                .Where(i => i.UserId == userId)
-                .Where(i => i.State == ToDoItemState.Active)
+            return models
                 .Select(ModelMapper.MapFromModel)
                 .ToList()
                 .AsReadOnly();
@@ -98,11 +95,12 @@ namespace NailBot.Infrastructure.DataAccess
         {
             using var dbContext = _factory.CreateDataContext();
 
-            await Task.Delay(1);
-
-            return dbContext.ToDoItems
+            var models = await dbContext.ToDoItems
                 .Where(i => i.UserId == userId)
                 .LoadWith(i => i.User)
+                .ToListAsync(ct);
+
+            return models
                 .Select(ModelMapper.MapFromModel)
                 .ToList()
                 .AsReadOnly();
@@ -120,11 +118,12 @@ namespace NailBot.Infrastructure.DataAccess
             else
                 query = query.Where(i => i.ToDoListId == null);
 
-            await Task.Delay(1);
-
-            return query
+            var models = await query
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
+                .ToListAsync(ct);
+
+            return models
                 .Select(ModelMapper.MapFromModel)
                 .ToList()
                 .AsReadOnly();
