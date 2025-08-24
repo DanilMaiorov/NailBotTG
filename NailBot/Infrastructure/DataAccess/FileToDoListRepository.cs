@@ -29,7 +29,6 @@ namespace NailBot.Infrastructure.DataAccess
         //объявлю semaphore
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-
         public Task Initialization { get; }
 
         public FileToDoListRepository(string toDoListFolderName, string toDoItemFolderName)
@@ -88,7 +87,6 @@ namespace NailBot.Infrastructure.DataAccess
                 _semaphore.Release();
             }
         }
-
 
         public async Task Delete(Guid id, CancellationToken ct)
         {
@@ -288,7 +286,6 @@ namespace NailBot.Infrastructure.DataAccess
                     ?? new Dictionary<Guid, Guid>();
             }
         }
-
     }
 }
 

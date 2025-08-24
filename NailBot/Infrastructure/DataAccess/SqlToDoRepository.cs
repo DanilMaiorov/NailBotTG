@@ -16,6 +16,7 @@ namespace NailBot.Infrastructure.DataAccess
         public async Task Add(ToDoItem item, CancellationToken ct)
         {
             using var dbContext = _factory.CreateDataContext();
+
             await dbContext.InsertAsync(ModelMapper.MapToModel(item), token: ct);
         }
         //РЕАЛИЗОВАНО
