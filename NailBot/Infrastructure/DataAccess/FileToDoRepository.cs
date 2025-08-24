@@ -169,6 +169,7 @@ namespace NailBot.Infrastructure.DataAccess
                     RebuildIndex();
                 }
             }
+            await Task.Delay(1);
         }
 
         public async Task Delete(Guid id, CancellationToken ct)
@@ -207,6 +208,9 @@ namespace NailBot.Infrastructure.DataAccess
         {
             if (item != null)
             {
+                item.State = ToDoItemState.Completed;
+                item.StateChangedAt = DateTime.Now;
+
                 var currentUserListDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, item.User.UserId.ToString());
                 if (item.List != null)
                     currentUserListDirectoryPath = Helper.GetDirectoryPath(_currentDirectory, item.User.UserId.ToString(), item.List.Id.ToString());

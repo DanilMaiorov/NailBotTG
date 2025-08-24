@@ -1,10 +1,5 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NailBot.Core.Services
 {
@@ -21,9 +16,7 @@ namespace NailBot.Core.Services
         {
             // Размер имени списка не может быть больше 10 символов
             if (string.IsNullOrWhiteSpace(name) || name.Length > 10)
-            {
                 throw new ArgumentException("Название списка не может быть пустым и не должно превышать 10 символов.");
-            }
 
             //Название списка должно быть уникально в рамках одного ToDoUser
             var isExist = await _toDoListRepository.ExistsByName(user.UserId, name, ct);
@@ -33,8 +26,10 @@ namespace NailBot.Core.Services
                 
             var newList = new ToDoList
             {
+                Id = Guid.NewGuid(),
                 Name = name,
                 User = user,
+                CreatedAt = DateTime.Now
             };
 
             await _toDoListRepository.Add(newList, ct);

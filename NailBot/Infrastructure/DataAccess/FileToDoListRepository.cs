@@ -29,7 +29,6 @@ namespace NailBot.Infrastructure.DataAccess
         //объявлю semaphore
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-
         public Task Initialization { get; }
 
         public FileToDoListRepository(string toDoListFolderName, string toDoItemFolderName)
@@ -80,7 +79,7 @@ namespace NailBot.Infrastructure.DataAccess
                 {
                     // логирую ошибку и перестраиваю индекс
                     Console.WriteLine($"Ошибка обновления индекса: {ex.Message}");
-                    RebuildIndex();
+                    await RebuildIndex();
                 }
             }
             finally
@@ -88,7 +87,6 @@ namespace NailBot.Infrastructure.DataAccess
                 _semaphore.Release();
             }
         }
-
 
         public async Task Delete(Guid id, CancellationToken ct)
         {
@@ -107,7 +105,7 @@ namespace NailBot.Infrastructure.DataAccess
                     //удаляю задачу
                     File.Delete(filePath);
                     //обновляю индекс
-                    RebuildIndex();
+                    await RebuildIndex();
                 }
                 else
                 {
@@ -271,7 +269,7 @@ namespace NailBot.Infrastructure.DataAccess
         {
             //проверка и перестроение индекса если он исчез по время работы
             if (!File.Exists(_indexPath))
-                RebuildIndex();
+                await RebuildIndex();
 
             try
             {
@@ -282,13 +280,12 @@ namespace NailBot.Infrastructure.DataAccess
             catch (Exception ex) when (ex is JsonException or IOException)
             {
                 // если файл поврежден или недоступен - перестраиваю
-                RebuildIndex();
+                await RebuildIndex();
                 var json = await File.ReadAllTextAsync(_indexPath);
                 return JsonSerializer.Deserialize<Dictionary<Guid, Guid>>(json)
                     ?? new Dictionary<Guid, Guid>();
             }
         }
-
     }
 }
 

@@ -9,6 +9,7 @@ using System.Globalization;
 
 namespace NailBot
 {
+    public enum ToDoItemState { Active, Completed };
     internal class Program//ЧИСТОВИК
     {
         //объявлю имена папок через константы
@@ -48,20 +49,34 @@ namespace NailBot
             int maxTaskAmount = 20;
             int maxTaskLength = 25;
 
-            //создам класс FileToDoRepository
-            var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
-            
-            //создам класс FileUserRepository
-            var fileUserRepository = new FileUserRepository(userfolderName);
 
-            IUserService _userService = new UserService(fileUserRepository);
-            IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
+            //ХРАНЕНИЕ В ФАЙЛОВОЙ СИСТЕМЕ
 
-            IToDoReportService _toDoReportService = new ToDoReportService(fileToDoRepository);
+            //var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
+            //var fileUserRepository = new FileUserRepository(userfolderName);
+            //var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName, toDoItemfolderName);
 
-            //логика списка задач
-            var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName, toDoItemfolderName);
-            IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
+            //IUserService _userService = new UserService(fileUserRepository);
+            //IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
+            //IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
+
+            //ХРАНЕНИЕ В ФАЙЛОВОЙ СИСТЕМЕ
+
+
+            //ПЕРЕХОД НА POSTGRESQL
+            IDataContextFactory<ToDoDataContext> factory = new DataContextFactory();
+
+            var sqlUserRepository = new SqlUserRepository(factory);
+            var sqlToDoRepository = new SqlToDoRepository(factory);
+            var sqlToDoListRepository = new SqlToDoListRepository(factory);
+
+            IUserService _userService = new UserService(sqlUserRepository);
+            IToDoService _toDoService = new ToDoService(sqlToDoRepository, maxTaskAmount, maxTaskLength);
+            IToDoListService _toDoListService = new ToDoListService(sqlToDoListRepository);
+            //ПЕРЕХОД НА POSTGRESQL
+
+            IToDoReportService _toDoReportService = new ToDoReportService(sqlToDoRepository);
+
 
             //логика сценариев
             IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
