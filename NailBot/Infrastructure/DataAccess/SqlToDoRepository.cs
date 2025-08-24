@@ -71,6 +71,7 @@ namespace NailBot.Infrastructure.DataAccess
                 .Where(i => i.Id == id)
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
+                .LoadWith(i => i.List!.User)
                 .FirstOrDefaultAsync(ct);
 
             return ModelMapper.MapFromModel(model);
@@ -83,6 +84,8 @@ namespace NailBot.Infrastructure.DataAccess
             var models = await dbContext.ToDoItems
                 .Where(i => i.UserId == userId && i.State == ToDoItemState.Active)
                 .LoadWith(i => i.User)
+                .LoadWith(i => i.List)
+                .LoadWith(i => i.List!.User)
                 .ToListAsync(ct);
 
             return models
@@ -98,6 +101,8 @@ namespace NailBot.Infrastructure.DataAccess
             var models = await dbContext.ToDoItems
                 .Where(i => i.UserId == userId)
                 .LoadWith(i => i.User)
+                .LoadWith(i => i.List)
+                .LoadWith(i => i.List!.User)
                 .ToListAsync(ct);
 
             return models
@@ -121,6 +126,7 @@ namespace NailBot.Infrastructure.DataAccess
             var models = await query
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
+                .LoadWith(i => i.List!.User)
                 .ToListAsync(ct);
 
             return models
