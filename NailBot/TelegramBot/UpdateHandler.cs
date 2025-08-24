@@ -81,9 +81,9 @@ internal class UpdateHandler : IUpdateHandler
         {
             var currentUser = await _userService.GetUser(telegramUserId, ct);
 
-            var currentUserTaskList = currentUser != null
-                ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
-                : null;
+            //var currentUserTaskList = currentUser != null
+            //    ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
+            //    : null;
 
             if (update.Message.Id == 1)
             {
@@ -103,7 +103,7 @@ internal class UpdateHandler : IUpdateHandler
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(message.Text);
 
-            (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input, currentUserTaskList);
+            (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input);
 
             input = inputCommand.Replace("/", string.Empty);
 
@@ -148,7 +148,7 @@ internal class UpdateHandler : IUpdateHandler
 
                 case Commands.Addtask:
                     await ProcessScenario(
-                        Helper.CreateScenarioContext(ScenarioType.AddTask, telegramUserId),
+                        Helper.CreateScenarioContext(ScenarioType.AddTask, currentUser.UserId),
                         update,
                         ct);
                     break;
@@ -355,7 +355,6 @@ internal class UpdateHandler : IUpdateHandler
             switch (callbackDto.Action)
             {
                 case "show":
-
                     var activetoDoItems = await GetKeyValuePairTasksCollection(
                         currentUser.UserId,
                         callbackPagedListDto.ToDoListId,
@@ -372,7 +371,7 @@ internal class UpdateHandler : IUpdateHandler
 
                 case "addlist":
                     await ProcessScenario(
-                        Helper.CreateScenarioContext(ScenarioType.AddList, telegramUserId), 
+                        Helper.CreateScenarioContext(ScenarioType.AddList, currentUser.UserId), 
                         update,
                         ct);
                     break;
@@ -419,14 +418,14 @@ internal class UpdateHandler : IUpdateHandler
 
                 case "deletetask":
                     await ProcessScenario(
-                        Helper.CreateScenarioContext(ScenarioType.DeleteTask, telegramUserId),
+                        Helper.CreateScenarioContext(ScenarioType.DeleteTask, currentUser.UserId),
                         update,
                         ct);
                     break;
 
                 case "deletelist":
                     await ProcessScenario(
-                        Helper.CreateScenarioContext(ScenarioType.DeleteList, telegramUserId),
+                        Helper.CreateScenarioContext(ScenarioType.DeleteList, currentUser.UserId),
                         update,
                         ct);
                     break;

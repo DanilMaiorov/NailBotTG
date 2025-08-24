@@ -2,8 +2,6 @@
 using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
 using NailBot.Helpers;
-using NailBot.TelegramBot;
-using System.Xml.Linq;
 
 namespace NailBot.Core.Services
 {
@@ -42,11 +40,12 @@ namespace NailBot.Core.Services
                 Id = Guid.NewGuid(),
                 CreatedAt = DateTime.Now,
                 User = user,
+                //UserId = user.UserId,
                 StateChangedAt = DateTime.Now,
                 Deadline = deadline,
                 List = list,
             };
-
+            ;
             await _toDoRepository.Add(newToDoItem, ct);
 
             return newToDoItem;
@@ -78,17 +77,13 @@ namespace NailBot.Core.Services
             var tasks = await GetAllByUserId(user.UserId, ct);
 
             if (tasks.Count == 0)
-            {
                 throw new EmptyTaskListException("искать");
-            }
 
             bool isContain = await _toDoRepository.ExistsByName(user.UserId, namePrefix, ct);
 
             if (!isContain)
-            {
                 throw new ArgumentException($"Задач, начинающихся \"{namePrefix}\" не найдено.\n");
-            }
-
+            
             return await _toDoRepository.Find(user.UserId, item =>
                 item.Name.Length >= namePrefix.Length &&
                 item.Name.Substring(0, namePrefix.Length) == namePrefix, ct);
@@ -112,10 +107,8 @@ namespace NailBot.Core.Services
         private async Task<ToDoItem?> GetTask(Guid id, string message, CancellationToken ct)
         {
             if (id == Guid.Empty)
-            {
                 throw new EmptyTaskListException(message);
-            }
-
+            
             var item = await _toDoRepository.Get(id, ct);
 
             var result = await GetAllByUserId(item.User.UserId, ct);

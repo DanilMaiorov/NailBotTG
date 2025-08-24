@@ -1,4 +1,5 @@
-﻿using NailBot.Core.DataAccess;
+﻿using LinqToDB;
+using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
 
 namespace NailBot.Infrastructure.DataAccess
@@ -10,19 +11,30 @@ namespace NailBot.Infrastructure.DataAccess
         {
             _factory = factory;
         }
-        public Task Add(ToDoUser user, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task Add(ToDoUser user, CancellationToken ct)
         {
-            throw new NotImplementedException();
-        }
+            using var dbContext = _factory.CreateDataContext();
 
-        public Task<ToDoUser?> GetUser(Guid userId, CancellationToken ct)
-        {
-            throw new NotImplementedException();
+            await dbContext.InsertAsync(ModelMapper.MapToModel(user), token: ct);
         }
-
-        public Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId, CancellationToken ct)
+        //РЕАЛИЗОВАНО
+        public async Task<ToDoUser?> GetUser(Guid userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            using var dbContext = _factory.CreateDataContext();
+
+            var user = await dbContext.ToDoUsers.FirstOrDefaultAsync(u => u.UserId == userId, token: ct);
+
+            return ModelMapper.MapFromModel(user);
+        }
+        //РЕАЛИЗОВАНО
+        public async Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId, CancellationToken ct)
+        {
+            using var dbContext = _factory.CreateDataContext();
+
+            var userModel = await dbContext.ToDoUsers.FirstOrDefaultAsync(u => u.TelegramUserId == telegramUserId, token: ct);
+
+            return userModel != null ? ModelMapper.MapFromModel(userModel) : null;
         }
     }
 }

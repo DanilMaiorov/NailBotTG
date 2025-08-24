@@ -1,11 +1,11 @@
 ﻿using LinqToDB.Mapping;
 
-namespace NailBot.Core.Entities
+namespace NailBot.Core.DataAccess.Models
 {
     [Table("ToDoList")]
     public class ToDoListModel
     {
-        [Column("Guid"), PrimaryKey]
+        [Column("Id"), PrimaryKey]
         public Guid Id { get; set; }
 
         [Column("Name"), NotNull]

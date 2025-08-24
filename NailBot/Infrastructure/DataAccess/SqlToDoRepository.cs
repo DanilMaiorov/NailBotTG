@@ -140,6 +140,9 @@ namespace NailBot.Infrastructure.DataAccess
         {
             using var dbContext = _factory.CreateDataContext();
 
+            item.State = ToDoItemState.Completed;
+            item.StateChangedAt = DateTime.Now;
+
             var model = ModelMapper.MapToModel(item);
 
             await dbContext.ToDoItems

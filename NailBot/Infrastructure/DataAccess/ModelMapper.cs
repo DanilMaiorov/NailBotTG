@@ -1,4 +1,5 @@
-﻿using NailBot.Core.Entities;
+﻿using NailBot.Core.DataAccess.Models;
+using NailBot.Core.Entities;
 
 namespace NailBot.Infrastructure.DataAccess
 {
@@ -29,15 +30,13 @@ namespace NailBot.Infrastructure.DataAccess
             return new ToDoItem
             {
                 Id = model.Id,
-                UserId = model.UserId,
-                User = null!,
+                User = model.User != null ? MapFromModel(model.User) : null,
                 Name = model.Name,
                 CreatedAt = model.CreatedAt,
                 State = model.State,
                 StateChangedAt = model.StateChangedAt,
                 Deadline = model.Deadline,
-                ToDoListId = model.ToDoListId,
-                List = null
+                List = model.List != null ? MapFromModel(model.List) : null
             };
         }
         public static ToDoItemModel MapToModel(ToDoItem entity)
@@ -45,14 +44,14 @@ namespace NailBot.Infrastructure.DataAccess
             return new ToDoItemModel
             {
                 Id = entity.Id,
-                UserId = entity.UserId,
+                UserId = entity.User.UserId,
                 User = null!,
                 Name = entity.Name,
                 CreatedAt = entity.CreatedAt,
                 State = entity.State,
                 StateChangedAt = entity.StateChangedAt,
                 Deadline = entity.Deadline,
-                ToDoListId = entity.ToDoListId,
+                ToDoListId = entity.List?.Id,
                 List = null
             };
         }
@@ -62,8 +61,7 @@ namespace NailBot.Infrastructure.DataAccess
             {
                 Id = model.Id,
                 Name = model.Name,
-                UserId = model.UserId,
-                User = null!,
+                User = model.User != null ? MapFromModel(model.User) : null,
                 CreatedAt = model.CreatedAt,
             };
         }
@@ -73,7 +71,7 @@ namespace NailBot.Infrastructure.DataAccess
             {
                 Id = entity.Id,
                 Name = entity.Name,
-                UserId = entity.UserId,
+                UserId = entity.User.UserId,
                 User = null!,
                 CreatedAt = entity.CreatedAt,
             };

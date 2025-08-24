@@ -1,11 +1,11 @@
 ﻿using LinqToDB.Mapping;
 
-namespace NailBot.Core.Entities
+namespace NailBot.Core.DataAccess.Models
 {
     [Table("ToDoItem")]
     public class ToDoItemModel
     {
-        [Column("Guid"), PrimaryKey]
+        [Column("Id"), PrimaryKey]
         public Guid Id { get; set; }
 
         [Column("UserId"), NotNull]
@@ -30,7 +30,7 @@ namespace NailBot.Core.Entities
         public DateTime Deadline { get; set; }
 
         [Column("ToDoListId"), NotNull]
-        public Guid ToDoListId { get; set; }
+        public Guid? ToDoListId { get; set; }
 
         [Association(ThisKey = nameof(ToDoListId), OtherKey = nameof(ToDoListModel.Id))]
         public ToDoListModel? List { get; set; }

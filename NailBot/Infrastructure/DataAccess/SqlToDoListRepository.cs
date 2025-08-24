@@ -1,9 +1,6 @@
 ﻿using LinqToDB;
 using NailBot.Core.Entities;
 using NailBot.Core.Services;
-using NailBot.Helpers;
-using Polly;
-using System.Threading;
 
 namespace NailBot.Infrastructure.DataAccess
 {
@@ -40,7 +37,7 @@ namespace NailBot.Infrastructure.DataAccess
 
             return await dbContext.ToDoLists
                 .Where(l => l.UserId == userId)
-                .AnyAsync(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+                .AnyAsync(l => l.Name.ToLower().StartsWith(name.ToLower()), ct);
         }
         //РЕАЛИЗОВАНО
         public async Task<ToDoList?> Get(Guid id, CancellationToken ct)

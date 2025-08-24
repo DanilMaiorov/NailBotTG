@@ -261,8 +261,8 @@ namespace NailBot.Helpers
             }
         }
 
-        //метод проверки корректного ввода команд /addtask, /removetask, /completetask, /find
-        public static (string, string, Guid) InputCheck(string input, IReadOnlyList<ToDoItem> currentUserTaskList = null)
+        //метод проверки корректного ввода команд /addtask, /find
+        public static (string, string, Guid) InputCheck(string input)
         {
             string cutInput = "";
             Guid taskGuid = Guid.Empty;
@@ -417,7 +417,7 @@ namespace NailBot.Helpers
         /// </summary>
         /// <param name="type">Тип создаваемого сценария</param>
         /// <returns>Новый экземпляр ScenarioContext</returns>
-        public static ScenarioContext CreateScenarioContext(ScenarioType type, long userId)
+        public static ScenarioContext CreateScenarioContext(ScenarioType type, Guid userId)
         {
             return new ScenarioContext(type, userId);
         }

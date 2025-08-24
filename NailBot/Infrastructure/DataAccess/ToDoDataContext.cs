@@ -1,15 +1,15 @@
 ﻿using LinqToDB;
 using LinqToDB.Data;
-using NailBot.Core.Entities;
+using NailBot.Core.DataAccess.Models;
 
 namespace NailBot.Infrastructure.DataAccess
 {
-        public class ToDoDataContext : DataConnection
-        {
-            public ToDoDataContext(string connectionString) : base(ProviderName.PostgreSQL, connectionString) { }
+    public class ToDoDataContext : DataConnection
+    {
+        public ToDoDataContext(string connectionString) : base(ProviderName.PostgreSQL, connectionString) { }
 
-            public ITable<ToDoUserModel> ToDoUsers => this.GetTable<ToDoUserModel>();
-            public ITable<ToDoItemModel> ToDoItems => this.GetTable<ToDoItemModel>();
-            public ITable<ToDoListModel> ToDoLists => this.GetTable<ToDoListModel>();
-        }
+        public ITable<ToDoUserModel> ToDoUsers => this.GetTable<ToDoUserModel>();
+        public ITable<ToDoItemModel> ToDoItems => this.GetTable<ToDoItemModel>();
+        public ITable<ToDoListModel> ToDoLists => this.GetTable<ToDoListModel>();
+    }
 }

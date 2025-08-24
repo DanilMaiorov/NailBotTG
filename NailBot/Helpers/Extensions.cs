@@ -52,11 +52,11 @@ namespace NailBot.Helpers
                     commands.Add(new BotCommand { Command = commandName, Description = "" });
                 }
             }
-
+            ;
             await botClient.SendMessage(chat, builder.ToString(), cancellationToken: ct);
 
             //рендерю менюшку
-            await botClient.SetMyCommands(commands, cancellationToken: ct);
+            //await botClient.SetMyCommands(commands, cancellationToken: ct);
         }
     }
 }
