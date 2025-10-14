@@ -361,7 +361,9 @@ internal class UpdateHandler : IUpdateHandler
                         ToDoItemState.Active,
                         ct);
 
-                    await botClient.EditMessageText(
+
+
+                        await botClient.EditMessageText(
                         currentChat,
                         currentMessageId,
                         "Список задач",
