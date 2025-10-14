@@ -3,12 +3,13 @@ using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
 using NailBot.TelegramBot.Scenarios;
+using NailBot.Core.Exceptions;
+using NailBot.Domain;
+using NailBot.TelegramBot.Dto;
+using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using NailBot.Core.Exceptions;
-using NailBot.TelegramBot.Dto;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NailBot.TelegramBot;
 
@@ -72,14 +73,11 @@ internal class UpdateHandler : IUpdateHandler
 
     private async Task OnMessage(ITelegramBotClient botClient, Update update, Message message, CancellationToken ct)
     {
-        Chat currentChat = update.Message.Chat;
-        int currentMessage = update.Message.MessageId;
-        long telegramUserId = update.Message.From.Id;
-        string input = update.Message.Text;
-
+        var messageData = await MessageGetData(update, ct);
+        
         try
         {
-            var currentUser = await _userService.GetUser(telegramUserId, ct);
+            var currentUser = await _userService.GetUser(messageData.TelegramUserId, ct);
 
             //var currentUserTaskList = currentUser != null
             //    ? await _toDoService.GetAllByUserId(currentUser.UserId, ct)
@@ -87,15 +85,15 @@ internal class UpdateHandler : IUpdateHandler
 
             if (update.Message.Id == 1)
             {
-                await botClient.SendMessage(currentChat, $"Привет! Это Todo List Bot! \n", cancellationToken: ct);
+                await botClient.SendMessage(messageData.Chat, $"Привет! Это Todo List Bot! \n", cancellationToken: ct);
                 return;
             }
 
             if (currentUser == null)
             {
-                if (input != "/start")
+                if (messageData.UserInput != "/start")
                 {
-                    await botClient.SendMessage(currentChat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: Helper.keyboardStart, cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", replyMarkup: Helper.keyboardStart, cancellationToken: ct);
                     return;
                 }
             }
@@ -103,24 +101,24 @@ internal class UpdateHandler : IUpdateHandler
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(message.Text);
 
-            (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(input);
+            (string inputCommand, string inputText, Guid taskGuid) = Helper.InputCheck(messageData.UserInput);
 
-            input = inputCommand.Replace("/", string.Empty);
+            messageData.UserInput = inputCommand.Replace("/", string.Empty);
 
-            if (currentUser == null && input != "start")
-                input = "unregistered user command";
+            if (currentUser == null && messageData.UserInput != "start")
+                messageData.UserInput = "unregistered user command";
 
             //получение значений команд типа Enum
-            Commands command = Helper.GetEnumValue<Commands>(input);
+            Commands command = Helper.GetEnumValue<Commands>(messageData.UserInput);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateCompleted?.Invoke(message.Text);
 
             //Работа с командой cancel и сценариями
             if (command == Commands.Cancel)
-                await _scenarioContextRepository.ResetContext(telegramUserId, ct);
+                await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
 
-            var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
+            var scenarioContext = await _scenarioContextRepository.GetContext(messageData.TelegramUserId, ct);
 
             if (scenarioContext != null)
             {
@@ -132,18 +130,18 @@ internal class UpdateHandler : IUpdateHandler
             {
                 case Commands.Start:
                     if (currentUser == null)
-                        currentUser = await _userService.RegisterUser(telegramUserId, update.Message.From.Username, ct);
+                        currentUser = await _userService.RegisterUser(messageData.TelegramUserId, update.Message.From.Username, ct);
 
-                    await botClient.SendMessage(currentChat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                    await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
+                    await botClient.SendMessage(messageData.Chat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await Commands.Start.CommandsRender(currentUser, messageData.Chat, botClient, ct);
                     break;
 
                 case Commands.Help:
-                    await ShowHelp(currentUser);
+                    await HandleShowHelpCommand(currentUser);
                     break;
 
                 case Commands.Info:
-                    await ShowInfo();
+                    await HandleShowInfoCommand();
                     break;
 
                 case Commands.Addtask:
@@ -154,12 +152,12 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Cancel:
-                    await botClient.SendMessage(currentChat, "Сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, "Сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Show:
                     var lists = await _toDoListService.GetUserLists(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardForShow(lists), cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, "Выберите список", replyMarkup: Helper.GetSelectListKeyboardForShow(lists), cancellationToken: ct);
                     break;
 
                 case Commands.Find:
@@ -169,14 +167,14 @@ internal class UpdateHandler : IUpdateHandler
 
                 case Commands.Report:
                     var (total, completed, active, generatedAt) = await _toDoReportService.GetUserStats(currentUser.UserId, ct);
-                    await botClient.SendMessage(currentChat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, $"Статистика по задачам на {generatedAt}. Всего: {total}; Завершенных: {completed}; Активных: {active};", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
                 case Commands.Exit:
-                    await botClient.SendMessage(currentChat, "Нажмите CTRL+C (Ввод) для остановки бота", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, "Нажмите CTRL+C (Ввод) для остановки бота", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
                 default:
-                    await botClient.SendMessage(currentChat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
             }
         }
@@ -190,8 +188,8 @@ internal class UpdateHandler : IUpdateHandler
         //}
         catch (TaskCountLimitException ex)
         {
-            await _scenarioContextRepository.ResetContext(telegramUserId, ct);
-            await botClient.SendMessage(currentChat, "Текущий сценарий завершен. Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
+            await botClient.SendMessage(messageData.Chat, "Текущий сценарий завершен. Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         }
         //catch (TaskLengthLimitException ex)
         //{
@@ -200,20 +198,20 @@ internal class UpdateHandler : IUpdateHandler
         //}
         catch (DuplicateTaskException ex)
         {
-            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
             return;
         }
         catch (EmptyTaskListException ex)
         {
-            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
         }
         #endregion
 
         catch (Exception)
         {
-            await botClient.SendMessage(currentChat, $"Произошла непредвиденная ошибка", cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, $"Произошла непредвиденная ошибка", cancellationToken: ct);
             throw;
         }
         #region МЕТОДЫ КОМАНД
@@ -226,50 +224,50 @@ internal class UpdateHandler : IUpdateHandler
             if (tasksList.Count == 0)
             {
                 string emptyMessage = isActive ? "Список задач пуст\n" : "Aктивных задач нет";
-                await botClient.SendMessage(currentChat, emptyMessage, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(messageData.Chat, emptyMessage, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                 return;
             }
 
             string message = tasks != null ? "Список найденных задач:"
                 : (isActive ? "Список всех задач:" : "Список активных задач:");
 
-            await botClient.SendMessage(currentChat, message, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, message, replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
             if (isActive)
-                await Helper.TasksListRender(tasksList, botClient, currentChat, currentMessage, isActive, ct);
+                await Helper.TasksListRender(tasksList, botClient, messageData.Chat, messageData.MessageId, isActive, ct);
             else
-                await Helper.TasksListRender(tasksList, botClient, currentChat, currentMessage, ct);            
+                await Helper.TasksListRender(tasksList, botClient, messageData.Chat, messageData.MessageId, ct);            
         }
 
-        async Task ShowHelp(ToDoUser user)
+        async Task HandleShowHelpCommand(ToDoUser user)
         {
             if (user == null)
             {
-                await botClient.SendMessage(currentChat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
-                $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(messageData.Chat, $"Незнакомец, это Todo List Bot - телеграм бот записи дел.\n" +
+                                                              $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
+                                                              $"Введя команду \"/help\" ты получишь справку о командах\n" +
+                                                              $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
+                                                              $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
             }
             else
             {
-                await botClient.SendMessage(currentChat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
-                $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
-                $"Введя команду \"/help\" ты получишь справку о командах\n" +
-                $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном вводе, задача будет добавлена\n" +
-                $"Введя команду \"/cancel\" ты сможешь отменить отменить добавление новой задачи \n" +
-                $"Введя команду \"/show\" ты сможешь увидеть список активных задач в списках\n" +
-                $"Введя команду \"/find\" *название задачи*\" ты сможешь увидеть список всех задач начинающихся с названия задачи\n" +
-                $"Введя команду \"/report\" ты получишь отчёт по задачам\n" +
-                $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
-                $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                await botClient.SendMessage(messageData.Chat, $"{user.TelegramUserName}, это Todo List Bot - телеграм бот записи дел.\n" +
+                                                              $"Введя команду \"/start\" бот предложит тебе ввести имя\n" +
+                                                              $"Введя команду \"/help\" ты получишь справку о командах\n" +
+                                                              $"Введя команду \"/addtask\" будет предложено ввести название задачи и при успешном вводе, задача будет добавлена\n" +
+                                                              $"Введя команду \"/cancel\" ты сможешь отменить отменить добавление новой задачи \n" +
+                                                              $"Введя команду \"/show\" ты сможешь увидеть список активных задач в списках\n" +
+                                                              $"Введя команду \"/find\" *название задачи*\" ты сможешь увидеть список всех задач начинающихся с названия задачи\n" +
+                                                              $"Введя команду \"/report\" ты получишь отчёт по задачам\n" +
+                                                              $"Введя команду \"/info\" ты получишь информацию о версии программы\n" +
+                                                              $"Введя команду \"/exit\" бот попрощается и завершит работу\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
             }
         }
 
-        async Task ShowInfo()
+        async Task HandleShowInfoCommand()
         {
             DateTime releaseDate = new DateTime(2025, 02, 08);
-            await botClient.SendMessage(currentChat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, $"Это NailBot версии 1.0 Beta. Релиз {releaseDate}.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         }
         #endregion
 
@@ -293,45 +291,42 @@ internal class UpdateHandler : IUpdateHandler
             var scenarioResult = await scenario.HandleMessageAsync(botClient, context, update, ct);
 
             if (scenarioResult == ScenarioResult.Completed)
-                await _scenarioContextRepository.ResetContext(telegramUserId, ct);
+                await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
             else
-                await _scenarioContextRepository.SetContext(telegramUserId, context, ct);
+                await _scenarioContextRepository.SetContext(messageData.TelegramUserId, context, ct);
         }
         #endregion
-
+        
     }
     private async Task OnCallbackQuery(ITelegramBotClient botClient, Update update, CallbackQuery callbackQuery, CancellationToken ct)
     {
-        Chat currentChat = callbackQuery.Message.Chat;
-        int currentMessageId = callbackQuery.Message.MessageId;
-        long telegramUserId = callbackQuery.From.Id;
-        string input = callbackQuery.Data;
+        var messageData = await MessageGetData(update, ct);
 
         ToDoItem currentTask = null;
 
         try
         {
-            var currentUser = await _userService.GetUser(telegramUserId, ct);
+            var currentUser = await _userService.GetUser(messageData.TelegramUserId, ct);
 
-            if (currentUser == null && input != "/start")
+            if (currentUser == null && messageData.UserInput != "/start")
             {
                 await botClient.SendMessage(
-                    currentChat, 
+                    messageData.Chat, 
                     "До регистрации доступна только команда /start. Нажмите на кнопку ниже или введите /start", 
                     replyMarkup: Helper.keyboardStart, 
                     cancellationToken: ct);
                 return;
             }
 
-            var callbackDto = CallbackDto.FromString(input);
+            var callbackDto = CallbackDto.FromString(messageData.UserInput);
 
-            var callbackPagedListDto = PagedListCallbackDto.FromString(input);
+            var callbackPagedListDto = PagedListCallbackDto.FromString(messageData.UserInput);
 
             //НАЧАЛО ОБРАБОТКИ СООБЩЕНИЯ
             OnHandleUpdateStarted?.Invoke(callbackQuery.Message.Text);
 
             //получение значений команд типа Enum
-            Commands command = Helper.GetEnumValue<Commands>(input);
+            Commands command = Helper.GetEnumValue<Commands>(messageData.UserInput);
             //ScenarioType scenarioType = Helper.GetEnumValue<ScenarioType>(input);
 
             //КОНЕЦ ОБРАБОТКИ СООБЩЕНИЯ
@@ -339,9 +334,9 @@ internal class UpdateHandler : IUpdateHandler
 
             //Работа с командой cancel и сценариями
             if (command == Commands.Cancel)
-                await _scenarioContextRepository.ResetContext(telegramUserId, ct);
+                await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
 
-            var scenarioContext = await _scenarioContextRepository.GetContext(telegramUserId, ct);
+            var scenarioContext = await _scenarioContextRepository.GetContext(messageData.TelegramUserId, ct);
 
             if (scenarioContext != null)
             {
@@ -360,12 +355,10 @@ internal class UpdateHandler : IUpdateHandler
                         callbackPagedListDto.ToDoListId,
                         ToDoItemState.Active,
                         ct);
-
-
-
+                    
                         await botClient.EditMessageText(
-                        currentChat,
-                        currentMessageId,
+                        messageData.Chat,
+                        messageData.MessageId,
                         "Список задач",
                         replyMarkup: await BuildPagedButtons(activetoDoItems, callbackPagedListDto),
                         cancellationToken: ct);
@@ -379,10 +372,10 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case "showtask":
-                    currentTask = await GetToDoItemFromCallbackDto(input, ct);
+                    currentTask = await GetToDoItemFromCallbackDto(messageData.UserInput, ct);
 
                     await botClient.SendMessage(
-                        currentChat,
+                        messageData.Chat,
                         $"{currentTask.Name}: \n\nСрок выполнения: {currentTask.Deadline}\nВремя создания: {currentTask.CreatedAt}",
                         replyMarkup: Helper.GetToDoItemKeyboard(currentTask), 
                         cancellationToken: ct);
@@ -396,26 +389,26 @@ internal class UpdateHandler : IUpdateHandler
                         ct);
 
                     await botClient.EditMessageText(
-                        currentChat,
-                        currentMessageId,
+                        messageData.Chat,
+                        messageData.MessageId,
                         "Список выполненных задач",
                         replyMarkup: await BuildPagedButtons(completedtoDoItems, callbackPagedListDto),
                         cancellationToken: ct);
                     break;
 
                 case "completetask":
-                    currentTask = await GetToDoItemFromCallbackDto(input, ct);
+                    currentTask = await GetToDoItemFromCallbackDto(messageData.UserInput, ct);
 
                     await _toDoService.MarkCompleted(currentTask.Id, ct);
 
                     await botClient.EditMessageText(
-                        currentChat,
-                        currentMessageId,
+                        messageData.Chat,
+                        messageData.MessageId,
                         $"{currentTask.Name}: \n\nСрок выполнения: {currentTask.Deadline}\nВремя создания: {currentTask.CreatedAt}",
                         replyMarkup: default,
                         cancellationToken: ct);
 
-                    await botClient.SendMessage(currentChat, "Задача выполнена", cancellationToken: ct);
+                    await botClient.SendMessage(messageData.Chat, "Задача выполнена", cancellationToken: ct);
                     break;
 
                 case "deletetask":
@@ -434,12 +427,12 @@ internal class UpdateHandler : IUpdateHandler
 
                 default:
                     await botClient.SendMessage(
-                        currentChat, 
+                        messageData.Chat, 
                         "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", 
                         replyMarkup: Helper.keyboardReg, 
                         cancellationToken: ct);
 
-                    await Commands.Start.CommandsRender(currentUser, currentChat, botClient, ct);
+                    await Commands.Start.CommandsRender(currentUser, messageData.Chat, botClient, ct);
                     break;
             }
         }
@@ -453,8 +446,8 @@ internal class UpdateHandler : IUpdateHandler
         //}
         catch (TaskCountLimitException ex)
         {
-            await _scenarioContextRepository.ResetContext(telegramUserId, ct);
-            await botClient.SendMessage(currentChat, "Текущий сценарий завершен. Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+            await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
+            await botClient.SendMessage(messageData.Chat, "Текущий сценарий завершен. Нужно почистить список задач.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
         }
         //catch (TaskLengthLimitException ex)
         //{
@@ -463,14 +456,14 @@ internal class UpdateHandler : IUpdateHandler
         //}
         catch (DuplicateTaskException ex)
         {
-            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
             return;
         }
         catch (EmptyTaskListException ex)
         {
-            await botClient.SendMessage(currentChat, ex.Message, cancellationToken: ct);
-            await botClient.SendMessage(currentChat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, ex.Message, cancellationToken: ct);
+            await botClient.SendMessage(messageData.Chat, "Введите название задачи заново или нажмите кнопку отмены:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
         }
         #endregion
 
@@ -504,9 +497,9 @@ internal class UpdateHandler : IUpdateHandler
             var scenarioResult = await scenario.HandleMessageAsync(botClient, context, update, ct);
 
             if (scenarioResult == ScenarioResult.Completed)
-                await _scenarioContextRepository.ResetContext(telegramUserId, ct);
+                await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
             else
-                await _scenarioContextRepository.SetContext(telegramUserId, context, ct);
+                await _scenarioContextRepository.SetContext(messageData.TelegramUserId, context, ct);
         }
         #endregion
     }
@@ -515,6 +508,36 @@ internal class UpdateHandler : IUpdateHandler
     {
         throw new ArgumentException("Получен неизветсный тип сообщения");
     }
+
+    private async Task<MessageData?> MessageGetData(Update update, CancellationToken ct)
+    {
+        if (update.Message != null)
+            return new MessageData(
+                update.Message.Chat,
+                update.Message.Text?.Trim(),
+                update.Message.Id,
+                await _userService.GetUser(update.Message.From.Id, ct)
+            );
+        else if (update.CallbackQuery != null)
+            return new MessageData(
+                update.CallbackQuery.Message.Chat,
+                update.CallbackQuery.Data?.Trim(),
+                update.CallbackQuery.Message.Id,
+                await _userService.GetUser(update.CallbackQuery.From.Id, ct)
+            );
+        else
+            return null;
+    }
+
+
+    // private async Task HandleStartCommand(ToDoUser user)
+    // {
+    //     if (user == null)
+    //         user = await _userService.RegisterUser(telegramUserId, update.Message.From.Username, ct);
+    //
+    //     await botClient.SendMessage(currentChat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+    //     await Commands.Start.CommandsRender(user, currentChat, botClient, ct);
+    // }
 
     private async Task<IReadOnlyList<KeyValuePair<string, string>>> GetKeyValuePairTasksCollection(
         Guid userId, 
@@ -545,6 +568,7 @@ internal class UpdateHandler : IUpdateHandler
 
         return new InlineKeyboardMarkup(keyboardRows);
     }
+    
     private async Task<ToDoItem?> GetToDoItemFromCallbackDto(string input, CancellationToken ct)
     {
         var callbackItemDto = ToDoItemCallbackDto.FromString(input);
