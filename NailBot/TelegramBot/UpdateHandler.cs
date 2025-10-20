@@ -132,7 +132,7 @@ internal class UpdateHandler : IUpdateHandler
                     if (currentUser == null)
                         currentUser = await _userService.RegisterUser(messageData.TelegramUserId, update.Message.From.Username, ct);
 
-                    await botClient.SendMessage(messageData.Chat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    // await botClient.SendMessage(messageData.Chat, "Спасибо за регистрацию", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     await Commands.Start.CommandsRender(currentUser, messageData.Chat, botClient, ct);
                     break;
 
