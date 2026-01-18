@@ -5,7 +5,7 @@
         Start = 1,
         Help,
         Info,
-        Addtask,
+        AddTask,
         Addlist,
         Cancel,
         Show,

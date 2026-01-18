@@ -9,7 +9,7 @@ public class MessageData
     { 
         Chat = chat;
         UserInput = userInput;
-        MessageId = messageId;  
+        MessageId = messageId;
         TelegramUserId = telegramUserId;
     }
 

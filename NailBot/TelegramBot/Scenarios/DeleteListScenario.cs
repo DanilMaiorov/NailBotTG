@@ -31,34 +31,35 @@ namespace NailBot.TelegramBot.Scenarios
             return scenario == ScenarioType.DeleteList;
         }
 
-        public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct)
+        public async Task<ScenarioResponse> HandleMessageAsync(ScenarioContext context, Chat chat, Update update, CancellationToken ct)
         {
             //верну выполненный сценарий если придёт какая-то левая инфа
             if (update.Message == null && update.CallbackQuery == null)
-                return ScenarioResult.Completed;
+                return new ScenarioResponse(ScenarioResult.Completed, chat)
+                {
+                    Message = "Это ToDoList Bot", //тут докрутить
+                    Keyboard = Helper.keyboardReg
+                };
 
             (Chat? currentChat, string? currentUserInput, int currentMessageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {
                 case null:
-                    return await HandleInitialStep(bot, context, currentUser, currentChat, ct);
+                    return await HandleInitialStep(context, currentUser, currentChat, ct);
 
                 case "Approve":
-                    return await HandleApproveStep(bot, context, currentUser, currentChat, currentUserInput, ct);
+                    return await HandleApproveStep(context, currentUser, currentChat, currentUserInput, ct);
 
                 case "Delete":
-                    return await HandleDeleteStep(bot, context, currentUser, currentChat, currentUserInput, ct);
+                    return await HandleDeleteStep(context, currentUser, currentChat, currentUserInput, ct);
 
                 default:
-                    await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                    break;
+                    return await HandleDefaultStep(currentChat, ct);
             }
-
-            return ScenarioResult.Completed;
         }
 
-        private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
+        private async Task<ScenarioResponse> HandleInitialStep(ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
             //context.Data[user.TelegramUserName] = user;
             context.Data["User"] = user;
@@ -67,19 +68,26 @@ namespace NailBot.TelegramBot.Scenarios
 
             if (lists.Count > 0)
             {
-                await bot.SendMessage(chat, "Выберете список для удаления:", replyMarkup: Helper.GetSelectListKeyboardForDelete(lists), cancellationToken: ct);
-
                 context.CurrentStep = "Approve";
-
-                return ScenarioResult.Transition;
+                
+                return new ScenarioResponse(ScenarioResult.Transition, chat)
+                {
+                    Message = "Выберете список для удаления:",
+                    Keyboard = Helper.GetSelectListKeyboardForDelete(lists)
+                };
             }
-            await bot.SendMessage(chat, "Нет списков для удаления.", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
 
-            return ScenarioResult.Completed;
+            return new ScenarioResponse(ScenarioResult.Completed, chat)
+            {
+                Message = "Нет списков для удаления.",
+                Keyboard = Helper.keyboardReg
+            };
         }
 
-        private async Task<ScenarioResult> HandleApproveStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        private async Task<ScenarioResponse> HandleApproveStep(ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
+            var message = "";
+            
             var deleteListGuid = Helper.ParseGuidFromCommand(userInput);
 
             if (deleteListGuid.HasValue)
@@ -89,18 +97,25 @@ namespace NailBot.TelegramBot.Scenarios
                 //context.Data[user.TelegramUserName] = deleteList;
                 context.Data["User"] = deleteList;
 
-                await bot.SendMessage(chat, $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?", replyMarkup: Helper.GetApproveDeleteToDoListAndToDoItemKeyboard(), cancellationToken: ct);
+                message = $"Подтверждаете удаление списка {deleteList.Name} и всех его задач?";
 
                 context.CurrentStep = "Delete";
             }
-            return ScenarioResult.Transition;
+            
+            return new ScenarioResponse(ScenarioResult.Transition, chat)
+            {
+                Message = message,
+                Keyboard = Helper.GetApproveDeleteToDoListAndToDoItemKeyboard()
+            };
         }
 
-        private async Task<ScenarioResult> HandleDeleteStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        private async Task<ScenarioResponse> HandleDeleteStep(ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
+            var message = "";
+            
             if (userInput == "no")
             {
-                await bot.SendMessage(chat, $"Удаление отменено", cancellationToken: ct);
+                message = "Удаление отменено";
             } 
             else
             {
@@ -124,11 +139,27 @@ namespace NailBot.TelegramBot.Scenarios
 
                     //затем удалю папку в todolist директории
                     await _toDoListService.Delete(toDoList.Id, ct);
-
-                    await bot.SendMessage(chat, $"Список {toDoList.Name} удален", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
+                    
+                    message = $"Список {toDoList.Name} удален";
                 }
             }
-            return ScenarioResult.Completed;
+
+            return new ScenarioResponse(ScenarioResult.Completed, chat)
+            {
+                Message = message,
+                Keyboard = Helper.keyboardReg
+            };
+        }
+        
+        private async Task<ScenarioResponse> HandleDefaultStep(Chat chat, CancellationToken ct)
+        {
+            await Task.Delay(1, ct);
+            
+            return new ScenarioResponse(ScenarioResult.Completed, chat)
+            {
+                Message = "Неизвестный шаг сценария",
+                Keyboard = Helper.keyboardReg
+            };
         }
     }
 }

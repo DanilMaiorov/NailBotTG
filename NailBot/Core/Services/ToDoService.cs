@@ -77,9 +77,6 @@ namespace NailBot.Core.Services
                 throw new EmptyTaskListException("искать");
 
             bool isContain = await _toDoRepository.ExistsByName(user.UserId, namePrefix, ct);
-
-            if (!isContain)
-                throw new ArgumentException($"Задач, начинающихся \"{namePrefix}\" не найдено.\n");
             
             return await _toDoRepository.Find(user.UserId, item =>
                 item.Name.Length >= namePrefix.Length &&

@@ -215,51 +215,8 @@ namespace NailBot.Helpers
             return new InlineKeyboardMarkup(keyboardRows);
         }
 
-        //рендер списка задач
-        public async static Task TasksListRender(
-            IReadOnlyList<ToDoItem> tasks, 
-            ITelegramBotClient botClient, 
-            Chat chat, 
-            int messageId,
-            CancellationToken ct)
-        {
-            int taskCounter = 0;
-
-            foreach (var task in tasks)
-            {
-                if (task.State == ToDoItemState.Active)
-                {
-                    taskCounter++;
-                    await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
-                    await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
-                }
-            }
-        }
-        
-        //добавлю перегрузку TasksListRender
-        public async static Task TasksListRender(
-            IReadOnlyList<ToDoItem> tasks,
-            ITelegramBotClient botClient, 
-            Chat chat,
-            int messageId,
-            bool isActive, 
-            CancellationToken ct)
-        {
-            int taskCounter = 0;
-
-            foreach (var task in tasks)
-            {
-                if (isActive)
-                {
-                    taskCounter++;
-                    await botClient.SendMessage(chat, $"{taskCounter}) ({task.State}) {task.Name} - {task.CreatedAt}", cancellationToken: ct);
-                    await botClient.SendMessage(chat, $"```Id\n{task.Id}```", parseMode: ParseMode.MarkdownV2, cancellationToken: ct);
-                }
-            }
-        }
-
         //метод проверки корректного ввода команд /addtask, /find
-        public static (string, string, Guid) InputCheck(string input)
+        public static (string, string) InputCheck(string input)
         {
             string cutInput = "";
             Guid taskGuid = Guid.Empty;
@@ -269,36 +226,7 @@ namespace NailBot.Helpers
                 cutInput = input.Substring(6);
                 input = "/find";
             }
-            return (input, cutInput, taskGuid);
-        }
-
-        //проверка дубликатов
-        public static void CheckDuplicate(string newTask, IReadOnlyList<ToDoItem> toDoItems)
-        {
-            if (toDoItems.Any(item => item.Name == newTask))
-                throw new DuplicateTaskException(newTask);
-        }
-
-        //метод присваивания значений длин
-        public static int GetStartValues(string message)
-        {
-            int value = 0;
-            while (value == 0)
-            {
-                while (true)
-                {
-                    try
-                    {
-                        Console.WriteLine(message);
-                        return value = Validate.ParseAndValidateInt(Console.ReadLine());
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-            }
-            return value;
+            return (input, cutInput);
         }
 
         /// <summary>
@@ -338,7 +266,7 @@ namespace NailBot.Helpers
         {
             return DateTime.TryParseExact(
                 userInput,
-                Constants.deadlineFormat,
+                Constants.DeadlineFormat,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out result

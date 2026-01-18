@@ -40,6 +40,7 @@ public static class CommonDiExtension
     {
         services.Configure<TaskOptions>(configuration.GetSection("TaskOptions"));
         services.Configure<FolderOptions>(configuration.GetSection("FolderOptions"));
+        services.Configure<PaginationOptions>(configuration.GetSection("PaginationOptions"));
         return services;
     }
     
@@ -61,6 +62,12 @@ public static class CommonDiExtension
         return services;
     }
     
+    public static IServiceCollection AddMessageServices(this IServiceCollection services)
+    {
+        services.AddScoped<IMessageService, MessageService>();
+        return services;
+    }
+    
     public static IServiceCollection AddScenarios(this IServiceCollection services)
     {
         services.AddTransient<IScenario, AddTaskScenario>();
@@ -77,6 +84,7 @@ public static class CommonDiExtension
             .AddDatabaseInfrastructure(config)
             .AddRepositories()
             .AddApplicationServices()
+            .AddMessageServices()
             .AddScenarios()
             .AddScoped<IUpdateHandler, UpdateHandler>()
             .AddScoped<IScenarioContextRepository, InMemoryScenarioContextRepository>()

@@ -11,6 +11,6 @@ namespace NailBot.TelegramBot.Scenarios
         bool CanHandle(ScenarioType scenario);
         //Обрабатывает входящее сообщение от пользователя в рамках текущего сценария.
         //Включает основную бизнес-логику
-        Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct);
+        Task<ScenarioResponse> HandleMessageAsync(ScenarioContext context, Chat chat, Update update, CancellationToken ct);
     }
 }

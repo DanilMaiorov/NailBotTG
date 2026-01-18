@@ -10,7 +10,7 @@ namespace NailBot.Helpers
     public static class Extensions
     {
         //метод рендера списка команд
-        public async static Task CommandsRender<T>(this T array, ToDoUser user, Chat chat, ITelegramBotClient botClient, CancellationToken ct) where T : Enum
+        public static string CommandsRender()
         {
             int counter = 0;
             //создам стрингБилдер для сборки в одно сообщение, а не пачки
@@ -25,7 +25,7 @@ namespace NailBot.Helpers
                 { Commands.Start, "Начало работы с ботом, регистрация" },
                 { Commands.Help, "Помощь по командам" },
                 { Commands.Info, "Информация о боте" },
-                { Commands.Addtask, "Добавить новую задачу" },
+                { Commands.AddTask, "Добавить новую задачу" },
                 { Commands.Show, "Показать активные задачи" },
                 { Commands.Find, "Найти задачу" },
                 { Commands.Report, "Сформировать отчет по задачам" },
@@ -34,7 +34,7 @@ namespace NailBot.Helpers
 
             builder.AppendLine("Список доступных команд:");
 
-            foreach (T commandValue in Enum.GetValues(typeof(T)))    
+            foreach (Commands commandValue in Enum.GetValues(typeof(Commands)))    
             {
                 Commands command = (Commands)Enum.Parse(typeof(Commands), commandValue.ToString());
 
@@ -51,10 +51,9 @@ namespace NailBot.Helpers
                     commands.Add(new BotCommand { Command = commandName, Description = "" });
                 }
             }
-            ;
-            await botClient.SendMessage(chat, builder.ToString(), cancellationToken: ct);
 
-            //рендерю менюшку
+            return builder.ToString();
+
             //await botClient.SetMyCommands(commands, cancellationToken: ct);
         }
         

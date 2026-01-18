@@ -22,48 +22,64 @@ namespace NailBot.TelegramBot.Scenarios
             return scenario == ScenarioType.AddList;
         }
 
-        public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct)
+        public async Task<ScenarioResponse> HandleMessageAsync(ScenarioContext context, Chat chat, Update update, CancellationToken ct)
         {
             //верну выполненный сценарий если придёт какая-то левая инфа
             if (update.Message == null && update.CallbackQuery == null)
-                return ScenarioResult.Completed;
+               return new ScenarioResponse(ScenarioResult.Completed, chat)
+               {
+                   Message = "Это ToDoList Bot", //тут докрутить
+                   Keyboard = Helper.keyboardReg
+               };
 
             (Chat? currentChat, string? currentUserInput, int messageId, ToDoUser? currentUser) = await Helper.HandleMessageAsyncGetData(update, context, ct, _userService);
 
             switch (context.CurrentStep)
             {
                 case null:
-                    return await HandleInitialStep(bot, context, currentUser, currentChat, ct);
+                    return await HandleInitialStep(context, currentUser, currentChat, ct);
 
                 case "Name":
-                    return await HandleNameStep(bot, context, currentUser, currentChat, currentUserInput, ct);
+                    return await HandleNameStep(currentUser, currentChat, currentUserInput, ct);
 
                 default:
-                    await bot.SendMessage(currentChat, "Неизвестный шаг сценария", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-                    break;
+                    return await HandleDefaultStep(currentChat, ct);
             }
-
-            return ScenarioResult.Completed;
         }
 
-        private async Task<ScenarioResult> HandleInitialStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
+        private async Task<ScenarioResponse> HandleInitialStep(ScenarioContext context, ToDoUser user, Chat chat, CancellationToken ct)
         {
+            await Task.Delay(1, ct);
+            
             context.Data["User"] = user;
-
-            await bot.SendMessage(chat, "Введите название списка:", replyMarkup: Helper.keyboardCancel, cancellationToken: ct);
-
+            
             context.CurrentStep = "Name";
-
-            return ScenarioResult.Transition;
+            
+            return new ScenarioResponse(ScenarioResult.Transition, chat)
+            {
+                Message = "Введите название списка:",
+                Keyboard = Helper.keyboardCancel
+            };
         }
 
-        private async Task<ScenarioResult> HandleNameStep(ITelegramBotClient bot, ScenarioContext context, ToDoUser user, Chat chat, string userInput, CancellationToken ct)
+        private async Task<ScenarioResponse> HandleNameStep(ToDoUser user, Chat chat, string userInput, CancellationToken ct)
         {
             await _toDoListService.Add(user, userInput, ct);
-
-            await bot.SendMessage(chat, $"Список {userInput} добавлен", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
-
-            return ScenarioResult.Completed;
+            
+            return new ScenarioResponse(ScenarioResult.Completed, chat)
+            {
+                Message = $"Список {userInput} добавлен",
+                Keyboard = Helper.keyboardReg
+            };
+        }
+        
+        private async Task<ScenarioResponse> HandleDefaultStep(Chat chat, CancellationToken ct)
+        {
+            return new ScenarioResponse(ScenarioResult.Completed, chat)
+            {
+                Message = "Неизвестный шаг сценария",
+                Keyboard = Helper.keyboardReg
+            };
         }
     }
 }
