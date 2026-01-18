@@ -1,110 +1,61 @@
 ﻿using NailBot.TelegramBot;
-using NailBot.Core.Services;
-using NailBot.Infrastructure.DataAccess;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types.Enums;
-using NailBot.TelegramBot.Scenarios;
-using System.Globalization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NailBot.Core.Services;
+using NailBot.Extensions;
 
 namespace NailBot
 {
     public enum ToDoItemState { Active, Completed };
-    internal class Program//ЧИСТОВИК
+    
+    public static class Program
     {
-        //объявлю имена папок через константы
-        //имя папки для ToDoItem
-        private const string toDoItemfolderName = "ToDoItemFolder";
-        //имя папки для User
-        private const string userfolderName = "UserFolder";
-        //имя папки для списков
-        private const string toDoListfolderName = "ToDoListFolder";
-
-        public async static Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            //string token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", EnvironmentVariableTarget.User);
-            string token = "8062262120:AAFwu-kWD_FGVaHpSnG3ZLKN-tPZCcUNK8c";
-
-            if (string.IsNullOrEmpty(token))
-            {
-                Console.WriteLine("Bot token not found. Please set the TELEGRAM_BOT_TOKEN environment variable.");
-                return;
-            }
-
-            var botClient = new TelegramBotClient(token);
+            var host = Host.CreateDefaultBuilder(args)
+                .UseEnvironment("Development")
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    var env = hostingContext.HostingEnvironment;
+                    
+                    config
+                        .SetBasePath(env.ContentRootPath)
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddApplication(context.Configuration);
+                })
+                .Build();
+            
+            var botClient = host.Services.GetRequiredService<ITelegramBotClient>();
 
             ReceiverOptions receiverOptions = new()
             {
-                AllowedUpdates = [] // принимаю любой тип
+                AllowedUpdates = []
             };
 
-            //объявлю CancellationTokenSource
             using var cts = new CancellationTokenSource();
 
-            //стартовые значения длин
-            //int maxTaskAmount = Helper.GetStartValues("Введите максимально допустимое количество задач");
-            //int maxTaskLength = Helper.GetStartValues("Введите максимально допустимую длину задачи");
+            await using var scope = host.Services.CreateAsyncScope();
+            var scopedProvider = scope.ServiceProvider;
 
-            //для ускоренного дебага
-            int maxTaskAmount = 20;
-            int maxTaskLength = 25;
+            var updateHandler = scopedProvider.GetRequiredService<IUpdateHandler>();
 
-
-            //ХРАНЕНИЕ В ФАЙЛОВОЙ СИСТЕМЕ
-
-            //var fileToDoRepository = new FileToDoRepository(toDoItemfolderName);
-            //var fileUserRepository = new FileUserRepository(userfolderName);
-            //var fileToDoListRepository = new FileToDoListRepository(toDoListfolderName, toDoItemfolderName);
-
-            //IUserService _userService = new UserService(fileUserRepository);
-            //IToDoService _toDoService = new ToDoService(fileToDoRepository, maxTaskAmount, maxTaskLength);
-            //IToDoListService _toDoListService = new ToDoListService(fileToDoListRepository);
-
-            //ХРАНЕНИЕ В ФАЙЛОВОЙ СИСТЕМЕ
-
-
-            //ПЕРЕХОД НА POSTGRESQL
-            IDataContextFactory<ToDoDataContext> factory = new DataContextFactory();
-
-            var sqlUserRepository = new SqlUserRepository(factory);
-            var sqlToDoRepository = new SqlToDoRepository(factory);
-            var sqlToDoListRepository = new SqlToDoListRepository(factory);
-
-            IUserService _userService = new UserService(sqlUserRepository);
-            IToDoService _toDoService = new ToDoService(sqlToDoRepository, maxTaskAmount, maxTaskLength);
-            IToDoListService _toDoListService = new ToDoListService(sqlToDoListRepository);
-            //ПЕРЕХОД НА POSTGRESQL
-
-            IToDoReportService _toDoReportService = new ToDoReportService(sqlToDoRepository);
-
-
-            //логика сценариев
-            IScenarioContextRepository contextRepository = new InMemoryScenarioContextRepository();
-            var scenarios = new List<IScenario>
+            if (updateHandler is UpdateHandler castHandler)
             {
-                new AddTaskScenario(_userService, _toDoService, _toDoListService),
-                new DeleteTaskScenario(_toDoService),
-                new AddListScenario(_userService, _toDoListService),
-                new DeleteListScenario(_userService, _toDoService, _toDoListService, toDoItemfolderName),
-            };
-
-            IUpdateHandler _updateHandler = new UpdateHandler(_userService, _toDoService, _toDoReportService, scenarios, contextRepository, _toDoListService);
-
-            if (_updateHandler is UpdateHandler castHandler)
-            {
-                //подписываюсь на события
-                castHandler.OnHandleUpdateStarted += castHandler.HandleStart;
-                castHandler.OnHandleUpdateCompleted += castHandler.HandleComplete;
-
                 try
                 {
                     botClient.StartReceiving(
-                        _updateHandler,
+                        updateHandler,
                         receiverOptions: receiverOptions,
                         cancellationToken: cts.Token
                     );
-
-                    //запускаю цикл, которые будет работать пока не нажму А
+                    
                     while (true)
                     {
                         Console.WriteLine("Нажми A и Ввод для остановки и выхода из бота");
@@ -122,7 +73,6 @@ namespace NailBot
                 }
                 finally
                 {
-                    //отписываюсь от событий
                     castHandler.OnHandleUpdateStarted -= castHandler.HandleStart;
                     castHandler.OnHandleUpdateCompleted -= castHandler.HandleComplete;
                 }

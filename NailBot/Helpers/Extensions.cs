@@ -1,8 +1,7 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 using NailBot.Core.Entities;
 using NailBot.Core.Enums;
-using NailBot.TelegramBot;
+using NailBot.Domain;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -58,6 +57,30 @@ namespace NailBot.Helpers
             //рендерю менюшку
             //await botClient.SetMyCommands(commands, cancellationToken: ct);
         }
+        
+        
+        
+        public static MessageData? MessageGetData(Update update, CancellationToken ct)
+        {
+            if (update.Message != null)
+                return new MessageData(
+                    update.Message.Chat,
+                    update.Message.Text?.Trim(),
+                    update.Message.Id,
+                    update.Message.From.Id
+                );
+            if (update.CallbackQuery != null)
+                return new MessageData(
+                    update.CallbackQuery.Message.Chat,
+                    update.CallbackQuery.Data?.Trim(),
+                    update.CallbackQuery.Message.Id,
+                    update.CallbackQuery.From.Id
+                );
+            return null;
+        }
     }
+    
+    
+
 }
 

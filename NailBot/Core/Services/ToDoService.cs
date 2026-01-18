@@ -1,7 +1,9 @@
-﻿using NailBot.Core.DataAccess;
+﻿using Microsoft.Extensions.Options;
+using NailBot.Core.DataAccess;
 using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
 using NailBot.Helpers;
+using NailBot.Options;
 
 namespace NailBot.Core.Services
 {
@@ -9,29 +11,27 @@ namespace NailBot.Core.Services
     {
         private readonly IToDoRepository _toDoRepository;
 
-        private readonly int maxTaskAmount;
-        private readonly int maxTaskLength;
+        private readonly int _maxTasksAmount;
+        private readonly int _maxTaskLength;
 
-        public ToDoService(IToDoRepository toDoRepository, int taskAmount, int taskLength)
+        public ToDoService(IToDoRepository toDoRepository, IOptions<TaskOptions> options)
         {
             _toDoRepository = toDoRepository;
 
-            maxTaskAmount = taskAmount;
-            maxTaskLength = taskLength;
+            _maxTasksAmount = options.Value.MaxTasksAmount;
+            _maxTaskLength = options.Value.MaxTaskLength;
         }
-
-        //реализация метода интерфейса GetAllByUserId
+        
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct) 
         {
             return await _toDoRepository.GetAllByUserId(userId, ct);
         }
-        //реализация метода интерфейса GetActiveByUserId
+
         public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken ct) 
         {
             return await _toDoRepository.GetActiveByUserId(userId, ct);
         }
-
-        // реализация метода интерфейса Add
+        
         public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, ToDoList? list, CancellationToken ct)
         {
             var newToDoItem = new ToDoItem
@@ -50,8 +50,7 @@ namespace NailBot.Core.Services
 
             return newToDoItem;
         }
-
-        // реализация метода интерфейса Delete
+        
         public async Task Delete(Guid id, CancellationToken ct)
         {
             var action = "удалять";
@@ -60,8 +59,7 @@ namespace NailBot.Core.Services
 
             await _toDoRepository.Delete(id, ct);
         }
-
-        // реализация метода интерфейса MarkCompleted
+        
         public async Task MarkCompleted(Guid id, CancellationToken ct)
         {
             var action = "выполнять";
@@ -70,8 +68,7 @@ namespace NailBot.Core.Services
 
             await _toDoRepository.Update(completedTask, ct);
         }
-
-        // реализация метода интерфейса Find
+        
         public async Task<IReadOnlyList<ToDoItem>> Find(ToDoUser user, string namePrefix, CancellationToken ct)
         {
             var tasks = await GetAllByUserId(user.UserId, ct);
@@ -89,11 +86,10 @@ namespace NailBot.Core.Services
                 item.Name.Substring(0, namePrefix.Length) == namePrefix, ct);
         }
 
-
-        //проверка дубликатов
+        
         public async Task<string> ThrowIfHasDuplicatesOrWhiteSpace(string newTaskName, Guid userId, CancellationToken ct)
         {
-            string taskName = Validate.ValidateString(newTaskName, maxTaskLength);
+            string taskName = Validate.ValidateString(newTaskName, _maxTaskLength);
 
             var items = await GetAllByUserId(userId, ct);
 
@@ -102,8 +98,7 @@ namespace NailBot.Core.Services
 
             return taskName;
         }
-
-        //проверка получения задачи
+        
         private async Task<ToDoItem?> GetTask(Guid id, string message, CancellationToken ct)
         {
             if (id == Guid.Empty)

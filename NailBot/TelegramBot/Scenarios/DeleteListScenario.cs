@@ -1,8 +1,9 @@
-﻿using NailBot.Core.Entities;
+﻿using Microsoft.Extensions.Options;
+using NailBot.Core.Entities;
 using NailBot.Core.Enums;
 using NailBot.Core.Services;
 using NailBot.Helpers;
-using NailBot.TelegramBot.Dto;
+using NailBot.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -16,13 +17,13 @@ namespace NailBot.TelegramBot.Scenarios
 
         //добавлю ещё имя папки с тудушками в конструктор
         private readonly string _toDoItemFolderName;
-        public DeleteListScenario(IUserService userService, IToDoService toDoService, IToDoListService toDoListService, string toDoItemFolderName) 
+        public DeleteListScenario(IUserService userService, IToDoService toDoService, IToDoListService toDoListService, IOptions<FolderOptions> options) 
         {
             _userService = userService;
             _toDoService = toDoService;
             _toDoListService = toDoListService;
 
-            _toDoItemFolderName = toDoItemFolderName;
+            _toDoItemFolderName = options.Value.ToDoItemFolderName;
         }
 
         public bool CanHandle(ScenarioType scenario)

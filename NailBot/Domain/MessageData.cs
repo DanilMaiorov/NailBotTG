@@ -5,18 +5,16 @@ namespace NailBot.Domain;
 
 public class MessageData
 {
-    public MessageData(Chat chat, string userInput, int messageId, ToDoUser user) 
+    public MessageData(Chat chat, string userInput, int messageId, long telegramUserId) 
     { 
         Chat = chat;
         UserInput = userInput;
         MessageId = messageId;  
-        User = user ?? null;
-        TelegramUserId = User?.TelegramUserId ?? 0;
+        TelegramUserId = telegramUserId;
     }
 
     public Chat Chat { get; }
     public string UserInput { get; set; }
     public int MessageId { get; }
-    public ToDoUser? User { get; }
     public long TelegramUserId { get; }
 }

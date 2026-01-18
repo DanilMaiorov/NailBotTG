@@ -4,7 +4,6 @@ using NailBot.Core.Services;
 using NailBot.Helpers;
 using NailBot.TelegramBot.Scenarios;
 using NailBot.Core.Exceptions;
-using NailBot.Domain;
 using NailBot.TelegramBot.Dto;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot;
@@ -31,27 +30,31 @@ internal class UpdateHandler : IUpdateHandler
 
     //IToDoListService 
     private readonly IToDoListService _toDoListService;
-
+    
     //количество кнопок задач на 1 странице
     int _pageSize = 5;
 
     public UpdateHandler(
-        IUserService iuserService, 
-        IToDoService itoDoService, 
-        IToDoReportService itoDoReportService, 
+        IUserService userService, //
+        IToDoService toDoService, //
+        IToDoReportService toDoReportService, //
         IEnumerable<IScenario> scenarios, 
         IScenarioContextRepository contextRepository,
-        IToDoListService itoDoListService)
+        IToDoListService toDoListService) //
     {
-        _userService = iuserService ?? throw new ArgumentNullException(nameof(iuserService));
-        _toDoService = itoDoService ?? throw new ArgumentNullException(nameof(itoDoService));
+        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        _toDoService = toDoService ?? throw new ArgumentNullException(nameof(toDoService));
 
-        _toDoReportService = itoDoReportService ?? throw new ArgumentNullException(nameof(itoDoReportService));
+        _toDoReportService = toDoReportService ?? throw new ArgumentNullException(nameof(toDoReportService));
 
-        _toDoListService = itoDoListService ?? throw new ArgumentNullException(nameof(itoDoListService));
+        _toDoListService = toDoListService ?? throw new ArgumentNullException(nameof(toDoListService));
 
         _scenarios = scenarios;
         _scenarioContextRepository = contextRepository;
+        
+        //подписываюсь на события
+        OnHandleUpdateStarted += HandleStart;
+        OnHandleUpdateCompleted += HandleComplete;
     }
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -67,13 +70,12 @@ internal class UpdateHandler : IUpdateHandler
         else
         {
             await OnUnknown();
-            return;
         }
     }
 
     private async Task OnMessage(ITelegramBotClient botClient, Update update, Message message, CancellationToken ct)
     {
-        var messageData = await MessageGetData(update, ct);
+        var messageData = Helpers.Extensions.MessageGetData(update, ct);
         
         try
         {
@@ -152,6 +154,7 @@ internal class UpdateHandler : IUpdateHandler
                     break;
 
                 case Commands.Cancel:
+                    await _scenarioContextRepository.ResetContext(messageData.TelegramUserId, ct);
                     await botClient.SendMessage(messageData.Chat, "Сценарий отменён. Выбирай что хочешь сделать?", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
 
@@ -177,6 +180,9 @@ internal class UpdateHandler : IUpdateHandler
                     await botClient.SendMessage(messageData.Chat, "Ошибка: введена некорректная команда. Пожалуйста, введите команду заново.\n", replyMarkup: Helper.keyboardReg, cancellationToken: ct);
                     break;
             }
+            
+            
+            
         }
         #region КАСТОМНЫЕ ИСКЛЮЧЕНИЯ
         //catch (ArgumentException ex)
@@ -300,7 +306,7 @@ internal class UpdateHandler : IUpdateHandler
     }
     private async Task OnCallbackQuery(ITelegramBotClient botClient, Update update, CallbackQuery callbackQuery, CancellationToken ct)
     {
-        var messageData = await MessageGetData(update, ct);
+        var messageData = Helpers.Extensions.MessageGetData(update, ct);
 
         ToDoItem currentTask = null;
 
@@ -508,28 +514,7 @@ internal class UpdateHandler : IUpdateHandler
     {
         throw new ArgumentException("Получен неизветсный тип сообщения");
     }
-
-    private async Task<MessageData?> MessageGetData(Update update, CancellationToken ct)
-    {
-        if (update.Message != null)
-            return new MessageData(
-                update.Message.Chat,
-                update.Message.Text?.Trim(),
-                update.Message.Id,
-                await _userService.GetUser(update.Message.From.Id, ct)
-            );
-        else if (update.CallbackQuery != null)
-            return new MessageData(
-                update.CallbackQuery.Message.Chat,
-                update.CallbackQuery.Data?.Trim(),
-                update.CallbackQuery.Message.Id,
-                await _userService.GetUser(update.CallbackQuery.From.Id, ct)
-            );
-        else
-            return null;
-    }
-
-
+    
     // private async Task HandleStartCommand(ToDoUser user)
     // {
     //     if (user == null)

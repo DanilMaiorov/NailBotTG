@@ -1,6 +1,5 @@
 ﻿using NailBot.Core.Entities;
 using NailBot.Core.Exceptions;
-using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
@@ -11,8 +10,6 @@ using System.Globalization;
 using NailBot.TelegramBot.Dto;
 using NailBot.TelegramBot.Scenarios;
 using NailBot.Core.Services;
-using System.Collections.Generic;
-using System;
 
 
 namespace NailBot.Helpers
